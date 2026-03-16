@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memorial Recitation</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<h1>Memorial Recitation</h1>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="showTab('quick')">Quick</button>
+<button class="tab-btn" onclick="showTab('khatam')">Khatam</button>
+</div>
+
+<div id="quick" class="panel active">
+
+<div class="counter">
+<h3>Bismillah</h3>
+<div>
+<button onclick="count('bismillah',-1)">−</button>
+<span id="bismillah">0</span>
+<button onclick="count('bismillah',1)">+</button>
+</div>
+</div>
+
+<div class="counter">
+<h3>Alhamdulillah</h3>
+<div>
+<button onclick="count('alhamdulillah',-1)">−</button>
+<span id="alhamdulillah">0</span>
+<button onclick="count('alhamdulillah',1)">+</button>
+</div>
+</div>
+
+<button class="main-btn">Submit</button>
+
+</div>
+
+<div id="khatam" class="panel">
+
+<h2>Claim Juz</h2>
+<div id="juzList"></div>
+
+</div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
