@@ -1,8 +1,4 @@
-/* ===============================
-   SUPABASE SETUP
-================================= */
-
-const supabase = window.supabase.createClient(
+const client = window.supabase.createClient(
   window.APP_CONFIG.supabaseUrl,
   window.APP_CONFIG.supabasePublishableKey
 );
@@ -10,11 +6,6 @@ const supabase = window.supabase.createClient(
 let currentMemorial = null;
 let currentCampaign = null;
 let currentParticipant = null;
-
-
-/* ===============================
-   COUNTER SYSTEM
-================================= */
 
 function count(id, val) {
   const el = document.getElementById(id);
@@ -58,29 +49,25 @@ function updateSummary() {
 
   let total = 0;
   summary.innerHTML =
-    active.map(([label, value]) => {
-      total += value;
-      return `<div class="summary-row"><span>${label}</span><strong>${value}</strong></div>`;
-    }).join("") +
+    active
+      .map(([label, value]) => {
+        total += value;
+        return `<div class="summary-row"><span>${label}</span><strong>${value}</strong></div>`;
+      })
+      .join("") +
     `<div class="summary-row"><span>Total</span><strong>${total}</strong></div>`;
 }
 
-
-/* ===============================
-   LOAD MEMORIAL DATA
-================================= */
-
 async function loadMemorial() {
-
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("memorials")
     .select("*")
     .eq("slug", window.APP_CONFIG.memorialSlug)
     .single();
 
   if (error) {
-    alert("Memorial not found.");
-    console.error(error);
+    console.error("loadMemorial error:", error);
+    alert("Could not load memorial.");
     return;
   }
 
@@ -98,37 +85,55 @@ async function loadMemorial() {
     `;
   }
 
-  const { data: campaigns } = await supabase
+  const { data: campaigns, error: campaignError } = await client
     .from("khatam_campaigns")
     .select("*")
     .eq("memorial_id", data.id)
     .order("created_at", { ascending: true });
 
+  if (campaignError) {
+    console.error("campaign load error:", campaignError);
+  }
+
   if (campaigns && campaigns.length) {
     currentCampaign = campaigns[0];
+    renderCampaignPills(campaigns[0]);
   }
 
   await loadJuzBoard();
 }
 
+function renderCampaignPills(campaign) {
+  const pillRow = document.querySelector(".pill-row");
+  if (!pillRow || !campaign) return;
 
-/* ===============================
-   PARTICIPANT SAVE
-================================= */
+  const deadlineText = campaign.deadline
+    ? new Date(campaign.deadline).toLocaleString()
+    : "No deadline set";
+
+  pillRow.innerHTML = `
+    <div class="pill">Campaign: ${campaign.title}</div>
+    <div class="pill">Deadline: ${deadlineText}</div>
+  `;
+}
 
 async function saveParticipant() {
-
-  const name = document.getElementById("readerName")?.value || "";
-  const ukCity = document.getElementById("ukCity")?.value || "";
-  const pakCity = document.getElementById("pakCity")?.value || "";
-  const relation = document.getElementById("relation")?.value || "";
-
-  if (!name && relation !== "Anonymous") {
-    alert("Enter name or choose anonymous.");
+  if (!currentMemorial) {
+    alert("Memorial not loaded yet.");
     return;
   }
 
-  const { data, error } = await supabase
+  const name = document.getElementById("readerName")?.value?.trim() || "";
+  const ukCity = document.getElementById("ukCity")?.value?.trim() || "";
+  const pakCity = document.getElementById("pakCity")?.value?.trim() || "";
+  const relation = document.getElementById("relation")?.value || "";
+
+  if (!name && relation !== "Anonymous") {
+    alert("Please enter your name or choose Anonymous.");
+    return;
+  }
+
+  const { data, error } = await client
     .from("participants")
     .insert({
       memorial_id: currentMemorial.id,
@@ -141,8 +146,8 @@ async function saveParticipant() {
     .single();
 
   if (error) {
-    alert("Could not save.");
-    console.error(error);
+    console.error("saveParticipant error:", error);
+    alert("Could not save participant.");
     return;
   }
 
@@ -150,15 +155,14 @@ async function saveParticipant() {
   alert("Saved.");
 }
 
-
-/* ===============================
-   SUBMIT RECITATIONS
-================================= */
-
 async function submitQuickRecitations() {
+  if (!currentMemorial) {
+    alert("Memorial not loaded yet.");
+    return;
+  }
 
   if (!currentParticipant) {
-    alert("Save your details first.");
+    alert("Please save your details first.");
     return;
   }
 
@@ -173,45 +177,54 @@ async function submitQuickRecitations() {
     ["Surah Yasin", "yasin"]
   ];
 
-  const rows = items.map(([label, id]) => {
-    const el = document.getElementById(id);
-    return {
-      memorial_id: currentMemorial.id,
-      participant_id: currentParticipant.id,
-      recitation_name: label,
-      recitation_count: parseInt(el?.innerText || "0", 10)
-    };
-  }).filter(x => x.recitation_count > 0);
+  const rows = items
+    .map(([label, id]) => {
+      const el = document.getElementById(id);
+      return {
+        memorial_id: currentMemorial.id,
+        participant_id: currentParticipant.id,
+        recitation_name: label,
+        recitation_count: parseInt(el?.innerText || "0", 10)
+      };
+    })
+    .filter((row) => row.recitation_count > 0);
 
   if (!rows.length) {
     alert("Add recitations first.");
     return;
   }
 
-  const { error } = await supabase.from("quick_recitations").insert(rows);
+  const { error } = await client.from("quick_recitations").insert(rows);
 
   if (error) {
-    alert("Error saving recitations.");
-    console.error(error);
+    console.error("submitQuickRecitations error:", error);
+    alert("Could not submit recitations.");
     return;
   }
 
   alert("Submitted.");
+
+  const ids = ["bismillah", "alhamdulillah", "subhanallah", "astaghfirullah", "durood", "fatiha", "ikhlas", "yasin"];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = "0";
+  });
+  updateSummary();
 }
 
-
-/* ===============================
-   JUZ BOARD (LIVE)
-================================= */
-
 async function loadJuzBoard() {
-
   if (!currentCampaign) return;
 
-  const { data } = await supabase
+  const { data, error } = await client
     .from("khatam_claims")
     .select("*")
-    .eq("campaign_id", currentCampaign.id);
+    .eq("campaign_id", currentCampaign.id)
+    .order("juz_number", { ascending: true });
+
+  if (error) {
+    console.error("loadJuzBoard error:", error);
+    return;
+  }
 
   const juzList = document.getElementById("juzList");
   if (!juzList) return;
@@ -219,9 +232,9 @@ async function loadJuzBoard() {
   juzList.innerHTML = "";
 
   for (let i = 1; i <= 30; i++) {
-
-    const claim = data.find(x => x.juz_number === i);
-    const claimed = !!claim;
+    const claim = data.find((x) => x.juz_number === i);
+    const isClaimed = !!claim;
+    const isCompleted = claim?.status === "completed";
 
     const card = document.createElement("div");
     card.className = "juz-card";
@@ -229,27 +242,44 @@ async function loadJuzBoard() {
     card.innerHTML = `
       <div class="juz-meta">
         <strong>Juz ${i}</strong>
-        <span>${claimed ? "Reserved" : "Available"}</span>
+        <span>${
+          isCompleted
+            ? "Completed"
+            : isClaimed
+            ? "Already reserved by a reader"
+            : "Available to claim"
+        }</span>
       </div>
-      <button class="juz-btn ${claimed ? "claimed" : "available"}">
-        ${claimed ? "Claimed" : "Claim"}
-      </button>
+      <button type="button" class="juz-btn ${
+        isClaimed ? "claimed" : "available"
+      }">${
+        isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim"
+      }</button>
     `;
 
-    if (!claimed) {
-      card.querySelector("button").addEventListener("click", async () => {
+    const btn = card.querySelector("button");
 
+    if (!isClaimed) {
+      btn.addEventListener("click", async () => {
         if (!currentParticipant) {
           alert("Save details first.");
           return;
         }
 
-        await supabase.from("khatam_claims").insert({
-          campaign_id: currentCampaign.id,
-          participant_id: currentParticipant.id,
-          juz_number: i,
-          status: "claimed"
-        });
+        const { error: insertError } = await client
+          .from("khatam_claims")
+          .insert({
+            campaign_id: currentCampaign.id,
+            participant_id: currentParticipant.id,
+            juz_number: i,
+            status: "claimed"
+          });
+
+        if (insertError) {
+          console.error("claim error:", insertError);
+          alert("Could not claim this Juz.");
+          return;
+        }
 
         await loadJuzBoard();
       });
@@ -259,17 +289,11 @@ async function loadJuzBoard() {
   }
 }
 
-
-/* ===============================
-   UI BINDINGS
-================================= */
-
 function bindTabs() {
-  document.querySelectorAll(".tab-btn").forEach(btn => {
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(p => p.classList.remove("active"));
-
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach((p) => p.classList.remove("active"));
       btn.classList.add("active");
       document.getElementById(btn.dataset.tab)?.classList.add("active");
     });
@@ -277,41 +301,34 @@ function bindTabs() {
 }
 
 function bindButtons() {
+  const saveBtn = document.getElementById("saveDetailsBtn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", saveParticipant);
+  }
 
-  const saveBtn = document.querySelector(".btn.btn-secondary");
-  if (saveBtn) saveBtn.onclick = saveParticipant;
-
-  const submitBtn = document.querySelector(".btn.btn-primary.btn-block");
-  if (submitBtn) submitBtn.onclick = submitQuickRecitations;
+  const submitBtn = document.getElementById("submitQuickBtn");
+  if (submitBtn) {
+    submitBtn.addEventListener("click", submitQuickRecitations);
+  }
 }
 
-
-/* ===============================
-   LIVE REALTIME
-================================= */
-
 function bindRealtime() {
-  supabase
-    .channel("live")
-    .on("postgres_changes",
+  client
+    .channel("live-khatam")
+    .on(
+      "postgres_changes",
       { event: "*", schema: "public", table: "khatam_claims" },
-      loadJuzBoard
+      async () => {
+        await loadJuzBoard();
+      }
     )
     .subscribe();
 }
 
-
-/* ===============================
-   INIT
-================================= */
-
 document.addEventListener("DOMContentLoaded", async () => {
-
   bindTabs();
   bindButtons();
   updateSummary();
-
   await loadMemorial();
   bindRealtime();
-
 });
