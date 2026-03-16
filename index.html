@@ -14,7 +14,7 @@
         <p class="eyebrow">Masjid Memorial Recitation</p>
         <h1 class="page-title">Esaal-e-Sawab & Quran Khatam</h1>
       </div>
-      <a class="ghost-link" href="totals.html" target="_blank">Open totals screen</a>
+      <a class="ghost-link" href="totals.html" target="_blank" rel="noreferrer">Open totals screen</a>
     </header>
 
     <main class="container grid-main">
@@ -43,7 +43,7 @@
       <section class="panel participant-panel">
         <div class="section-header">
           <h2>Your Details</h2>
-          <p>Used for leaderboard and recent activity.</p>
+          <p>Used for recitations and Juz claims.</p>
         </div>
 
         <form id="participantForm" class="stack-lg" onsubmit="return false;">
@@ -230,16 +230,16 @@
         <div id="khatamPanel" class="tab-content">
           <div class="section-header compact">
             <h2>Quran Khatam</h2>
-            <p>Choose a campaign and claim one Juz.</p>
+            <p>Claim one available Juz below.</p>
           </div>
 
           <div class="campaign-grid">
             <div class="campaign-card active">
-              <div class="campaign-title">3rd Day Khatam</div>
-              <div class="campaign-deadline">Current active campaign</div>
+              <div class="campaign-title">Live Campaign</div>
+              <div class="campaign-deadline">Connected to Supabase</div>
               <div class="progress-header">
-                <span>Live from database</span>
-                <span>Active</span>
+                <span>Shared board</span>
+                <span>Realtime</span>
               </div>
               <div class="progress-bar">
                 <div class="progress-bar__fill" style="width: 0%"></div>
@@ -247,10 +247,10 @@
             </div>
 
             <div class="campaign-card">
-              <div class="campaign-title">40th Day Khatam</div>
-              <div class="campaign-deadline">Available after setup</div>
+              <div class="campaign-title">Next Campaign</div>
+              <div class="campaign-deadline">Ready for future use</div>
               <div class="progress-header">
-                <span>Future campaign</span>
+                <span>Secondary</span>
                 <span>Waiting</span>
               </div>
               <div class="progress-bar">
@@ -261,16 +261,14 @@
 
           <div class="stats-toolbar mt-lg">
             <div class="pill-row">
-              <div class="pill">Campaign: Live</div>
-              <div class="pill">Status: Synced</div>
+              <div class="pill">Campaign: Loading...</div>
+              <div class="pill">Status: Syncing</div>
             </div>
           </div>
 
           <div class="my-assignment-card mt-md">
             <h3>Your Current Assignment</h3>
-            <div>
-              Save your details first, then claim any available Juz below.
-            </div>
+            <div>Save your details first, then claim any available Juz below.</div>
           </div>
 
           <div class="juz-grid mt-lg" id="juzList"></div>
@@ -280,8 +278,8 @@
       <aside class="sidebar">
         <section class="panel totals-panel">
           <div class="section-header compact">
-            <h2>Live Totals</h2>
-            <p>Monitor and TV friendly layout.</p>
+            <h2>Live Status</h2>
+            <p>Shared recitations and Juz claiming.</p>
           </div>
 
           <div class="stats-grid two-up">
@@ -307,7 +305,7 @@
         <section class="panel leaderboard-panel">
           <div class="section-header compact">
             <h2>Leaderboard</h2>
-            <p>Will reflect live data next.</p>
+            <p>Will be wired to live data next.</p>
           </div>
           <div class="leaderboard-list">
             <div class="leaderboard-item"><span>Top readers</span><strong>Coming next</strong></div>
@@ -317,10 +315,10 @@
         <section class="panel activity-panel">
           <div class="section-header compact">
             <h2>Recent Activity</h2>
-            <p>Will reflect live actions next.</p>
+            <p>Realtime connection status.</p>
           </div>
           <div class="activity-list">
-            <div class="activity-item"><span>Realtime connected</span><strong>Ready</strong></div>
+            <div class="activity-item"><span>App loaded</span><strong>Ready</strong></div>
           </div>
         </section>
       </aside>
