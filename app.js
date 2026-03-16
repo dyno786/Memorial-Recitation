@@ -14,7 +14,6 @@ function count(id, val) {
   var num = parseInt(el.innerText || "0", 10);
   num += val;
   if (num < 0) num = 0;
-
   el.innerText = String(num);
   updateSummary();
 }
@@ -55,9 +54,9 @@ function updateSummary() {
   summary.innerHTML =
     active.map(function (row) {
       total += row[1];
-      return '<div class="summary-row"><span>' + row[0] + '</span><strong>' + row[1] + "</strong></div>";
+      return '<div class="summary-row"><span>' + row[0] + '</span><strong>' + row[1] + '</strong></div>';
     }).join("") +
-    '<div class="summary-row"><span>Total</span><strong>' + total + "</strong></div>";
+    '<div class="summary-row"><span>Total</span><strong>' + total + '</strong></div>';
 }
 
 function bindTabs() {
@@ -70,7 +69,6 @@ function bindTabs() {
       document.querySelectorAll(".tab-content").forEach(function (p) {
         p.classList.remove("active");
       });
-
       btn.classList.add("active");
       var target = document.getElementById(btn.dataset.tab);
       if (target) target.classList.add("active");
@@ -79,6 +77,8 @@ function bindTabs() {
 }
 
 async function loadMemorial() {
+  console.log("Loading memorial slug:", window.APP_CONFIG.memorialSlug);
+
   var result = await memorialClient
     .from("memorials")
     .select("*")
@@ -87,11 +87,12 @@ async function loadMemorial() {
 
   if (result.error) {
     console.error("loadMemorial error:", result.error);
-    alert("Could not load memorial.");
+    alert("Could not load memorial. Check Supabase data and policies.");
     return;
   }
 
   currentMemorial = result.data;
+  console.log("Memorial loaded:", currentMemorial);
 
   var nameEl = document.querySelector(".memorial-name");
   if (nameEl) {
@@ -119,6 +120,8 @@ async function loadMemorial() {
   if (campaignResult.data && campaignResult.data.length) {
     currentCampaign = campaignResult.data[0];
     renderCampaignPills(currentCampaign);
+  } else {
+    console.warn("No campaigns found for memorial");
   }
 
   await loadJuzBoard();
@@ -133,8 +136,8 @@ function renderCampaignPills(campaign) {
     : "No deadline set";
 
   pillRow.innerHTML =
-    '<div class="pill">Campaign: ' + campaign.title + "</div>" +
-    '<div class="pill">Deadline: ' + deadlineText + "</div>";
+    '<div class="pill">Campaign: ' + campaign.title + '</div>' +
+    '<div class="pill">Deadline: ' + deadlineText + '</div>';
 }
 
 async function saveParticipant() {
@@ -172,6 +175,7 @@ async function saveParticipant() {
   }
 
   currentParticipant = result.data;
+  console.log("Participant saved:", currentParticipant);
   alert("Saved.");
 }
 
@@ -238,7 +242,10 @@ async function submitQuickRecitations() {
 }
 
 async function loadJuzBoard() {
-  if (!currentCampaign) return;
+  if (!currentCampaign) {
+    console.warn("No current campaign, skipping Juz load");
+    return;
+  }
 
   var result = await memorialClient
     .from("khatam_claims")
@@ -270,18 +277,18 @@ async function loadJuzBoard() {
 
     card.innerHTML =
       '<div class="juz-meta">' +
-        "<strong>Juz " + i + "</strong>" +
-        "<span>" +
+        '<strong>Juz ' + i + '</strong>' +
+        '<span>' +
           (isCompleted
             ? "Completed"
             : isClaimed
             ? "Already reserved by a reader"
             : "Available to claim") +
-        "</span>" +
-      "</div>" +
+        '</span>' +
+      '</div>' +
       '<button type="button" class="juz-btn ' + (isClaimed ? "claimed" : "available") + '">' +
         (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") +
-      "</button>";
+      '</button>';
 
     var btn = card.querySelector("button");
 
@@ -319,14 +326,10 @@ async function loadJuzBoard() {
 
 function bindButtons() {
   var saveBtn = document.getElementById("saveDetailsBtn");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", saveParticipant);
-  }
+  if (saveBtn) saveBtn.addEventListener("click", saveParticipant);
 
   var submitBtn = document.getElementById("submitQuickBtn");
-  if (submitBtn) {
-    submitBtn.addEventListener("click", submitQuickRecitations);
-  }
+  if (submitBtn) submitBtn.addEventListener("click", submitQuickRecitations);
 }
 
 function bindRealtime() {
