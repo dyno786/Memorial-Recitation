@@ -1,29 +1,238 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Admin</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memorial Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .admin-shell{
+      width:min(1200px, calc(100% - 32px));
+      margin:0 auto;
+      padding:24px 0 40px;
+    }
+
+    .admin-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+    }
+
+    .admin-grid .panel{
+      margin-bottom:0;
+    }
+
+    .admin-list{
+      background:rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:10px 16px;
+    }
+
+    .admin-item{
+      padding:16px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .admin-item:last-child{
+      border-bottom:none;
+    }
+
+    .admin-item h3{
+      margin:0 0 6px;
+      font-size:20px;
+    }
+
+    .admin-item p{
+      margin:0;
+      color:#c9c7b9;
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    .admin-link-group{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .admin-mini-card{
+      background:rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:18px;
+    }
+
+    .helper-box{
+      margin-top:16px;
+      padding:16px;
+      border-radius:16px;
+      background:rgba(202,168,92,.08);
+      border:1px solid rgba(202,168,92,.28);
+      color:#e4decb;
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    textarea{
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius:14px;
+      padding:14px;
+      background:#1a3028;
+      color:#fff;
+      font-size:15px;
+      font-family:Arial, Helvetica, sans-serif;
+      resize:vertical;
+    }
+
+    .status-badge{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#173026;
+      font-size:13px;
+      color:#f5f5f0;
+      margin-top:10px;
+    }
+
+    @media (max-width: 920px){
+      .admin-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="admin-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Mosque Admin</p>
+        <h1 class="page-title">Memorial Dashboard</h1>
+      </div>
+      <div class="pill-row">
+        <div class="pill">Admin Mode</div>
+        <div class="pill">Local Demo</div>
+      </div>
+    </header>
 
-<div class="container">
+    <main class="admin-grid">
+      <section class="panel">
+        <div class="section-header">
+          <h2>Create Memorial</h2>
+          <p>Create the deceased profile and prepare the 3rd-day and 40th-day khatam setup.</p>
+        </div>
 
-<div class="header">
-<h1>Admin Panel</h1>
-</div>
+        <form class="stack-lg">
+          <div class="field-grid two-up">
+            <div class="field">
+              <label for="fullName">Full Name</label>
+              <input id="fullName" type="text" placeholder="Ahmed Khan" />
+            </div>
+            <div class="field">
+              <label for="age">Age</label>
+              <input id="age" type="number" placeholder="67" />
+            </div>
+          </div>
 
-<div class="panel active">
+          <div class="field-grid two-up">
+            <div class="field">
+              <label for="dateOfPassing">Date of Passing</label>
+              <input id="dateOfPassing" type="date" />
+            </div>
+            <div class="field">
+              <label for="mosqueName">Mosque Name</label>
+              <input id="mosqueName" type="text" placeholder="Leeds Islamic Centre" />
+            </div>
+          </div>
 
-<input placeholder="Name" style="width:100%;padding:10px;margin-bottom:10px">
-<input placeholder="Mosque" style="width:100%;padding:10px;margin-bottom:10px">
+          <div class="field-grid two-up">
+            <div class="field">
+              <label for="ukCityAdmin">UK City</label>
+              <input id="ukCityAdmin" type="text" placeholder="Leeds" />
+            </div>
+            <div class="field">
+              <label for="pakCityAdmin">Pakistani City</label>
+              <input id="pakCityAdmin" type="text" placeholder="Lahore" />
+            </div>
+          </div>
 
-<button class="main-btn">Create</button>
+          <div class="field">
+            <label for="tribute">Family Message / Tribute</label>
+            <textarea id="tribute" rows="4" placeholder="Please recite and make dua for the deceased."></textarea>
+          </div>
 
-</div>
+          <div class="field-grid two-up">
+            <div class="field">
+              <label for="thirdDayDeadline">3rd Day Deadline</label>
+              <input id="thirdDayDeadline" type="datetime-local" />
+            </div>
+            <div class="field">
+              <label for="fortiethDayDeadline">40th Day Deadline</label>
+              <input id="fortiethDayDeadline" type="datetime-local" />
+            </div>
+          </div>
 
-</div>
+          <div class="inline-actions">
+            <button class="btn btn-primary" type="button">Create Memorial</button>
+            <button class="btn btn-secondary" type="button">Auto-fill 3rd & 40th Day</button>
+          </div>
+        </form>
 
+        <div class="helper-box">
+          This is the upgraded admin layout. The next stage will connect this form to Supabase
+          so each memorial is saved properly, gets its own link, and can later generate a QR code.
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-header compact">
+          <h2>Saved Memorials</h2>
+          <p>Example layout for the memorial list</p>
+        </div>
+
+        <div class="admin-list">
+          <div class="admin-item">
+            <h3>Ahmed Khan</h3>
+            <p>
+              Age 67 · Leeds Islamic Centre<br>
+              3rd Day Khatam: 15 March 2026<br>
+              40th Day Khatam: 21 April 2026
+            </p>
+            <span class="status-badge">Active</span>
+            <div class="admin-link-group">
+              <a class="ghost-link" href="index.html">Open Memorial</a>
+              <a class="ghost-link" href="totals.html">Open Totals Screen</a>
+            </div>
+          </div>
+
+          <div class="admin-item">
+            <h3>Fatima Begum</h3>
+            <p>
+              Age 74 · Bradford Community Mosque<br>
+              3rd Day Khatam: 20 March 2026<br>
+              40th Day Khatam: 26 April 2026
+            </p>
+            <span class="status-badge">Draft</span>
+            <div class="admin-link-group">
+              <a class="ghost-link" href="index.html">Open Memorial</a>
+              <a class="ghost-link" href="totals.html">Open Totals Screen</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-mini-card mt-lg">
+          <div class="section-header compact">
+            <h3>What comes next</h3>
+          </div>
+          <p class="muted-text" style="line-height:1.8;">
+            Next we connect this admin page to a database so it can:
+            create memorials, create 3rd-day and 40th-day campaigns,
+            save deadlines, and generate unique public pages.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
