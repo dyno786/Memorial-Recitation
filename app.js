@@ -1,26 +1,26 @@
-const client = window.supabase.createClient(
+var memorialClient = window.supabase.createClient(
   window.APP_CONFIG.supabaseUrl,
   window.APP_CONFIG.supabasePublishableKey
 );
 
-let currentMemorial = null;
-let currentCampaign = null;
-let currentParticipant = null;
+var currentMemorial = null;
+var currentCampaign = null;
+var currentParticipant = null;
 
 function count(id, val) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (!el) return;
 
-  let num = parseInt(el.innerText || "0", 10);
+  var num = parseInt(el.innerText || "0", 10);
   num += val;
   if (num < 0) num = 0;
 
-  el.innerText = num;
+  el.innerText = String(num);
   updateSummary();
 }
 
 function updateSummary() {
-  const items = [
+  var items = [
     ["Bismillah", "bismillah"],
     ["Alhamdulillah", "alhamdulillah"],
     ["Subhanallah", "subhanallah"],
@@ -31,90 +31,110 @@ function updateSummary() {
     ["Surah Yasin", "yasin"]
   ];
 
-  const summary = document.getElementById("quickSummary");
+  var summary = document.getElementById("quickSummary");
   if (!summary) return;
 
-  const active = items
-    .map(([label, id]) => {
-      const el = document.getElementById(id);
-      return [label, parseInt(el?.innerText || "0", 10)];
+  var active = items
+    .map(function (item) {
+      var label = item[0];
+      var id = item[1];
+      var el = document.getElementById(id);
+      return [label, parseInt((el && el.innerText) || "0", 10)];
     })
-    .filter(([, value]) => value > 0);
+    .filter(function (row) {
+      return row[1] > 0;
+    });
 
   if (!active.length) {
     summary.innerHTML =
-      `<div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>`;
+      '<div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>';
     return;
   }
 
-  let total = 0;
+  var total = 0;
   summary.innerHTML =
-    active
-      .map(([label, value]) => {
-        total += value;
-        return `<div class="summary-row"><span>${label}</span><strong>${value}</strong></div>`;
-      })
-      .join("") +
-    `<div class="summary-row"><span>Total</span><strong>${total}</strong></div>`;
+    active.map(function (row) {
+      total += row[1];
+      return '<div class="summary-row"><span>' + row[0] + '</span><strong>' + row[1] + "</strong></div>";
+    }).join("") +
+    '<div class="summary-row"><span>Total</span><strong>' + total + "</strong></div>";
+}
+
+function bindTabs() {
+  var buttons = document.querySelectorAll(".tab-btn");
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".tab-btn").forEach(function (b) {
+        b.classList.remove("active");
+      });
+      document.querySelectorAll(".tab-content").forEach(function (p) {
+        p.classList.remove("active");
+      });
+
+      btn.classList.add("active");
+      var target = document.getElementById(btn.dataset.tab);
+      if (target) target.classList.add("active");
+    });
+  });
 }
 
 async function loadMemorial() {
-  const { data, error } = await client
+  var result = await memorialClient
     .from("memorials")
     .select("*")
     .eq("slug", window.APP_CONFIG.memorialSlug)
     .single();
 
-  if (error) {
-    console.error("loadMemorial error:", error);
+  if (result.error) {
+    console.error("loadMemorial error:", result.error);
     alert("Could not load memorial.");
     return;
   }
 
-  currentMemorial = data;
+  currentMemorial = result.data;
 
-  const nameEl = document.querySelector(".memorial-name");
-  if (nameEl) nameEl.textContent = data.full_name || "Memorial";
-
-  const metaEl = document.querySelector(".meta");
-  if (metaEl) {
-    metaEl.innerHTML = `
-      Age: ${data.age ?? "-"}<br>
-      Passed away: ${data.date_of_passing ?? "-"}<br>
-      Mosque: ${data.mosque_name ?? "-"}
-    `;
+  var nameEl = document.querySelector(".memorial-name");
+  if (nameEl) {
+    nameEl.textContent = currentMemorial.full_name || "Memorial";
   }
 
-  const { data: campaigns, error: campaignError } = await client
+  var metaEl = document.querySelector(".meta");
+  if (metaEl) {
+    metaEl.innerHTML =
+      "Age: " + (currentMemorial.age ?? "-") + "<br>" +
+      "Passed away: " + (currentMemorial.date_of_passing ?? "-") + "<br>" +
+      "Mosque: " + (currentMemorial.mosque_name ?? "-");
+  }
+
+  var campaignResult = await memorialClient
     .from("khatam_campaigns")
     .select("*")
-    .eq("memorial_id", data.id)
+    .eq("memorial_id", currentMemorial.id)
     .order("created_at", { ascending: true });
 
-  if (campaignError) {
-    console.error("campaign load error:", campaignError);
+  if (campaignResult.error) {
+    console.error("campaign load error:", campaignResult.error);
   }
 
-  if (campaigns && campaigns.length) {
-    currentCampaign = campaigns[0];
-    renderCampaignPills(campaigns[0]);
+  if (campaignResult.data && campaignResult.data.length) {
+    currentCampaign = campaignResult.data[0];
+    renderCampaignPills(currentCampaign);
   }
 
   await loadJuzBoard();
 }
 
 function renderCampaignPills(campaign) {
-  const pillRow = document.querySelector(".pill-row");
+  var pillRow = document.querySelector(".pill-row");
   if (!pillRow || !campaign) return;
 
-  const deadlineText = campaign.deadline
+  var deadlineText = campaign.deadline
     ? new Date(campaign.deadline).toLocaleString()
     : "No deadline set";
 
-  pillRow.innerHTML = `
-    <div class="pill">Campaign: ${campaign.title}</div>
-    <div class="pill">Deadline: ${deadlineText}</div>
-  `;
+  pillRow.innerHTML =
+    '<div class="pill">Campaign: ' + campaign.title + "</div>" +
+    '<div class="pill">Deadline: ' + deadlineText + "</div>";
 }
 
 async function saveParticipant() {
@@ -123,35 +143,35 @@ async function saveParticipant() {
     return;
   }
 
-  const name = document.getElementById("readerName")?.value?.trim() || "";
-  const ukCity = document.getElementById("ukCity")?.value?.trim() || "";
-  const pakCity = document.getElementById("pakCity")?.value?.trim() || "";
-  const relation = document.getElementById("relation")?.value || "";
+  var name = (document.getElementById("readerName") || {}).value || "";
+  var ukCity = (document.getElementById("ukCity") || {}).value || "";
+  var pakCity = (document.getElementById("pakCity") || {}).value || "";
+  var relation = (document.getElementById("relation") || {}).value || "";
 
-  if (!name && relation !== "Anonymous") {
+  if (!name.trim() && relation !== "Anonymous") {
     alert("Please enter your name or choose Anonymous.");
     return;
   }
 
-  const { data, error } = await client
+  var result = await memorialClient
     .from("participants")
     .insert({
       memorial_id: currentMemorial.id,
-      name: relation === "Anonymous" ? "Anonymous" : name,
-      uk_city: ukCity,
-      pak_city: pakCity,
+      name: relation === "Anonymous" ? "Anonymous" : name.trim(),
+      uk_city: ukCity.trim(),
+      pak_city: pakCity.trim(),
       relation: relation || null
     })
     .select()
     .single();
 
-  if (error) {
-    console.error("saveParticipant error:", error);
+  if (result.error) {
+    console.error("saveParticipant error:", result.error);
     alert("Could not save participant.");
     return;
   }
 
-  currentParticipant = data;
+  currentParticipant = result.data;
   alert("Saved.");
 }
 
@@ -166,7 +186,7 @@ async function submitQuickRecitations() {
     return;
   }
 
-  const items = [
+  var items = [
     ["Bismillah", "bismillah"],
     ["Alhamdulillah", "alhamdulillah"],
     ["Subhanallah", "subhanallah"],
@@ -177,155 +197,152 @@ async function submitQuickRecitations() {
     ["Surah Yasin", "yasin"]
   ];
 
-  const rows = items
-    .map(([label, id]) => {
-      const el = document.getElementById(id);
+  var rows = items
+    .map(function (item) {
+      var label = item[0];
+      var id = item[1];
+      var el = document.getElementById(id);
       return {
         memorial_id: currentMemorial.id,
         participant_id: currentParticipant.id,
         recitation_name: label,
-        recitation_count: parseInt(el?.innerText || "0", 10)
+        recitation_count: parseInt((el && el.innerText) || "0", 10)
       };
     })
-    .filter((row) => row.recitation_count > 0);
+    .filter(function (row) {
+      return row.recitation_count > 0;
+    });
 
   if (!rows.length) {
     alert("Add recitations first.");
     return;
   }
 
-  const { error } = await client.from("quick_recitations").insert(rows);
+  var result = await memorialClient.from("quick_recitations").insert(rows);
 
-  if (error) {
-    console.error("submitQuickRecitations error:", error);
+  if (result.error) {
+    console.error("submitQuickRecitations error:", result.error);
     alert("Could not submit recitations.");
     return;
   }
 
   alert("Submitted.");
 
-  const ids = ["bismillah", "alhamdulillah", "subhanallah", "astaghfirullah", "durood", "fatiha", "ikhlas", "yasin"];
-  ids.forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.innerText = "0";
-  });
+  ["bismillah","alhamdulillah","subhanallah","astaghfirullah","durood","fatiha","ikhlas","yasin"]
+    .forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.innerText = "0";
+    });
+
   updateSummary();
 }
 
 async function loadJuzBoard() {
   if (!currentCampaign) return;
 
-  const { data, error } = await client
+  var result = await memorialClient
     .from("khatam_claims")
     .select("*")
     .eq("campaign_id", currentCampaign.id)
     .order("juz_number", { ascending: true });
 
-  if (error) {
-    console.error("loadJuzBoard error:", error);
+  if (result.error) {
+    console.error("loadJuzBoard error:", result.error);
     return;
   }
 
-  const juzList = document.getElementById("juzList");
+  var data = result.data || [];
+  var juzList = document.getElementById("juzList");
   if (!juzList) return;
 
   juzList.innerHTML = "";
 
-  for (let i = 1; i <= 30; i++) {
-    const claim = data.find((x) => x.juz_number === i);
-    const isClaimed = !!claim;
-    const isCompleted = claim?.status === "completed";
+  for (var i = 1; i <= 30; i++) {
+    var claim = data.find(function (x) {
+      return x.juz_number === i;
+    });
 
-    const card = document.createElement("div");
+    var isClaimed = !!claim;
+    var isCompleted = claim && claim.status === "completed";
+
+    var card = document.createElement("div");
     card.className = "juz-card";
 
-    card.innerHTML = `
-      <div class="juz-meta">
-        <strong>Juz ${i}</strong>
-        <span>${
-          isCompleted
+    card.innerHTML =
+      '<div class="juz-meta">' +
+        "<strong>Juz " + i + "</strong>" +
+        "<span>" +
+          (isCompleted
             ? "Completed"
             : isClaimed
             ? "Already reserved by a reader"
-            : "Available to claim"
-        }</span>
-      </div>
-      <button type="button" class="juz-btn ${
-        isClaimed ? "claimed" : "available"
-      }">${
-        isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim"
-      }</button>
-    `;
+            : "Available to claim") +
+        "</span>" +
+      "</div>" +
+      '<button type="button" class="juz-btn ' + (isClaimed ? "claimed" : "available") + '">' +
+        (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") +
+      "</button>";
 
-    const btn = card.querySelector("button");
+    var btn = card.querySelector("button");
 
-    if (!isClaimed) {
-      btn.addEventListener("click", async () => {
-        if (!currentParticipant) {
-          alert("Save details first.");
-          return;
-        }
+    if (!isClaimed && btn) {
+      (function (juzNumber) {
+        btn.addEventListener("click", async function () {
+          if (!currentParticipant) {
+            alert("Save details first.");
+            return;
+          }
 
-        const { error: insertError } = await client
-          .from("khatam_claims")
-          .insert({
-            campaign_id: currentCampaign.id,
-            participant_id: currentParticipant.id,
-            juz_number: i,
-            status: "claimed"
-          });
+          var insertResult = await memorialClient
+            .from("khatam_claims")
+            .insert({
+              campaign_id: currentCampaign.id,
+              participant_id: currentParticipant.id,
+              juz_number: juzNumber,
+              status: "claimed"
+            });
 
-        if (insertError) {
-          console.error("claim error:", insertError);
-          alert("Could not claim this Juz.");
-          return;
-        }
+          if (insertResult.error) {
+            console.error("claim error:", insertResult.error);
+            alert("Could not claim this Juz.");
+            return;
+          }
 
-        await loadJuzBoard();
-      });
+          await loadJuzBoard();
+        });
+      })(i);
     }
 
     juzList.appendChild(card);
   }
 }
 
-function bindTabs() {
-  document.querySelectorAll(".tab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach((p) => p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.tab)?.classList.add("active");
-    });
-  });
-}
-
 function bindButtons() {
-  const saveBtn = document.getElementById("saveDetailsBtn");
+  var saveBtn = document.getElementById("saveDetailsBtn");
   if (saveBtn) {
     saveBtn.addEventListener("click", saveParticipant);
   }
 
-  const submitBtn = document.getElementById("submitQuickBtn");
+  var submitBtn = document.getElementById("submitQuickBtn");
   if (submitBtn) {
     submitBtn.addEventListener("click", submitQuickRecitations);
   }
 }
 
 function bindRealtime() {
-  client
+  memorialClient
     .channel("live-khatam")
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "khatam_claims" },
-      async () => {
+      async function () {
         await loadJuzBoard();
       }
     )
     .subscribe();
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async function () {
   bindTabs();
   bindButtons();
   updateSummary();
