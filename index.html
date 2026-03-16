@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Memorial Recitation</title>
-  <meta name="theme-color" content="#0f1713" />
+  <meta name="theme-color" content="#03110f" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -19,11 +19,12 @@
 
     <main class="container grid-main">
       <section class="panel memorial-card">
-        <h2 class="memorial-name">Ahmed Khan</h2>
+        <h2 class="memorial-name">Loading memorial...</h2>
+
         <div class="meta">
-          Age: 67<br />
-          Passed away: 12 March 2026<br />
-          Mosque: Leeds Islamic Centre
+          Age: -<br />
+          Passed away: -<br />
+          Mosque: -
         </div>
 
         <div class="hadith-box">
@@ -45,7 +46,7 @@
           <p>Used for leaderboard and recent activity.</p>
         </div>
 
-        <form id="participantForm" class="stack-lg">
+        <form id="participantForm" class="stack-lg" onsubmit="return false;">
           <div class="field">
             <label for="readerName">Name</label>
             <input id="readerName" type="text" placeholder="Enter your name" />
@@ -56,6 +57,7 @@
               <label for="ukCity">UK City</label>
               <input id="ukCity" type="text" placeholder="e.g. Leeds" />
             </div>
+
             <div class="field">
               <label for="pakCity">Pakistani City</label>
               <input id="pakCity" type="text" placeholder="e.g. Lahore" />
@@ -66,24 +68,24 @@
             <label for="relation">Relation</label>
             <select id="relation">
               <option value="">Select relation</option>
-              <option>Family</option>
-              <option>Friend</option>
-              <option>Community Member</option>
-              <option>Anonymous</option>
+              <option value="Family">Family</option>
+              <option value="Friend">Friend</option>
+              <option value="Community Member">Community Member</option>
+              <option value="Anonymous">Anonymous</option>
             </select>
           </div>
 
           <div class="inline-actions">
-            <button class="btn btn-secondary" type="button">Save my details</button>
-            <span class="muted-text">Saved locally on this device</span>
+            <button type="button" class="btn btn-secondary" id="saveDetailsBtn">Save my details</button>
+            <span class="muted-text">Save first before submitting recitations or claiming Juz.</span>
           </div>
         </form>
       </section>
 
       <section class="panel tab-panel-wrap">
         <div class="tabs">
-          <button class="tab-btn active" data-tab="quickPanel">Quick Recitations</button>
-          <button class="tab-btn" data-tab="khatamPanel">Quran Khatam</button>
+          <button type="button" class="tab-btn active" data-tab="quickPanel">Quick Recitations</button>
+          <button type="button" class="tab-btn" data-tab="khatamPanel">Quran Khatam</button>
         </div>
 
         <div id="quickPanel" class="tab-content active">
@@ -101,9 +103,9 @@
                 </div>
               </div>
               <div class="counter-controls">
-                <button class="count-btn" onclick="count('bismillah', -1)">−</button>
+                <button type="button" class="count-btn" onclick="count('bismillah', -1)">−</button>
                 <div class="count-display" id="bismillah">0</div>
-                <button class="count-btn" onclick="count('bismillah', 1)">+</button>
+                <button type="button" class="count-btn" onclick="count('bismillah', 1)">+</button>
               </div>
             </div>
 
@@ -115,9 +117,9 @@
                 </div>
               </div>
               <div class="counter-controls">
-                <button class="count-btn" onclick="count('alhamdulillah', -1)">−</button>
+                <button type="button" class="count-btn" onclick="count('alhamdulillah', -1)">−</button>
                 <div class="count-display" id="alhamdulillah">0</div>
-                <button class="count-btn" onclick="count('alhamdulillah', 1)">+</button>
+                <button type="button" class="count-btn" onclick="count('alhamdulillah', 1)">+</button>
               </div>
             </div>
 
@@ -129,9 +131,9 @@
                 </div>
               </div>
               <div class="counter-controls">
-                <button class="count-btn" onclick="count('subhanallah', -1)">−</button>
+                <button type="button" class="count-btn" onclick="count('subhanallah', -1)">−</button>
                 <div class="count-display" id="subhanallah">0</div>
-                <button class="count-btn" onclick="count('subhanallah', 1)">+</button>
+                <button type="button" class="count-btn" onclick="count('subhanallah', 1)">+</button>
               </div>
             </div>
 
@@ -143,9 +145,9 @@
                 </div>
               </div>
               <div class="counter-controls">
-                <button class="count-btn" onclick="count('astaghfirullah', -1)">−</button>
+                <button type="button" class="count-btn" onclick="count('astaghfirullah', -1)">−</button>
                 <div class="count-display" id="astaghfirullah">0</div>
-                <button class="count-btn" onclick="count('astaghfirullah', 1)">+</button>
+                <button type="button" class="count-btn" onclick="count('astaghfirullah', 1)">+</button>
               </div>
             </div>
 
@@ -157,9 +159,9 @@
                 </div>
               </div>
               <div class="counter-controls">
-                <button class="count-btn" onclick="count('durood', -1)">−</button>
+                <button type="button" class="count-btn" onclick="count('durood', -1)">−</button>
                 <div class="count-display" id="durood">0</div>
-                <button class="count-btn" onclick="count('durood', 1)">+</button>
+                <button type="button" class="count-btn" onclick="count('durood', 1)">+</button>
               </div>
             </div>
 
@@ -171,9 +173,9 @@
                 </div>
               </div>
               <div class="counter-controls">
-                <button class="count-btn" onclick="count('fatiha', -1)">−</button>
+                <button type="button" class="count-btn" onclick="count('fatiha', -1)">−</button>
                 <div class="count-display" id="fatiha">0</div>
-                <button class="count-btn" onclick="count('fatiha', 1)">+</button>
+                <button type="button" class="count-btn" onclick="count('fatiha', 1)">+</button>
               </div>
             </div>
 
@@ -185,9 +187,9 @@
                 </div>
               </div>
               <div class="counter-controls">
-                <button class="count-btn" onclick="count('ikhlas', -1)">−</button>
+                <button type="button" class="count-btn" onclick="count('ikhlas', -1)">−</button>
                 <div class="count-display" id="ikhlas">0</div>
-                <button class="count-btn" onclick="count('ikhlas', 1)">+</button>
+                <button type="button" class="count-btn" onclick="count('ikhlas', 1)">+</button>
               </div>
             </div>
 
@@ -199,9 +201,9 @@
                 </div>
               </div>
               <div class="counter-controls">
-                <button class="count-btn" onclick="count('yasin', -1)">−</button>
+                <button type="button" class="count-btn" onclick="count('yasin', -1)">−</button>
                 <div class="count-display" id="yasin">0</div>
-                <button class="count-btn" onclick="count('yasin', 1)">+</button>
+                <button type="button" class="count-btn" onclick="count('yasin', 1)">+</button>
               </div>
             </div>
           </div>
@@ -211,10 +213,16 @@
               <h3>Your Quick Summary</h3>
             </div>
             <div class="summary-list" id="quickSummary">
-              <div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>
+              <div class="summary-row">
+                <span>No recitations added yet</span>
+                <strong>0</strong>
+              </div>
             </div>
+
             <div class="actions-sticky mt-lg">
-              <button class="btn btn-primary btn-block">Submit quick recitations</button>
+              <button type="button" class="btn btn-primary btn-block" id="submitQuickBtn">
+                Submit quick recitations
+              </button>
             </div>
           </div>
         </div>
@@ -228,65 +236,41 @@
           <div class="campaign-grid">
             <div class="campaign-card active">
               <div class="campaign-title">3rd Day Khatam</div>
-              <div class="campaign-deadline">Deadline: 15 March 2026, 11:59 PM</div>
+              <div class="campaign-deadline">Current active campaign</div>
               <div class="progress-header">
-                <span>7 completed</span>
-                <span>4 claimed</span>
+                <span>Live from database</span>
+                <span>Active</span>
               </div>
               <div class="progress-bar">
-                <div class="progress-bar__fill" style="width:23%"></div>
+                <div class="progress-bar__fill" style="width: 0%"></div>
               </div>
             </div>
 
             <div class="campaign-card">
               <div class="campaign-title">40th Day Khatam</div>
-              <div class="campaign-deadline">Deadline: 21 April 2026, 11:59 PM</div>
+              <div class="campaign-deadline">Available after setup</div>
               <div class="progress-header">
-                <span>2 completed</span>
-                <span>3 claimed</span>
+                <span>Future campaign</span>
+                <span>Waiting</span>
               </div>
               <div class="progress-bar">
-                <div class="progress-bar__fill" style="width:7%"></div>
+                <div class="progress-bar__fill" style="width: 0%"></div>
               </div>
             </div>
           </div>
 
           <div class="stats-toolbar mt-lg">
             <div class="pill-row">
-              <div class="pill">Campaign: 3rd Day Khatam</div>
-              <div class="pill">Deadline: 15 March 2026</div>
-            </div>
-            <button class="btn btn-secondary">Assign me a Juz</button>
-          </div>
-
-          <div class="stats-grid three-up mt-md">
-            <div class="mini-stat">
-              <span class="mini-stat__value">7</span>
-              <span class="mini-stat__label">Completed</span>
-            </div>
-            <div class="mini-stat">
-              <span class="mini-stat__value">4</span>
-              <span class="mini-stat__label">Claimed</span>
-            </div>
-            <div class="mini-stat">
-              <span class="mini-stat__value">19</span>
-              <span class="mini-stat__label">Available</span>
-            </div>
-          </div>
-
-          <div class="progress-card mt-md">
-            <div class="progress-header">
-              <span>Campaign progress</span>
-              <span>7 / 30 completed</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-bar__fill" style="width:23%"></div>
+              <div class="pill">Campaign: Live</div>
+              <div class="pill">Status: Synced</div>
             </div>
           </div>
 
           <div class="my-assignment-card mt-md">
             <h3>Your Current Assignment</h3>
-            <div>You have not claimed a Juz yet. Choose an available Juz or press <strong>Assign me a Juz</strong>.</div>
+            <div>
+              Save your details first, then claim any available Juz below.
+            </div>
           </div>
 
           <div class="juz-grid mt-lg" id="juzList"></div>
@@ -299,22 +283,23 @@
             <h2>Live Totals</h2>
             <p>Monitor and TV friendly layout.</p>
           </div>
+
           <div class="stats-grid two-up">
             <div class="mini-stat">
-              <span class="mini-stat__value">128</span>
-              <span class="mini-stat__label">Readers</span>
+              <span class="mini-stat__value">Live</span>
+              <span class="mini-stat__label">Supabase</span>
             </div>
             <div class="mini-stat">
-              <span class="mini-stat__value">5120</span>
-              <span class="mini-stat__label">Quick recitations</span>
+              <span class="mini-stat__value">Shared</span>
+              <span class="mini-stat__label">Counters</span>
             </div>
             <div class="mini-stat">
-              <span class="mini-stat__value">7</span>
-              <span class="mini-stat__label">Juz completed</span>
+              <span class="mini-stat__value">Global</span>
+              <span class="mini-stat__label">Juz Claims</span>
             </div>
             <div class="mini-stat">
-              <span class="mini-stat__value">2</span>
-              <span class="mini-stat__label">Campaigns</span>
+              <span class="mini-stat__value">Ready</span>
+              <span class="mini-stat__label">Monitor View</span>
             </div>
           </div>
         </section>
@@ -322,32 +307,28 @@
         <section class="panel leaderboard-panel">
           <div class="section-header compact">
             <h2>Leaderboard</h2>
-            <p>Most active readers</p>
+            <p>Will reflect live data next.</p>
           </div>
           <div class="leaderboard-list">
-            <div class="leaderboard-item"><span>1. Ahmed</span><strong>120</strong></div>
-            <div class="leaderboard-item"><span>2. Fatima</span><strong>98</strong></div>
-            <div class="leaderboard-item"><span>3. Usman</span><strong>85</strong></div>
+            <div class="leaderboard-item"><span>Top readers</span><strong>Coming next</strong></div>
           </div>
         </section>
 
         <section class="panel activity-panel">
           <div class="section-header compact">
             <h2>Recent Activity</h2>
-            <p>Latest recitations and khatam updates</p>
+            <p>Will reflect live actions next.</p>
           </div>
           <div class="activity-list">
-            <div class="activity-item">Amina submitted 33 Alhamdulillah</div>
-            <div class="activity-item">Idris claimed Juz 5</div>
-            <div class="activity-item">Fatima completed Surah Yasin</div>
+            <div class="activity-item"><span>Realtime connected</span><strong>Ready</strong></div>
           </div>
         </section>
       </aside>
     </main>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
