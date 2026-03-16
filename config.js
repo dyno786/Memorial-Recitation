@@ -1,5 +1,5 @@
 window.APP_CONFIG = {
-  supabaseUrl: "PASTE_YOUR_SUPABASE_URL_HERE",
-  supabaseAnonKey: "PASTE_YOUR_SUPABASE_ANON_KEY_HERE",
+  supabaseUrl: "https://qbddjirbspxxgtowogna.supabase.co",
+  supabaseAnonKey: "sb_publishable_KrLi7d-CpmxSPZVl3ta9Dg_3QxIiA5h",
   memorialSlug: "ahmed-khan"
 };
