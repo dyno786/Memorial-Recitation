@@ -1,27 +1,311 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Totals</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memorial Totals Screen</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .monitor-shell{
+      width:min(1600px, calc(100% - 32px));
+      margin:0 auto;
+      padding:24px 0 40px;
+    }
+
+    .monitor-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:18px;
+      background:linear-gradient(90deg,#0d1e18,#10241d);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px;
+      padding:24px;
+    }
+
+    .monitor-title{
+      margin:0;
+      font-size:46px;
+      line-height:1.1;
+    }
+
+    .monitor-subtitle{
+      margin:10px 0 0;
+      color:#d8d6c8;
+      font-size:20px;
+    }
+
+    .monitor-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+    }
+
+    .monitor-grid .panel{
+      margin-bottom:0;
+    }
+
+    .monitor-list{
+      background:rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:10px 18px;
+    }
+
+    .monitor-row{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      padding:16px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      font-size:20px;
+    }
+
+    .monitor-row:last-child{
+      border-bottom:none;
+    }
+
+    .monitor-juz-grid{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .monitor-juz{
+      padding:14px 10px;
+      border-radius:14px;
+      text-align:center;
+      font-weight:bold;
+      font-size:18px;
+      background:#173026;
+    }
+
+    .monitor-juz.completed{
+      background:#2f6d4f;
+      color:#fff;
+    }
+
+    .monitor-juz.claimed{
+      background:#7c6731;
+      color:#fff;
+    }
+
+    .monitor-juz.available{
+      background:#173026;
+      color:#f5f5f0;
+    }
+
+    .monitor-hero-stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+    }
+
+    .monitor-stat{
+      background:rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:22px;
+      text-align:center;
+    }
+
+    .monitor-stat-value{
+      display:block;
+      font-size:42px;
+      font-weight:bold;
+      line-height:1;
+    }
+
+    .monitor-stat-label{
+      display:block;
+      margin-top:10px;
+      color:#c9c7b9;
+      font-size:16px;
+    }
+
+    @media (max-width: 1100px){
+      .monitor-grid{
+        grid-template-columns:1fr;
+      }
+
+      .monitor-hero-stats{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .monitor-juz-grid{
+        grid-template-columns:repeat(3,1fr);
+      }
+    }
+
+    @media (max-width: 700px){
+      .monitor-header{
+        flex-direction:column;
+      }
+
+      .monitor-title{
+        font-size:32px;
+      }
+
+      .monitor-subtitle{
+        font-size:16px;
+      }
+
+      .monitor-hero-stats{
+        grid-template-columns:1fr;
+      }
+
+      .monitor-juz-grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .monitor-row{
+        font-size:16px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="monitor-shell">
+    <header class="monitor-header">
+      <div>
+        <p class="eyebrow">Live Memorial Display</p>
+        <h1 class="monitor-title">Ahmed Khan</h1>
+        <p class="monitor-subtitle">
+          Leeds Islamic Centre · 3rd Day Khatam · Updated live for family, mosque and visitors
+        </p>
+      </div>
 
-<div class="container">
+      <div class="pill-row">
+        <div class="pill">Campaign: 3rd Day Khatam</div>
+        <div class="pill">Deadline: 15 March 2026</div>
+      </div>
+    </header>
 
-<div class="header">
-<h1>Live Totals</h1>
-</div>
+    <section class="panel">
+      <div class="section-header compact">
+        <h2>Overall Totals</h2>
+        <p>Combined quick recitations and Quran khatam progress</p>
+      </div>
 
-<div class="panel active">
+      <div class="monitor-hero-stats">
+        <div class="monitor-stat">
+          <span class="monitor-stat-value">128</span>
+          <span class="monitor-stat-label">Readers</span>
+        </div>
+        <div class="monitor-stat">
+          <span class="monitor-stat-value">5,120</span>
+          <span class="monitor-stat-label">Quick Recitations</span>
+        </div>
+        <div class="monitor-stat">
+          <span class="monitor-stat-value">7</span>
+          <span class="monitor-stat-label">Juz Completed</span>
+        </div>
+        <div class="monitor-stat">
+          <span class="monitor-stat-value">2</span>
+          <span class="monitor-stat-label">Campaigns</span>
+        </div>
+      </div>
+    </section>
 
-<div class="juz">Bismillah — 1200</div>
-<div class="juz">Alhamdulillah — 900</div>
+    <main class="monitor-grid">
+      <section class="panel">
+        <div class="section-header compact">
+          <h2>Quick Recitation Breakdown</h2>
+          <p>Live counts from community readers</p>
+        </div>
 
-</div>
+        <div class="monitor-list">
+          <div class="monitor-row"><span>Bismillah</span><strong>1,420</strong></div>
+          <div class="monitor-row"><span>Alhamdulillah</span><strong>1,180</strong></div>
+          <div class="monitor-row"><span>Subhanallah</span><strong>930</strong></div>
+          <div class="monitor-row"><span>Astaghfirullah</span><strong>640</strong></div>
+          <div class="monitor-row"><span>Durood Sharif</span><strong>510</strong></div>
+          <div class="monitor-row"><span>Surah Fatiha</span><strong>180</strong></div>
+          <div class="monitor-row"><span>Surah Ikhlas</span><strong>160</strong></div>
+          <div class="monitor-row"><span>Surah Yasin</span><strong>100</strong></div>
+        </div>
+      </section>
 
-</div>
+      <section class="panel">
+        <div class="section-header compact">
+          <h2>Top Readers</h2>
+          <p>Most active contributors for this memorial</p>
+        </div>
 
+        <div class="monitor-list">
+          <div class="monitor-row"><span>1. Ahmed — Leeds</span><strong>120</strong></div>
+          <div class="monitor-row"><span>2. Fatima — Bradford</span><strong>98</strong></div>
+          <div class="monitor-row"><span>3. Usman — Manchester</span><strong>85</strong></div>
+          <div class="monitor-row"><span>4. Amina — Leeds</span><strong>72</strong></div>
+          <div class="monitor-row"><span>5. Idris — Leeds</span><strong>64</strong></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-header compact">
+          <h2>Quran Khatam Progress</h2>
+          <p>Current 3rd-day campaign board</p>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-header">
+            <span>Campaign progress</span>
+            <span>7 / 30 completed</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar__fill" style="width:23%"></div>
+          </div>
+        </div>
+
+        <div class="monitor-juz-grid">
+          <div class="monitor-juz completed">Juz 1</div>
+          <div class="monitor-juz completed">Juz 2</div>
+          <div class="monitor-juz claimed">Juz 3</div>
+          <div class="monitor-juz claimed">Juz 4</div>
+          <div class="monitor-juz available">Juz 5</div>
+          <div class="monitor-juz available">Juz 6</div>
+          <div class="monitor-juz available">Juz 7</div>
+          <div class="monitor-juz available">Juz 8</div>
+          <div class="monitor-juz available">Juz 9</div>
+          <div class="monitor-juz available">Juz 10</div>
+          <div class="monitor-juz available">Juz 11</div>
+          <div class="monitor-juz available">Juz 12</div>
+          <div class="monitor-juz available">Juz 13</div>
+          <div class="monitor-juz available">Juz 14</div>
+          <div class="monitor-juz available">Juz 15</div>
+          <div class="monitor-juz available">Juz 16</div>
+          <div class="monitor-juz available">Juz 17</div>
+          <div class="monitor-juz available">Juz 18</div>
+          <div class="monitor-juz available">Juz 19</div>
+          <div class="monitor-juz available">Juz 20</div>
+          <div class="monitor-juz available">Juz 21</div>
+          <div class="monitor-juz available">Juz 22</div>
+          <div class="monitor-juz available">Juz 23</div>
+          <div class="monitor-juz available">Juz 24</div>
+          <div class="monitor-juz available">Juz 25</div>
+          <div class="monitor-juz available">Juz 26</div>
+          <div class="monitor-juz available">Juz 27</div>
+          <div class="monitor-juz available">Juz 28</div>
+          <div class="monitor-juz available">Juz 29</div>
+          <div class="monitor-juz available">Juz 30</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-header compact">
+          <h2>Recent Activity</h2>
+          <p>Latest recitations and khatam actions</p>
+        </div>
+
+        <div class="monitor-list">
+          <div class="monitor-row"><span>Amina submitted 33 Alhamdulillah</span><strong>Now</strong></div>
+          <div class="monitor-row"><span>Idris claimed Juz 5</span><strong>2 min ago</strong></div>
+          <div class="monitor-row"><span>Fatima completed Surah Yasin</span><strong>4 min ago</strong></div>
+          <div class="monitor-row"><span>Usman submitted 10 Durood Sharif</span><strong>7 min ago</strong></div>
+          <div class="monitor-row"><span>Ahmed completed Juz 2</span><strong>11 min ago</strong></div>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
