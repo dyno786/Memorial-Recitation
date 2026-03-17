@@ -6,6 +6,48 @@
   <title>Memorial Recitation</title>
   <meta name="theme-color" content="#03110f" />
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .chooser-wrap{display:none;}
+    .chooser-search{
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius:14px;
+      padding:14px;
+      background:#1a3028;
+      color:#fff;
+      font-size:16px;
+      margin-top:12px;
+    }
+    .chooser-list{
+      margin-top:16px;
+      display:grid;
+      gap:12px;
+    }
+    .chooser-item{
+      background:rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:18px;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .chooser-item h3{
+      margin:0 0 8px;
+      font-size:22px;
+    }
+    .chooser-item p{
+      margin:0;
+      color:#d8d6c8;
+      line-height:1.7;
+      font-size:14px;
+    }
+    .chooser-actions{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .memorial-app{display:none;}
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -17,311 +59,202 @@
       <a class="ghost-link" id="totalsLink" href="totals.html" target="_blank" rel="noreferrer">Open totals screen</a>
     </header>
 
-    <main class="container grid-main">
-      <section class="panel memorial-card">
-        <h2 class="memorial-name">Loading memorial...</h2>
-
-        <div class="meta">
-          Age: -<br />
-          Passed away: -<br />
-          Mosque: -
-        </div>
-
-        <div class="hadith-box">
-          <div class="hadith-text">
-            “When a person dies, all their deeds come to an end except three:
-            ongoing charity, beneficial knowledge, or a righteous child who prays for them.”
-          </div>
-          <div class="hadith-ref">— Sahih Muslim</div>
-          <div class="hadith-note">
-            Please recite, make du‘a, and take part in the collective Qur’an reading
-            with the intention of reward for the deceased.
-          </div>
-        </div>
-      </section>
-
-      <section class="panel participant-panel">
+    <main class="container">
+      <!-- MEMORIAL CHOOSER -->
+      <section class="panel chooser-wrap" id="chooserWrap">
         <div class="section-header">
-          <h2>Your Details</h2>
-          <p>Used for recitations and Juz claims.</p>
+          <h2>Choose a Memorial</h2>
+          <p>Search by name, mosque, or city.</p>
         </div>
 
-        <form id="participantForm" class="stack-lg" onsubmit="return false;">
-          <div class="field">
-            <label for="readerName">Name</label>
-            <input id="readerName" type="text" placeholder="Enter your name" />
-          </div>
+        <input
+          type="text"
+          id="memorialSearch"
+          class="chooser-search"
+          placeholder="Search memorials..."
+        />
 
-          <div class="field-grid two-up">
-            <div class="field">
-              <label for="ukCity">UK City</label>
-              <input id="ukCity" type="text" placeholder="e.g. Leeds" />
-            </div>
-
-            <div class="field">
-              <label for="pakCity">Pakistani City</label>
-              <input id="pakCity" type="text" placeholder="e.g. Lahore" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="relation">Relation</label>
-            <select id="relation">
-              <option value="">Select relation</option>
-              <option value="Family">Family</option>
-              <option value="Friend">Friend</option>
-              <option value="Community Member">Community Member</option>
-              <option value="Anonymous">Anonymous</option>
-            </select>
-          </div>
-
-          <div class="inline-actions">
-            <button type="button" class="btn btn-secondary" id="saveDetailsBtn">Save my details</button>
-            <span class="muted-text">Save first before submitting recitations or claiming Juz.</span>
-          </div>
-        </form>
-      </section>
-
-      <section class="panel tab-panel-wrap">
-        <div class="tabs">
-          <button type="button" class="tab-btn active" data-tab="quickPanel">Quick Recitations</button>
-          <button type="button" class="tab-btn" data-tab="khatamPanel">Quran Khatam</button>
-        </div>
-
-        <div id="quickPanel" class="tab-content active">
-          <div class="section-header compact">
-            <h2>Quick Recitations</h2>
-            <p>Tap plus and minus, then submit once finished.</p>
-          </div>
-
-          <div class="counter-list">
-            <div class="counter-item">
-              <div class="counter-top">
-                <div>
-                  <div class="counter-name">Bismillah</div>
-                  <div class="counter-sub">Short recitation counter</div>
-                </div>
-              </div>
-              <div class="counter-controls">
-                <button type="button" class="count-btn" onclick="count('bismillah', -1)">−</button>
-                <div class="count-display" id="bismillah">0</div>
-                <button type="button" class="count-btn" onclick="count('bismillah', 1)">+</button>
-              </div>
-            </div>
-
-            <div class="counter-item">
-              <div class="counter-top">
-                <div>
-                  <div class="counter-name">Alhamdulillah</div>
-                  <div class="counter-sub">Short recitation counter</div>
-                </div>
-              </div>
-              <div class="counter-controls">
-                <button type="button" class="count-btn" onclick="count('alhamdulillah', -1)">−</button>
-                <div class="count-display" id="alhamdulillah">0</div>
-                <button type="button" class="count-btn" onclick="count('alhamdulillah', 1)">+</button>
-              </div>
-            </div>
-
-            <div class="counter-item">
-              <div class="counter-top">
-                <div>
-                  <div class="counter-name">Subhanallah</div>
-                  <div class="counter-sub">Short recitation counter</div>
-                </div>
-              </div>
-              <div class="counter-controls">
-                <button type="button" class="count-btn" onclick="count('subhanallah', -1)">−</button>
-                <div class="count-display" id="subhanallah">0</div>
-                <button type="button" class="count-btn" onclick="count('subhanallah', 1)">+</button>
-              </div>
-            </div>
-
-            <div class="counter-item">
-              <div class="counter-top">
-                <div>
-                  <div class="counter-name">Astaghfirullah</div>
-                  <div class="counter-sub">Short recitation counter</div>
-                </div>
-              </div>
-              <div class="counter-controls">
-                <button type="button" class="count-btn" onclick="count('astaghfirullah', -1)">−</button>
-                <div class="count-display" id="astaghfirullah">0</div>
-                <button type="button" class="count-btn" onclick="count('astaghfirullah', 1)">+</button>
-              </div>
-            </div>
-
-            <div class="counter-item">
-              <div class="counter-top">
-                <div>
-                  <div class="counter-name">Durood Sharif</div>
-                  <div class="counter-sub">Short recitation counter</div>
-                </div>
-              </div>
-              <div class="counter-controls">
-                <button type="button" class="count-btn" onclick="count('durood', -1)">−</button>
-                <div class="count-display" id="durood">0</div>
-                <button type="button" class="count-btn" onclick="count('durood', 1)">+</button>
-              </div>
-            </div>
-
-            <div class="counter-item">
-              <div class="counter-top">
-                <div>
-                  <div class="counter-name">Surah Fatiha</div>
-                  <div class="counter-sub">Completed recitations</div>
-                </div>
-              </div>
-              <div class="counter-controls">
-                <button type="button" class="count-btn" onclick="count('fatiha', -1)">−</button>
-                <div class="count-display" id="fatiha">0</div>
-                <button type="button" class="count-btn" onclick="count('fatiha', 1)">+</button>
-              </div>
-            </div>
-
-            <div class="counter-item">
-              <div class="counter-top">
-                <div>
-                  <div class="counter-name">Surah Ikhlas</div>
-                  <div class="counter-sub">Completed recitations</div>
-                </div>
-              </div>
-              <div class="counter-controls">
-                <button type="button" class="count-btn" onclick="count('ikhlas', -1)">−</button>
-                <div class="count-display" id="ikhlas">0</div>
-                <button type="button" class="count-btn" onclick="count('ikhlas', 1)">+</button>
-              </div>
-            </div>
-
-            <div class="counter-item">
-              <div class="counter-top">
-                <div>
-                  <div class="counter-name">Surah Yasin</div>
-                  <div class="counter-sub">Completed recitations</div>
-                </div>
-              </div>
-              <div class="counter-controls">
-                <button type="button" class="count-btn" onclick="count('yasin', -1)">−</button>
-                <div class="count-display" id="yasin">0</div>
-                <button type="button" class="count-btn" onclick="count('yasin', 1)">+</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="summary-card mt-lg">
-            <div class="section-header compact">
-              <h3>Your Quick Summary</h3>
-            </div>
-            <div class="summary-list" id="quickSummary">
-              <div class="summary-row">
-                <span>No recitations added yet</span>
-                <strong>0</strong>
-              </div>
-            </div>
-
-            <div class="actions-sticky mt-lg">
-              <button type="button" class="btn btn-primary btn-block" id="submitQuickBtn">
-                Submit quick recitations
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div id="khatamPanel" class="tab-content">
-          <div class="section-header compact">
-            <h2>Quran Khatam</h2>
-            <p>Claim one available Juz below.</p>
-          </div>
-
-          <div class="campaign-grid">
-            <div class="campaign-card active">
-              <div class="campaign-title">Live Campaign</div>
-              <div class="campaign-deadline">Connected to Supabase</div>
-              <div class="progress-header">
-                <span>Shared board</span>
-                <span>Realtime</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-bar__fill" style="width:0%"></div>
-              </div>
-            </div>
-
-            <div class="campaign-card">
-              <div class="campaign-title">Next Campaign</div>
-              <div class="campaign-deadline">Ready for future use</div>
-              <div class="progress-header">
-                <span>Secondary</span>
-                <span>Waiting</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-bar__fill" style="width:0%"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="stats-toolbar mt-lg">
-            <div class="pill-row">
-              <div class="pill">Campaign: Loading...</div>
-              <div class="pill">Status: Syncing</div>
-            </div>
-          </div>
-
-          <div class="my-assignment-card mt-md">
-            <h3>Your Current Assignment</h3>
-            <div>Save your details first, then claim any available Juz below.</div>
-          </div>
-
-          <div class="juz-grid mt-lg" id="juzList"></div>
+        <div class="chooser-list" id="chooserList">
+          <div class="muted-text">Loading memorials...</div>
         </div>
       </section>
 
-      <aside class="sidebar">
-        <section class="panel totals-panel">
-          <div class="section-header compact">
-            <h2>Live Status</h2>
-            <p>Shared recitations and Juz claiming.</p>
-          </div>
+      <!-- MAIN MEMORIAL APP -->
+      <div class="memorial-app" id="memorialApp">
+        <div class="grid-main">
+          <section class="panel memorial-card">
+            <h2 class="memorial-name">Loading memorial...</h2>
+            <div class="meta">
+              Age: -<br />
+              Passed away: -<br />
+              Mosque: -
+            </div>
 
-          <div class="stats-grid two-up">
-            <div class="mini-stat">
-              <span class="mini-stat__value">Live</span>
-              <span class="mini-stat__label">Supabase</span>
+            <div class="hadith-box">
+              <div class="hadith-text">
+                “When a person dies, all their deeds come to an end except three:
+                ongoing charity, beneficial knowledge, or a righteous child who prays for them.”
+              </div>
+              <div class="hadith-ref">— Sahih Muslim</div>
+              <div class="hadith-note">
+                Please recite, make du‘a, and take part in the collective Qur’an reading
+                with the intention of reward for the deceased.
+              </div>
             </div>
-            <div class="mini-stat">
-              <span class="mini-stat__value">Shared</span>
-              <span class="mini-stat__label">Counters</span>
-            </div>
-            <div class="mini-stat">
-              <span class="mini-stat__value">Global</span>
-              <span class="mini-stat__label">Juz Claims</span>
-            </div>
-            <div class="mini-stat">
-              <span class="mini-stat__value">Ready</span>
-              <span class="mini-stat__label">Monitor View</span>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <section class="panel leaderboard-panel">
-          <div class="section-header compact">
-            <h2>Leaderboard</h2>
-            <p>Will be wired to live data next.</p>
-          </div>
-          <div class="leaderboard-list">
-            <div class="leaderboard-item"><span>Top readers</span><strong>Coming next</strong></div>
-          </div>
-        </section>
+          <section class="panel participant-panel">
+            <div class="section-header">
+              <h2>Your Details</h2>
+              <p>Used for recitations and Juz claims.</p>
+            </div>
 
-        <section class="panel activity-panel">
-          <div class="section-header compact">
-            <h2>Recent Activity</h2>
-            <p>Realtime connection status.</p>
-          </div>
-          <div class="activity-list">
-            <div class="activity-item"><span>App loaded</span><strong>Ready</strong></div>
-          </div>
-        </section>
-      </aside>
+            <form id="participantForm" class="stack-lg" onsubmit="return false;">
+              <div class="field">
+                <label for="readerName">Name</label>
+                <input id="readerName" type="text" placeholder="Enter your name" />
+              </div>
+
+              <div class="field-grid two-up">
+                <div class="field">
+                  <label for="ukCity">UK City</label>
+                  <input id="ukCity" type="text" placeholder="e.g. Leeds" />
+                </div>
+
+                <div class="field">
+                  <label for="pakCity">Pakistani City</label>
+                  <input id="pakCity" type="text" placeholder="e.g. Lahore" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="relation">Relation</label>
+                <select id="relation">
+                  <option value="">Select relation</option>
+                  <option value="Family">Family</option>
+                  <option value="Friend">Friend</option>
+                  <option value="Community Member">Community Member</option>
+                  <option value="Anonymous">Anonymous</option>
+                </select>
+              </div>
+
+              <div class="inline-actions">
+                <button type="button" class="btn btn-secondary" id="saveDetailsBtn">Save my details</button>
+                <span class="muted-text">Save first before submitting recitations or claiming Juz.</span>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel tab-panel-wrap">
+            <div class="tabs">
+              <button type="button" class="tab-btn active" data-tab="quickPanel">Quick Recitations</button>
+              <button type="button" class="tab-btn" data-tab="khatamPanel">Quran Khatam</button>
+            </div>
+
+            <div id="quickPanel" class="tab-content active">
+              <div class="section-header compact">
+                <h2>Quick Recitations</h2>
+                <p>Tap plus and minus, then submit once finished.</p>
+              </div>
+
+              <div class="counter-list">
+                <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Bismillah</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('bismillah', -1)">−</button><div class="count-display" id="bismillah">0</div><button type="button" class="count-btn" onclick="count('bismillah', 1)">+</button></div></div>
+                <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Alhamdulillah</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('alhamdulillah', -1)">−</button><div class="count-display" id="alhamdulillah">0</div><button type="button" class="count-btn" onclick="count('alhamdulillah', 1)">+</button></div></div>
+                <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Subhanallah</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('subhanallah', -1)">−</button><div class="count-display" id="subhanallah">0</div><button type="button" class="count-btn" onclick="count('subhanallah', 1)">+</button></div></div>
+                <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Astaghfirullah</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('astaghfirullah', -1)">−</button><div class="count-display" id="astaghfirullah">0</div><button type="button" class="count-btn" onclick="count('astaghfirullah', 1)">+</button></div></div>
+                <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Durood Sharif</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('durood', -1)">−</button><div class="count-display" id="durood">0</div><button type="button" class="count-btn" onclick="count('durood', 1)">+</button></div></div>
+                <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Surah Fatiha</div><div class="counter-sub">Completed recitations</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('fatiha', -1)">−</button><div class="count-display" id="fatiha">0</div><button type="button" class="count-btn" onclick="count('fatiha', 1)">+</button></div></div>
+                <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Surah Ikhlas</div><div class="counter-sub">Completed recitations</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('ikhlas', -1)">−</button><div class="count-display" id="ikhlas">0</div><button type="button" class="count-btn" onclick="count('ikhlas', 1)">+</button></div></div>
+                <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Surah Yasin</div><div class="counter-sub">Completed recitations</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('yasin', -1)">−</button><div class="count-display" id="yasin">0</div><button type="button" class="count-btn" onclick="count('yasin', 1)">+</button></div></div>
+              </div>
+
+              <div class="summary-card mt-lg">
+                <div class="section-header compact">
+                  <h3>Your Quick Summary</h3>
+                </div>
+                <div class="summary-list" id="quickSummary">
+                  <div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>
+                </div>
+                <div class="actions-sticky mt-lg">
+                  <button type="button" class="btn btn-primary btn-block" id="submitQuickBtn">Submit quick recitations</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="khatamPanel" class="tab-content">
+              <div class="section-header compact">
+                <h2>Quran Khatam</h2>
+                <p>Claim one available Juz below.</p>
+              </div>
+
+              <div class="campaign-grid">
+                <div class="campaign-card active">
+                  <div class="campaign-title">Live Campaign</div>
+                  <div class="campaign-deadline">Connected to Supabase</div>
+                  <div class="progress-header"><span>Shared board</span><span>Realtime</span></div>
+                  <div class="progress-bar"><div class="progress-bar__fill" style="width:0%"></div></div>
+                </div>
+
+                <div class="campaign-card">
+                  <div class="campaign-title">Next Campaign</div>
+                  <div class="campaign-deadline">Ready for future use</div>
+                  <div class="progress-header"><span>Secondary</span><span>Waiting</span></div>
+                  <div class="progress-bar"><div class="progress-bar__fill" style="width:0%"></div></div>
+                </div>
+              </div>
+
+              <div class="stats-toolbar mt-lg">
+                <div class="pill-row">
+                  <div class="pill">Campaign: Loading...</div>
+                  <div class="pill">Status: Syncing</div>
+                </div>
+              </div>
+
+              <div class="my-assignment-card mt-md">
+                <h3>Your Current Assignment</h3>
+                <div>Save your details first, then claim any available Juz below.</div>
+              </div>
+
+              <div class="juz-grid mt-lg" id="juzList"></div>
+            </div>
+          </section>
+
+          <aside class="sidebar">
+            <section class="panel totals-panel">
+              <div class="section-header compact">
+                <h2>Live Status</h2>
+                <p>Shared recitations and Juz claiming.</p>
+              </div>
+              <div class="stats-grid two-up">
+                <div class="mini-stat"><span class="mini-stat__value">Live</span><span class="mini-stat__label">Supabase</span></div>
+                <div class="mini-stat"><span class="mini-stat__value">Shared</span><span class="mini-stat__label">Counters</span></div>
+                <div class="mini-stat"><span class="mini-stat__value">Global</span><span class="mini-stat__label">Juz Claims</span></div>
+                <div class="mini-stat"><span class="mini-stat__value">Ready</span><span class="mini-stat__label">Monitor View</span></div>
+              </div>
+            </section>
+
+            <section class="panel leaderboard-panel">
+              <div class="section-header compact">
+                <h2>Leaderboard</h2>
+                <p>Will be wired to live data next.</p>
+              </div>
+              <div class="leaderboard-list">
+                <div class="leaderboard-item"><span>Top readers</span><strong>Coming next</strong></div>
+              </div>
+            </section>
+
+            <section class="panel activity-panel">
+              <div class="section-header compact">
+                <h2>Recent Activity</h2>
+                <p>Realtime connection status.</p>
+              </div>
+              <div class="activity-list">
+                <div class="activity-item"><span>App loaded</span><strong>Ready</strong></div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
     </main>
   </div>
 
