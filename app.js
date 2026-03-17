@@ -76,22 +76,38 @@ function bindTabs() {
   });
 }
 
+async function getMemorialWithRetry() {
+  for (var attempt = 1; attempt <= 3; attempt++) {
+    var result = await memorialClient
+      .from("memorials")
+      .select("*")
+      .eq("slug", window.APP_CONFIG.memorialSlug)
+      .maybeSingle();
+
+    if (!result.error && result.data) {
+      return result.data;
+    }
+
+    console.error("Memorial fetch attempt " + attempt + " failed:", result.error || "No data");
+    await new Promise(function (resolve) {
+      setTimeout(resolve, 400 * attempt);
+    });
+  }
+
+  return null;
+}
+
 async function loadMemorial() {
   console.log("Loading memorial slug:", window.APP_CONFIG.memorialSlug);
 
-  var result = await memorialClient
-    .from("memorials")
-    .select("*")
-    .eq("slug", window.APP_CONFIG.memorialSlug)
-    .single();
+  var memorial = await getMemorialWithRetry();
 
-  if (result.error) {
-    console.error("loadMemorial error:", result.error);
-    alert("Could not load memorial. Check Supabase data and policies.");
+  if (!memorial) {
+    alert("Could not load memorial. Please check the memorial row and public read policy in Supabase.");
     return;
   }
 
-  currentMemorial = result.data;
+  currentMemorial = memorial;
   console.log("Memorial loaded:", currentMemorial);
 
   var nameEl = document.querySelector(".memorial-name");
@@ -120,8 +136,6 @@ async function loadMemorial() {
   if (campaignResult.data && campaignResult.data.length) {
     currentCampaign = campaignResult.data[0];
     renderCampaignPills(currentCampaign);
-  } else {
-    console.warn("No campaigns found for memorial");
   }
 
   await loadJuzBoard();
@@ -175,7 +189,6 @@ async function saveParticipant() {
   }
 
   currentParticipant = result.data;
-  console.log("Participant saved:", currentParticipant);
   alert("Saved.");
 }
 
@@ -242,10 +255,7 @@ async function submitQuickRecitations() {
 }
 
 async function loadJuzBoard() {
-  if (!currentCampaign) {
-    console.warn("No current campaign, skipping Juz load");
-    return;
-  }
+  if (!currentCampaign) return;
 
   var result = await memorialClient
     .from("khatam_claims")
