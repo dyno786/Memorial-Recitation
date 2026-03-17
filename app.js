@@ -16,14 +16,21 @@ function getSlugFromUrl() {
 
 function updateLinksForSlug() {
   var totalsLink = document.getElementById("totalsLink");
-  if (totalsLink && memorialSlug) {
+  if (!totalsLink) return;
+
+  if (memorialSlug) {
     totalsLink.href = "totals.html?slug=" + encodeURIComponent(memorialSlug);
+    totalsLink.style.display = "";
+  } else {
+    totalsLink.href = "totals.html";
+    totalsLink.style.display = "none";
   }
 }
 
 function showChooser() {
   var chooser = document.getElementById("chooserWrap");
   var app = document.getElementById("memorialApp");
+
   if (chooser) chooser.style.display = "block";
   if (app) app.style.display = "none";
 }
@@ -31,81 +38,85 @@ function showChooser() {
 function showMemorialApp() {
   var chooser = document.getElementById("chooserWrap");
   var app = document.getElementById("memorialApp");
+
   if (chooser) chooser.style.display = "none";
   if (app) app.style.display = "block";
 }
 
 async function loadMemorialChooser() {
+  var chooserWrap = document.getElementById("chooserWrap");
+  var dropdown = document.getElementById("memorialDropdown");
+  var openBtn = document.getElementById("openMemorialBtn");
+
+  if (!chooserWrap || !dropdown || !openBtn) {
+    console.warn("Chooser elements not found on this page.");
+    return;
+  }
+
+  dropdown.innerHTML = '<option value="">Loading memorials...</option>';
+  openBtn.disabled = true;
+
   var result = await memorialClient
     .from("memorials")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("full_name", { ascending: true });
 
   if (result.error) {
     console.error("chooser load error:", result.error);
-    document.getElementById("chooserList").innerHTML =
-      '<div class="muted-text">Could not load memorials.</div>';
+    dropdown.innerHTML = '<option value="">Could not load memorials</option>';
     return;
   }
 
   allMemorials = result.data || [];
-  renderChooserList(allMemorials);
 
-  var searchInput = document.getElementById("memorialSearch");
-  if (searchInput) {
-    searchInput.addEventListener("input", function () {
-      var q = searchInput.value.toLowerCase().trim();
-      var filtered = allMemorials.filter(function (item) {
-        return (
-          (item.full_name || "").toLowerCase().includes(q) ||
-          (item.mosque_name || "").toLowerCase().includes(q) ||
-          (item.uk_city || "").toLowerCase().includes(q) ||
-          (item.pak_city || "").toLowerCase().includes(q) ||
-          (item.slug || "").toLowerCase().includes(q)
-        );
-      });
-      renderChooserList(filtered);
-    });
-  }
-}
-
-function renderChooserList(items) {
-  var list = document.getElementById("chooserList");
-  if (!list) return;
-
-  if (!items.length) {
-    list.innerHTML = '<div class="muted-text">No memorials found.</div>';
+  if (!allMemorials.length) {
+    dropdown.innerHTML = '<option value="">No memorials found</option>';
     return;
   }
 
-  list.innerHTML = items.map(function (memorial) {
-    var url = "index.html?slug=" + encodeURIComponent(memorial.slug);
-    var totalsUrl = "totals.html?slug=" + encodeURIComponent(memorial.slug);
+  dropdown.innerHTML =
+    '<option value="">Select a memorial</option>' +
+    allMemorials.map(function (memorial) {
+      var label = memorial.full_name || memorial.slug || "Memorial";
+      if (memorial.mosque_name) {
+        label += " — " + memorial.mosque_name;
+      }
+      return '<option value="' + memorial.slug + '">' + escapeHtml(label) + '</option>';
+    }).join("");
 
-    return `
-      <div class="chooser-item">
-        <h3>${memorial.full_name}</h3>
-        <p>
-          Age: ${memorial.age ?? "-"}<br>
-          Passed away: ${memorial.date_of_passing ?? "-"}<br>
-          Mosque: ${memorial.mosque_name ?? "-"}<br>
-          UK City: ${memorial.uk_city ?? "-"}
-        </p>
-        <div class="chooser-actions">
-          <a class="ghost-link" href="${url}">Open Memorial</a>
-          <a class="ghost-link" href="${totalsUrl}" target="_blank">Open Totals</a>
-        </div>
-      </div>
-    `;
-  }).join("");
+  openBtn.disabled = false;
+
+  openBtn.onclick = function () {
+    var selectedSlug = dropdown.value;
+    if (!selectedSlug) {
+      alert("Please choose a memorial first.");
+      return;
+    }
+    window.location.href = "index.html?slug=" + encodeURIComponent(selectedSlug);
+  };
+
+  dropdown.onchange = function () {
+    openBtn.disabled = !dropdown.value;
+  };
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function count(id, val) {
   var el = document.getElementById(id);
   if (!el) return;
+
   var num = parseInt(el.innerText || "0", 10);
   num += val;
   if (num < 0) num = 0;
+
   el.innerText = String(num);
   updateSummary();
 }
@@ -132,7 +143,9 @@ function updateSummary() {
       var el = document.getElementById(id);
       return [label, parseInt((el && el.innerText) || "0", 10)];
     })
-    .filter(function (row) { return row[1] > 0; });
+    .filter(function (row) {
+      return row[1] > 0;
+    });
 
   if (!active.length) {
     summary.innerHTML = '<div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>';
@@ -155,10 +168,13 @@ function bindTabs() {
       document.querySelectorAll(".tab-btn").forEach(function (b) {
         b.classList.remove("active");
       });
-      document.querySelectorAll(".tab-content").forEach(function (p) {
-        p.classList.remove("active");
+
+      document.querySelectorAll(".tab-content").forEach(function (panel) {
+        panel.classList.remove("active");
       });
+
       btn.classList.add("active");
+
       var target = document.getElementById(btn.dataset.tab);
       if (target) target.classList.add("active");
     });
@@ -173,16 +189,22 @@ async function getMemorialWithRetry() {
       .eq("slug", memorialSlug)
       .maybeSingle();
 
-    if (!result.error && result.data) return result.data;
+    if (!result.error && result.data) {
+      return result.data;
+    }
 
     console.error("Memorial fetch attempt " + attempt + " failed:", result.error || "No data");
-    await new Promise(function (resolve) { setTimeout(resolve, 400 * attempt); });
+    await new Promise(function (resolve) {
+      setTimeout(resolve, 400 * attempt);
+    });
   }
+
   return null;
 }
 
 async function loadMemorial() {
   memorialSlug = getSlugFromUrl();
+  updateLinksForSlug();
 
   if (!memorialSlug) {
     showChooser();
@@ -191,19 +213,22 @@ async function loadMemorial() {
   }
 
   showMemorialApp();
-  updateLinksForSlug();
 
   var memorial = await getMemorialWithRetry();
 
   if (!memorial) {
-    alert("Could not load memorial. Please check the memorial row and public read policy in Supabase.");
+    alert("Could not load memorial. Please check the slug and Supabase public read policy.");
+    showChooser();
+    await loadMemorialChooser();
     return;
   }
 
   currentMemorial = memorial;
 
   var nameEl = document.querySelector(".memorial-name");
-  if (nameEl) nameEl.textContent = currentMemorial.full_name || "Memorial";
+  if (nameEl) {
+    nameEl.textContent = currentMemorial.full_name || "Memorial";
+  }
 
   var metaEl = document.querySelector(".meta");
   if (metaEl) {
@@ -211,6 +236,11 @@ async function loadMemorial() {
       "Age: " + (currentMemorial.age ?? "-") + "<br>" +
       "Passed away: " + (currentMemorial.date_of_passing ?? "-") + "<br>" +
       "Mosque: " + (currentMemorial.mosque_name ?? "-");
+  }
+
+  var hadithNote = document.querySelector(".hadith-note");
+  if (hadithNote && currentMemorial.tribute) {
+    hadithNote.textContent = currentMemorial.tribute;
   }
 
   var campaignResult = await memorialClient
@@ -228,12 +258,16 @@ async function loadMemorial() {
 }
 
 function renderCampaignPills(campaign) {
-  var pillRow = document.querySelector(".pill-row");
+  var pillRow = document.querySelector(".stats-toolbar .pill-row");
   if (!pillRow || !campaign) return;
-  var deadlineText = campaign.deadline ? new Date(campaign.deadline).toLocaleString() : "No deadline set";
+
+  var deadlineText = campaign.deadline
+    ? new Date(campaign.deadline).toLocaleString()
+    : "No deadline set";
+
   pillRow.innerHTML =
-    '<div class="pill">Campaign: ' + campaign.title + '</div>' +
-    '<div class="pill">Deadline: ' + deadlineText + '</div>';
+    '<div class="pill">Campaign: ' + escapeHtml(campaign.title || "Untitled") + '</div>' +
+    '<div class="pill">Deadline: ' + escapeHtml(deadlineText) + '</div>';
 }
 
 async function saveParticipant() {
@@ -242,12 +276,17 @@ async function saveParticipant() {
     return;
   }
 
-  var name = (document.getElementById("readerName") || {}).value || "";
-  var ukCity = (document.getElementById("ukCity") || {}).value || "";
-  var pakCity = (document.getElementById("pakCity") || {}).value || "";
-  var relation = (document.getElementById("relation") || {}).value || "";
+  var nameInput = document.getElementById("readerName");
+  var ukCityInput = document.getElementById("ukCity");
+  var pakCityInput = document.getElementById("pakCity");
+  var relationInput = document.getElementById("relation");
 
-  if (!name.trim() && relation !== "Anonymous") {
+  var name = nameInput ? nameInput.value.trim() : "";
+  var ukCity = ukCityInput ? ukCityInput.value.trim() : "";
+  var pakCity = pakCityInput ? pakCityInput.value.trim() : "";
+  var relation = relationInput ? relationInput.value : "";
+
+  if (!name && relation !== "Anonymous") {
     alert("Please enter your name or choose Anonymous.");
     return;
   }
@@ -256,9 +295,9 @@ async function saveParticipant() {
     .from("participants")
     .insert({
       memorial_id: currentMemorial.id,
-      name: relation === "Anonymous" ? "Anonymous" : name.trim(),
-      uk_city: ukCity.trim(),
-      pak_city: pakCity.trim(),
+      name: relation === "Anonymous" ? "Anonymous" : name,
+      uk_city: ukCity || null,
+      pak_city: pakCity || null,
       relation: relation || null
     })
     .select()
@@ -271,7 +310,7 @@ async function saveParticipant() {
   }
 
   currentParticipant = result.data;
-  alert("Saved.");
+  alert("Your details have been saved.");
 }
 
 async function submitQuickRecitations() {
@@ -279,6 +318,7 @@ async function submitQuickRecitations() {
     alert("Memorial not loaded yet.");
     return;
   }
+
   if (!currentParticipant) {
     alert("Please save your details first.");
     return;
@@ -300,6 +340,7 @@ async function submitQuickRecitations() {
       var label = item[0];
       var id = item[1];
       var el = document.getElementById(id);
+
       return {
         memorial_id: currentMemorial.id,
         participant_id: currentParticipant.id,
@@ -307,14 +348,18 @@ async function submitQuickRecitations() {
         recitation_count: parseInt((el && el.innerText) || "0", 10)
       };
     })
-    .filter(function (row) { return row.recitation_count > 0; });
+    .filter(function (row) {
+      return row.recitation_count > 0;
+    });
 
   if (!rows.length) {
     alert("Add recitations first.");
     return;
   }
 
-  var result = await memorialClient.from("quick_recitations").insert(rows);
+  var result = await memorialClient
+    .from("quick_recitations")
+    .insert(rows);
 
   if (result.error) {
     console.error("submitQuickRecitations error:", result.error);
@@ -322,19 +367,33 @@ async function submitQuickRecitations() {
     return;
   }
 
-  alert("Submitted.");
+  alert("Recitations submitted.");
 
-  ["bismillah","alhamdulillah","subhanallah","astaghfirullah","durood","fatiha","ikhlas","yasin"]
-    .forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) el.innerText = "0";
-    });
+  [
+    "bismillah",
+    "alhamdulillah",
+    "subhanallah",
+    "astaghfirullah",
+    "durood",
+    "fatiha",
+    "ikhlas",
+    "yasin"
+  ].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.innerText = "0";
+  });
 
   updateSummary();
 }
 
 async function loadJuzBoard() {
-  if (!currentCampaign) return;
+  var juzList = document.getElementById("juzList");
+  if (!juzList) return;
+
+  if (!currentCampaign) {
+    juzList.innerHTML = '<div class="muted-text">No khatam campaign found for this memorial yet.</div>';
+    return;
+  }
 
   var result = await memorialClient
     .from("khatam_claims")
@@ -344,17 +403,18 @@ async function loadJuzBoard() {
 
   if (result.error) {
     console.error("loadJuzBoard error:", result.error);
+    juzList.innerHTML = '<div class="muted-text">Could not load Juz board.</div>';
     return;
   }
 
   var data = result.data || [];
-  var juzList = document.getElementById("juzList");
-  if (!juzList) return;
-
   juzList.innerHTML = "";
 
   for (var i = 1; i <= 30; i++) {
-    var claim = data.find(function (x) { return x.juz_number === i; });
+    var claim = data.find(function (x) {
+      return x.juz_number === i;
+    });
+
     var isClaimed = !!claim;
     var isCompleted = claim && claim.status === "completed";
 
@@ -362,12 +422,17 @@ async function loadJuzBoard() {
     card.className = "juz-card";
     card.innerHTML =
       '<div class="juz-meta">' +
-      '<strong>Juz ' + i + '</strong>' +
-      '<span>' +
-      (isCompleted ? "Completed" : isClaimed ? "Already reserved by a reader" : "Available to claim") +
-      '</span></div>' +
+        '<strong>Juz ' + i + '</strong>' +
+        '<span>' +
+          (isCompleted
+            ? "Completed"
+            : isClaimed
+              ? "Already reserved by a reader"
+              : "Available to claim") +
+        '</span>' +
+      '</div>' +
       '<button type="button" class="juz-btn ' + (isClaimed ? "claimed" : "available") + '">' +
-      (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") +
+        (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") +
       '</button>';
 
     var btn = card.querySelector("button");
@@ -406,18 +471,26 @@ async function loadJuzBoard() {
 
 function bindButtons() {
   var saveBtn = document.getElementById("saveDetailsBtn");
-  if (saveBtn) saveBtn.addEventListener("click", saveParticipant);
+  if (saveBtn) {
+    saveBtn.addEventListener("click", saveParticipant);
+  }
 
   var submitBtn = document.getElementById("submitQuickBtn");
-  if (submitBtn) submitBtn.addEventListener("click", submitQuickRecitations);
+  if (submitBtn) {
+    submitBtn.addEventListener("click", submitQuickRecitations);
+  }
 }
 
 function bindRealtime() {
   memorialClient
     .channel("live-khatam")
-    .on("postgres_changes", { event: "*", schema: "public", table: "khatam_claims" }, async function () {
-      await loadJuzBoard();
-    })
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "khatam_claims" },
+      async function () {
+        await loadJuzBoard();
+      }
+    )
     .subscribe();
 }
 
