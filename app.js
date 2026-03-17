@@ -7,10 +7,11 @@ var currentMemorial = null;
 var currentCampaign = null;
 var currentParticipant = null;
 var memorialSlug = null;
+var allMemorials = [];
 
 function getSlugFromUrl() {
   var params = new URLSearchParams(window.location.search);
-  return params.get("slug") || "ahmed-khan";
+  return params.get("slug");
 }
 
 function updateLinksForSlug() {
@@ -20,10 +21,88 @@ function updateLinksForSlug() {
   }
 }
 
+function showChooser() {
+  var chooser = document.getElementById("chooserWrap");
+  var app = document.getElementById("memorialApp");
+  if (chooser) chooser.style.display = "block";
+  if (app) app.style.display = "none";
+}
+
+function showMemorialApp() {
+  var chooser = document.getElementById("chooserWrap");
+  var app = document.getElementById("memorialApp");
+  if (chooser) chooser.style.display = "none";
+  if (app) app.style.display = "block";
+}
+
+async function loadMemorialChooser() {
+  var result = await memorialClient
+    .from("memorials")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (result.error) {
+    console.error("chooser load error:", result.error);
+    document.getElementById("chooserList").innerHTML =
+      '<div class="muted-text">Could not load memorials.</div>';
+    return;
+  }
+
+  allMemorials = result.data || [];
+  renderChooserList(allMemorials);
+
+  var searchInput = document.getElementById("memorialSearch");
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      var q = searchInput.value.toLowerCase().trim();
+      var filtered = allMemorials.filter(function (item) {
+        return (
+          (item.full_name || "").toLowerCase().includes(q) ||
+          (item.mosque_name || "").toLowerCase().includes(q) ||
+          (item.uk_city || "").toLowerCase().includes(q) ||
+          (item.pak_city || "").toLowerCase().includes(q) ||
+          (item.slug || "").toLowerCase().includes(q)
+        );
+      });
+      renderChooserList(filtered);
+    });
+  }
+}
+
+function renderChooserList(items) {
+  var list = document.getElementById("chooserList");
+  if (!list) return;
+
+  if (!items.length) {
+    list.innerHTML = '<div class="muted-text">No memorials found.</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(function (memorial) {
+    var url = "index.html?slug=" + encodeURIComponent(memorial.slug);
+    var totalsUrl = "totals.html?slug=" + encodeURIComponent(memorial.slug);
+
+    return `
+      <div class="chooser-item">
+        <h3>${memorial.full_name}</h3>
+        <p>
+          Age: ${memorial.age ?? "-"}<br>
+          Passed away: ${memorial.date_of_passing ?? "-"}<br>
+          Mosque: ${memorial.mosque_name ?? "-"}<br>
+          UK City: ${memorial.uk_city ?? "-"}
+        </p>
+        <div class="chooser-actions">
+          <a class="ghost-link" href="${url}">Open Memorial</a>
+          <a class="ghost-link" href="${totalsUrl}" target="_blank">Open Totals</a>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 function count(id, val) {
   var el = document.getElementById(id);
   if (!el) return;
-
   var num = parseInt(el.innerText || "0", 10);
   num += val;
   if (num < 0) num = 0;
@@ -53,13 +132,10 @@ function updateSummary() {
       var el = document.getElementById(id);
       return [label, parseInt((el && el.innerText) || "0", 10)];
     })
-    .filter(function (row) {
-      return row[1] > 0;
-    });
+    .filter(function (row) { return row[1] > 0; });
 
   if (!active.length) {
-    summary.innerHTML =
-      '<div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>';
+    summary.innerHTML = '<div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>';
     return;
   }
 
@@ -97,24 +173,25 @@ async function getMemorialWithRetry() {
       .eq("slug", memorialSlug)
       .maybeSingle();
 
-    if (!result.error && result.data) {
-      return result.data;
-    }
+    if (!result.error && result.data) return result.data;
 
     console.error("Memorial fetch attempt " + attempt + " failed:", result.error || "No data");
-    await new Promise(function (resolve) {
-      setTimeout(resolve, 400 * attempt);
-    });
+    await new Promise(function (resolve) { setTimeout(resolve, 400 * attempt); });
   }
-
   return null;
 }
 
 async function loadMemorial() {
   memorialSlug = getSlugFromUrl();
-  updateLinksForSlug();
 
-  console.log("Loading memorial slug:", memorialSlug);
+  if (!memorialSlug) {
+    showChooser();
+    await loadMemorialChooser();
+    return;
+  }
+
+  showMemorialApp();
+  updateLinksForSlug();
 
   var memorial = await getMemorialWithRetry();
 
@@ -124,12 +201,9 @@ async function loadMemorial() {
   }
 
   currentMemorial = memorial;
-  console.log("Memorial loaded:", currentMemorial);
 
   var nameEl = document.querySelector(".memorial-name");
-  if (nameEl) {
-    nameEl.textContent = currentMemorial.full_name || "Memorial";
-  }
+  if (nameEl) nameEl.textContent = currentMemorial.full_name || "Memorial";
 
   var metaEl = document.querySelector(".meta");
   if (metaEl) {
@@ -145,11 +219,7 @@ async function loadMemorial() {
     .eq("memorial_id", currentMemorial.id)
     .order("created_at", { ascending: true });
 
-  if (campaignResult.error) {
-    console.error("campaign load error:", campaignResult.error);
-  }
-
-  if (campaignResult.data && campaignResult.data.length) {
+  if (!campaignResult.error && campaignResult.data && campaignResult.data.length) {
     currentCampaign = campaignResult.data[0];
     renderCampaignPills(currentCampaign);
   }
@@ -160,11 +230,7 @@ async function loadMemorial() {
 function renderCampaignPills(campaign) {
   var pillRow = document.querySelector(".pill-row");
   if (!pillRow || !campaign) return;
-
-  var deadlineText = campaign.deadline
-    ? new Date(campaign.deadline).toLocaleString()
-    : "No deadline set";
-
+  var deadlineText = campaign.deadline ? new Date(campaign.deadline).toLocaleString() : "No deadline set";
   pillRow.innerHTML =
     '<div class="pill">Campaign: ' + campaign.title + '</div>' +
     '<div class="pill">Deadline: ' + deadlineText + '</div>';
@@ -213,7 +279,6 @@ async function submitQuickRecitations() {
     alert("Memorial not loaded yet.");
     return;
   }
-
   if (!currentParticipant) {
     alert("Please save your details first.");
     return;
@@ -242,9 +307,7 @@ async function submitQuickRecitations() {
         recitation_count: parseInt((el && el.innerText) || "0", 10)
       };
     })
-    .filter(function (row) {
-      return row.recitation_count > 0;
-    });
+    .filter(function (row) { return row.recitation_count > 0; });
 
   if (!rows.length) {
     alert("Add recitations first.");
@@ -291,29 +354,20 @@ async function loadJuzBoard() {
   juzList.innerHTML = "";
 
   for (var i = 1; i <= 30; i++) {
-    var claim = data.find(function (x) {
-      return x.juz_number === i;
-    });
-
+    var claim = data.find(function (x) { return x.juz_number === i; });
     var isClaimed = !!claim;
     var isCompleted = claim && claim.status === "completed";
 
     var card = document.createElement("div");
     card.className = "juz-card";
-
     card.innerHTML =
       '<div class="juz-meta">' +
-        '<strong>Juz ' + i + '</strong>' +
-        '<span>' +
-          (isCompleted
-            ? "Completed"
-            : isClaimed
-            ? "Already reserved by a reader"
-            : "Available to claim") +
-        '</span>' +
-      '</div>' +
+      '<strong>Juz ' + i + '</strong>' +
+      '<span>' +
+      (isCompleted ? "Completed" : isClaimed ? "Already reserved by a reader" : "Available to claim") +
+      '</span></div>' +
       '<button type="button" class="juz-btn ' + (isClaimed ? "claimed" : "available") + '">' +
-        (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") +
+      (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") +
       '</button>';
 
     var btn = card.querySelector("button");
@@ -361,13 +415,9 @@ function bindButtons() {
 function bindRealtime() {
   memorialClient
     .channel("live-khatam")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "khatam_claims" },
-      async function () {
-        await loadJuzBoard();
-      }
-    )
+    .on("postgres_changes", { event: "*", schema: "public", table: "khatam_claims" }, async function () {
+      await loadJuzBoard();
+    })
     .subscribe();
 }
 
