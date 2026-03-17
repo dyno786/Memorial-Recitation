@@ -6,6 +6,19 @@ var memorialClient = window.supabase.createClient(
 var currentMemorial = null;
 var currentCampaign = null;
 var currentParticipant = null;
+var memorialSlug = null;
+
+function getSlugFromUrl() {
+  var params = new URLSearchParams(window.location.search);
+  return params.get("slug") || "ahmed-khan";
+}
+
+function updateLinksForSlug() {
+  var totalsLink = document.getElementById("totalsLink");
+  if (totalsLink && memorialSlug) {
+    totalsLink.href = "totals.html?slug=" + encodeURIComponent(memorialSlug);
+  }
+}
 
 function count(id, val) {
   var el = document.getElementById(id);
@@ -81,7 +94,7 @@ async function getMemorialWithRetry() {
     var result = await memorialClient
       .from("memorials")
       .select("*")
-      .eq("slug", window.APP_CONFIG.memorialSlug)
+      .eq("slug", memorialSlug)
       .maybeSingle();
 
     if (!result.error && result.data) {
@@ -98,7 +111,10 @@ async function getMemorialWithRetry() {
 }
 
 async function loadMemorial() {
-  console.log("Loading memorial slug:", window.APP_CONFIG.memorialSlug);
+  memorialSlug = getSlugFromUrl();
+  updateLinksForSlug();
+
+  console.log("Loading memorial slug:", memorialSlug);
 
   var memorial = await getMemorialWithRetry();
 
