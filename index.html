@@ -7,46 +7,25 @@
   <meta name="theme-color" content="#03110f" />
   <link rel="stylesheet" href="styles.css" />
   <style>
-    .chooser-wrap{display:none;}
-    .chooser-search{
-      width:100%;
-      border:none;
-      outline:none;
-      border-radius:14px;
-      padding:14px;
-      background:#1a3028;
-      color:#fff;
-      font-size:16px;
-      margin-top:12px;
+    .chooser-wrap { display: none; }
+    .chooser-select {
+      width: 100%;
+      border: none;
+      outline: none;
+      border-radius: 14px;
+      padding: 14px;
+      background: #1a3028;
+      color: #fff;
+      font-size: 16px;
+      margin-top: 12px;
     }
-    .chooser-list{
-      margin-top:16px;
-      display:grid;
-      gap:12px;
+    .chooser-actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .chooser-item{
-      background:rgba(255,255,255,.03);
-      border-radius:18px;
-      padding:18px;
-      border:1px solid rgba(255,255,255,.06);
-    }
-    .chooser-item h3{
-      margin:0 0 8px;
-      font-size:22px;
-    }
-    .chooser-item p{
-      margin:0;
-      color:#d8d6c8;
-      line-height:1.7;
-      font-size:14px;
-    }
-    .chooser-actions{
-      margin-top:14px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .memorial-app{display:none;}
+    .memorial-app { display: none; }
   </style>
 </head>
 <body>
@@ -63,23 +42,20 @@
       <!-- MEMORIAL CHOOSER -->
       <section class="panel chooser-wrap" id="chooserWrap">
         <div class="section-header">
-          <h2>Choose a Memorial</h2>
-          <p>Search by name, mosque, or city.</p>
+          <h2>Select a Memorial</h2>
+          <p>Choose from the list below.</p>
         </div>
 
-        <input
-          type="text"
-          id="memorialSearch"
-          class="chooser-search"
-          placeholder="Search memorials..."
-        />
+        <select id="memorialDropdown" class="chooser-select">
+          <option value="">Loading memorials...</option>
+        </select>
 
-        <div class="chooser-list" id="chooserList">
-          <div class="muted-text">Loading memorials...</div>
+        <div class="chooser-actions">
+          <button type="button" class="btn btn-primary" id="openMemorialBtn">Open Memorial</button>
         </div>
       </section>
 
-      <!-- MAIN MEMORIAL APP -->
+      <!-- MEMORIAL APP -->
       <div class="memorial-app" id="memorialApp">
         <div class="grid-main">
           <section class="panel memorial-card">
