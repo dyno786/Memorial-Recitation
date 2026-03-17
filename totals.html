@@ -169,15 +169,13 @@
     <header class="monitor-header">
       <div>
         <p class="eyebrow">Live Memorial Display</p>
-        <h1 class="monitor-title">Ahmed Khan</h1>
-        <p class="monitor-subtitle">
-          Leeds Islamic Centre · 3rd Day Khatam · Updated live for family, mosque and visitors
-        </p>
+        <h1 class="monitor-title" id="monitorName">Loading memorial...</h1>
+        <p class="monitor-subtitle" id="monitorSubtitle">Please wait</p>
       </div>
 
-      <div class="pill-row">
-        <div class="pill">Campaign: 3rd Day Khatam</div>
-        <div class="pill">Deadline: 15 March 2026</div>
+      <div class="pill-row" id="monitorPills">
+        <div class="pill">Campaign: Loading...</div>
+        <div class="pill">Deadline: Loading...</div>
       </div>
     </header>
 
@@ -189,19 +187,19 @@
 
       <div class="monitor-hero-stats">
         <div class="monitor-stat">
-          <span class="monitor-stat-value">128</span>
+          <span class="monitor-stat-value" id="totalReaders">0</span>
           <span class="monitor-stat-label">Readers</span>
         </div>
         <div class="monitor-stat">
-          <span class="monitor-stat-value">5,120</span>
+          <span class="monitor-stat-value" id="totalQuickReads">0</span>
           <span class="monitor-stat-label">Quick Recitations</span>
         </div>
         <div class="monitor-stat">
-          <span class="monitor-stat-value">7</span>
+          <span class="monitor-stat-value" id="totalJuzCompleted">0</span>
           <span class="monitor-stat-label">Juz Completed</span>
         </div>
         <div class="monitor-stat">
-          <span class="monitor-stat-value">2</span>
+          <span class="monitor-stat-value" id="totalCampaigns">0</span>
           <span class="monitor-stat-label">Campaigns</span>
         </div>
       </div>
@@ -214,15 +212,8 @@
           <p>Live counts from community readers</p>
         </div>
 
-        <div class="monitor-list">
-          <div class="monitor-row"><span>Bismillah</span><strong>1,420</strong></div>
-          <div class="monitor-row"><span>Alhamdulillah</span><strong>1,180</strong></div>
-          <div class="monitor-row"><span>Subhanallah</span><strong>930</strong></div>
-          <div class="monitor-row"><span>Astaghfirullah</span><strong>640</strong></div>
-          <div class="monitor-row"><span>Durood Sharif</span><strong>510</strong></div>
-          <div class="monitor-row"><span>Surah Fatiha</span><strong>180</strong></div>
-          <div class="monitor-row"><span>Surah Ikhlas</span><strong>160</strong></div>
-          <div class="monitor-row"><span>Surah Yasin</span><strong>100</strong></div>
+        <div class="monitor-list" id="quickBreakdown">
+          <div class="monitor-row"><span>Loading...</span><strong>0</strong></div>
         </div>
       </section>
 
@@ -232,63 +223,28 @@
           <p>Most active contributors for this memorial</p>
         </div>
 
-        <div class="monitor-list">
-          <div class="monitor-row"><span>1. Ahmed — Leeds</span><strong>120</strong></div>
-          <div class="monitor-row"><span>2. Fatima — Bradford</span><strong>98</strong></div>
-          <div class="monitor-row"><span>3. Usman — Manchester</span><strong>85</strong></div>
-          <div class="monitor-row"><span>4. Amina — Leeds</span><strong>72</strong></div>
-          <div class="monitor-row"><span>5. Idris — Leeds</span><strong>64</strong></div>
+        <div class="monitor-list" id="topReaders">
+          <div class="monitor-row"><span>Loading...</span><strong>0</strong></div>
         </div>
       </section>
 
       <section class="panel">
         <div class="section-header compact">
           <h2>Quran Khatam Progress</h2>
-          <p>Current 3rd-day campaign board</p>
+          <p>Current campaign board</p>
         </div>
 
         <div class="progress-card">
           <div class="progress-header">
             <span>Campaign progress</span>
-            <span>7 / 30 completed</span>
+            <span id="campaignProgressText">0 / 30 completed</span>
           </div>
           <div class="progress-bar">
-            <div class="progress-bar__fill" style="width:23%"></div>
+            <div class="progress-bar__fill" id="campaignProgressFill" style="width:0%"></div>
           </div>
         </div>
 
-        <div class="monitor-juz-grid">
-          <div class="monitor-juz completed">Juz 1</div>
-          <div class="monitor-juz completed">Juz 2</div>
-          <div class="monitor-juz claimed">Juz 3</div>
-          <div class="monitor-juz claimed">Juz 4</div>
-          <div class="monitor-juz available">Juz 5</div>
-          <div class="monitor-juz available">Juz 6</div>
-          <div class="monitor-juz available">Juz 7</div>
-          <div class="monitor-juz available">Juz 8</div>
-          <div class="monitor-juz available">Juz 9</div>
-          <div class="monitor-juz available">Juz 10</div>
-          <div class="monitor-juz available">Juz 11</div>
-          <div class="monitor-juz available">Juz 12</div>
-          <div class="monitor-juz available">Juz 13</div>
-          <div class="monitor-juz available">Juz 14</div>
-          <div class="monitor-juz available">Juz 15</div>
-          <div class="monitor-juz available">Juz 16</div>
-          <div class="monitor-juz available">Juz 17</div>
-          <div class="monitor-juz available">Juz 18</div>
-          <div class="monitor-juz available">Juz 19</div>
-          <div class="monitor-juz available">Juz 20</div>
-          <div class="monitor-juz available">Juz 21</div>
-          <div class="monitor-juz available">Juz 22</div>
-          <div class="monitor-juz available">Juz 23</div>
-          <div class="monitor-juz available">Juz 24</div>
-          <div class="monitor-juz available">Juz 25</div>
-          <div class="monitor-juz available">Juz 26</div>
-          <div class="monitor-juz available">Juz 27</div>
-          <div class="monitor-juz available">Juz 28</div>
-          <div class="monitor-juz available">Juz 29</div>
-          <div class="monitor-juz available">Juz 30</div>
-        </div>
+        <div class="monitor-juz-grid" id="monitorJuzGrid"></div>
       </section>
 
       <section class="panel">
@@ -297,12 +253,8 @@
           <p>Latest recitations and khatam actions</p>
         </div>
 
-        <div class="monitor-list">
-          <div class="monitor-row"><span>Amina submitted 33 Alhamdulillah</span><strong>Now</strong></div>
-          <div class="monitor-row"><span>Idris claimed Juz 5</span><strong>2 min ago</strong></div>
-          <div class="monitor-row"><span>Fatima completed Surah Yasin</span><strong>4 min ago</strong></div>
-          <div class="monitor-row"><span>Usman submitted 10 Durood Sharif</span><strong>7 min ago</strong></div>
-          <div class="monitor-row"><span>Ahmed completed Juz 2</span><strong>11 min ago</strong></div>
+        <div class="monitor-list" id="recentActivity">
+          <div class="monitor-row"><span>Loading...</span><strong>Now</strong></div>
         </div>
       </section>
     </main>
@@ -310,5 +262,273 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
+  <script>
+    var totalsClient = window.supabase.createClient(
+      window.APP_CONFIG.supabaseUrl,
+      window.APP_CONFIG.supabasePublishableKey
+    );
+
+    var currentMemorial = null;
+    var currentCampaign = null;
+    var memorialSlug = null;
+
+    function getSlugFromUrl() {
+      var params = new URLSearchParams(window.location.search);
+      return params.get("slug") || "ahmed-khan";
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "No deadline set";
+      return new Date(value).toLocaleString();
+    }
+
+    async function loadMemorial() {
+      memorialSlug = getSlugFromUrl();
+
+      var result = await totalsClient
+        .from("memorials")
+        .select("*")
+        .eq("slug", memorialSlug)
+        .maybeSingle();
+
+      if (result.error || !result.data) {
+        console.error("Totals memorial load error:", result.error);
+        document.getElementById("monitorName").textContent = "Memorial not found";
+        document.getElementById("monitorSubtitle").textContent = "Check the slug in the URL";
+        return;
+      }
+
+      currentMemorial = result.data;
+
+      document.getElementById("monitorName").textContent = currentMemorial.full_name || "Memorial";
+      document.getElementById("monitorSubtitle").textContent =
+        "Mosque: " + (currentMemorial.mosque_name || "-") +
+        " · Passed away: " + (currentMemorial.date_of_passing || "-");
+
+      var campaignResult = await totalsClient
+        .from("khatam_campaigns")
+        .select("*")
+        .eq("memorial_id", currentMemorial.id)
+        .order("created_at", { ascending: true });
+
+      if (!campaignResult.error && campaignResult.data && campaignResult.data.length) {
+        currentCampaign = campaignResult.data[0];
+        document.getElementById("monitorPills").innerHTML =
+          '<div class="pill">Campaign: ' + currentCampaign.title + '</div>' +
+          '<div class="pill">Deadline: ' + formatDateTime(currentCampaign.deadline) + '</div>';
+      }
+
+      document.getElementById("totalCampaigns").textContent =
+        String((campaignResult.data && campaignResult.data.length) || 0);
+
+      await Promise.all([
+        loadQuickBreakdown(),
+        loadTopReaders(),
+        loadJuzProgress(),
+        loadRecentActivity()
+      ]);
+    }
+
+    async function loadQuickBreakdown() {
+      if (!currentMemorial) return;
+
+      var result = await totalsClient
+        .from("quick_recitations")
+        .select("recitation_name, recitation_count")
+        .eq("memorial_id", currentMemorial.id);
+
+      if (result.error) {
+        console.error("Quick breakdown error:", result.error);
+        return;
+      }
+
+      var totals = {};
+      var overall = 0;
+
+      (result.data || []).forEach(function (row) {
+        totals[row.recitation_name] = (totals[row.recitation_name] || 0) + row.recitation_count;
+        overall += row.recitation_count;
+      });
+
+      document.getElementById("totalQuickReads").textContent = String(overall);
+
+      var order = [
+        "Bismillah",
+        "Alhamdulillah",
+        "Subhanallah",
+        "Astaghfirullah",
+        "Durood Sharif",
+        "Surah Fatiha",
+        "Surah Ikhlas",
+        "Surah Yasin"
+      ];
+
+      var html = order.map(function (name) {
+        return '<div class="monitor-row"><span>' + name + '</span><strong>' + (totals[name] || 0) + '</strong></div>';
+      }).join("");
+
+      document.getElementById("quickBreakdown").innerHTML =
+        html || '<div class="monitor-row"><span>No recitations yet</span><strong>0</strong></div>';
+    }
+
+    async function loadTopReaders() {
+      if (!currentMemorial) return;
+
+      var participantsResult = await totalsClient
+        .from("participants")
+        .select("id, name, uk_city")
+        .eq("memorial_id", currentMemorial.id);
+
+      var recitationsResult = await totalsClient
+        .from("quick_recitations")
+        .select("participant_id, recitation_count")
+        .eq("memorial_id", currentMemorial.id);
+
+      if (participantsResult.error || recitationsResult.error) {
+        console.error("Top readers error:", participantsResult.error || recitationsResult.error);
+        return;
+      }
+
+      var participants = participantsResult.data || [];
+      var recitations = recitationsResult.data || [];
+
+      document.getElementById("totalReaders").textContent = String(participants.length);
+
+      var totalsByParticipant = {};
+      recitations.forEach(function (row) {
+        if (!row.participant_id) return;
+        totalsByParticipant[row.participant_id] = (totalsByParticipant[row.participant_id] || 0) + row.recitation_count;
+      });
+
+      var ranking = participants.map(function (p) {
+        return {
+          name: p.name || "Anonymous",
+          city: p.uk_city || "-",
+          total: totalsByParticipant[p.id] || 0
+        };
+      }).sort(function (a, b) {
+        return b.total - a.total;
+      }).slice(0, 5);
+
+      var html = ranking.map(function (row, index) {
+        return '<div class="monitor-row"><span>' + (index + 1) + '. ' + row.name + ' — ' + row.city + '</span><strong>' + row.total + '</strong></div>';
+      }).join("");
+
+      document.getElementById("topReaders").innerHTML =
+        html || '<div class="monitor-row"><span>No readers yet</span><strong>0</strong></div>';
+    }
+
+    async function loadJuzProgress() {
+      if (!currentCampaign) {
+        document.getElementById("monitorJuzGrid").innerHTML = "";
+        return;
+      }
+
+      var result = await totalsClient
+        .from("khatam_claims")
+        .select("*")
+        .eq("campaign_id", currentCampaign.id)
+        .order("juz_number", { ascending: true });
+
+      if (result.error) {
+        console.error("Juz progress error:", result.error);
+        return;
+      }
+
+      var data = result.data || [];
+      var completed = data.filter(function (x) { return x.status === "completed"; }).length;
+
+      document.getElementById("totalJuzCompleted").textContent = String(completed);
+      document.getElementById("campaignProgressText").textContent = completed + " / 30 completed";
+      document.getElementById("campaignProgressFill").style.width = (completed / 30 * 100) + "%";
+
+      var html = "";
+      for (var i = 1; i <= 30; i++) {
+        var claim = data.find(function (x) { return x.juz_number === i; });
+        var cls = "available";
+        if (claim && claim.status === "completed") cls = "completed";
+        else if (claim) cls = "claimed";
+
+        html += '<div class="monitor-juz ' + cls + '">Juz ' + i + '</div>';
+      }
+
+      document.getElementById("monitorJuzGrid").innerHTML = html;
+    }
+
+    async function loadRecentActivity() {
+      if (!currentMemorial) return;
+
+      var recentRecitations = await totalsClient
+        .from("quick_recitations")
+        .select("recitation_name, recitation_count, created_at, participant_id")
+        .eq("memorial_id", currentMemorial.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      var recentClaims = currentCampaign
+        ? await totalsClient
+            .from("khatam_claims")
+            .select("juz_number, status, claimed_at, completed_at, participant_id")
+            .eq("campaign_id", currentCampaign.id)
+            .order("claimed_at", { ascending: false })
+            .limit(5)
+        : { data: [], error: null };
+
+      if (recentRecitations.error || recentClaims.error) {
+        console.error("Recent activity error:", recentRecitations.error || recentClaims.error);
+        return;
+      }
+
+      var items = [];
+
+      (recentRecitations.data || []).forEach(function (row) {
+        items.push({
+          text: row.recitation_name + " submitted (" + row.recitation_count + ")",
+          time: row.created_at
+        });
+      });
+
+      (recentClaims.data || []).forEach(function (row) {
+        items.push({
+          text: "Juz " + row.juz_number + " " + (row.status === "completed" ? "completed" : "claimed"),
+          time: row.completed_at || row.claimed_at
+        });
+      });
+
+      items.sort(function (a, b) {
+        return new Date(b.time) - new Date(a.time);
+      });
+
+      var html = items.slice(0, 6).map(function (row) {
+        return '<div class="monitor-row"><span>' + row.text + '</span><strong>' + new Date(row.time).toLocaleTimeString() + '</strong></div>';
+      }).join("");
+
+      document.getElementById("recentActivity").innerHTML =
+        html || '<div class="monitor-row"><span>No activity yet</span><strong>—</strong></div>';
+    }
+
+    function bindRealtime() {
+      totalsClient
+        .channel("totals-live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "quick_recitations" }, async function () {
+          await loadQuickBreakdown();
+          await loadTopReaders();
+          await loadRecentActivity();
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "khatam_claims" }, async function () {
+          await loadJuzProgress();
+          await loadRecentActivity();
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "participants" }, async function () {
+          await loadTopReaders();
+        })
+        .subscribe();
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+      await loadMemorial();
+      bindRealtime();
+    });
+  </script>
 </body>
 </html>
