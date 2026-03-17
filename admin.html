@@ -73,6 +73,36 @@
       font-size:14px;
     }
 
+    .status-badge{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#173026;
+      font-size:13px;
+      color:#f5f5f0;
+      margin-top:10px;
+    }
+
+    .notice-box{
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:14px;
+      background:#173026;
+      color:#f5f5f0;
+      display:none;
+      line-height:1.7;
+    }
+
+    .link-box{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      background:rgba(255,255,255,.03);
+      word-break:break-all;
+      font-size:14px;
+      color:#d9d7cb;
+    }
+
     textarea{
       width:100%;
       border:none;
@@ -84,16 +114,6 @@
       font-size:15px;
       font-family:Arial, Helvetica, sans-serif;
       resize:vertical;
-    }
-
-    .status-badge{
-      display:inline-block;
-      padding:8px 12px;
-      border-radius:999px;
-      background:#173026;
-      font-size:13px;
-      color:#f5f5f0;
-      margin-top:10px;
     }
 
     @media (max-width: 920px){
@@ -112,7 +132,7 @@
       </div>
       <div class="pill-row">
         <div class="pill">Admin Mode</div>
-        <div class="pill">Local Demo</div>
+        <div class="pill">URL Based Memorials</div>
       </div>
     </header>
 
@@ -120,10 +140,10 @@
       <section class="panel">
         <div class="section-header">
           <h2>Create Memorial</h2>
-          <p>Create the deceased profile and prepare the 3rd-day and 40th-day khatam setup.</p>
+          <p>Create a deceased profile and generate a unique memorial URL.</p>
         </div>
 
-        <form class="stack-lg">
+        <form id="memorialForm" class="stack-lg" onsubmit="return false;">
           <div class="field-grid two-up">
             <div class="field">
               <label for="fullName">Full Name</label>
@@ -174,61 +194,38 @@
           </div>
 
           <div class="inline-actions">
-            <button class="btn btn-primary" type="button">Create Memorial</button>
-            <button class="btn btn-secondary" type="button">Auto-fill 3rd & 40th Day</button>
+            <button class="btn btn-primary" type="button" id="createMemorialBtn">Create Memorial</button>
+            <button class="btn btn-secondary" type="button" id="autoFillDatesBtn">Auto-fill 3rd & 40th Day</button>
           </div>
         </form>
 
+        <div class="notice-box" id="adminNotice"></div>
+
         <div class="helper-box">
-          This is the upgraded admin layout. The next stage will connect this form to Supabase
-          so each memorial is saved properly, gets its own link, and can later generate a QR code.
+          Each memorial will get a unique URL like:
+          <br /><br />
+          <strong>index.html?slug=ahmed-khan</strong>
+          <br />
+          <strong>totals.html?slug=ahmed-khan</strong>
         </div>
       </section>
 
       <section class="panel">
         <div class="section-header compact">
           <h2>Saved Memorials</h2>
-          <p>Example layout for the memorial list</p>
+          <p>Click links to open each unique memorial.</p>
         </div>
 
-        <div class="admin-list">
-          <div class="admin-item">
-            <h3>Ahmed Khan</h3>
-            <p>
-              Age 67 · Leeds Islamic Centre<br>
-              3rd Day Khatam: 15 March 2026<br>
-              40th Day Khatam: 21 April 2026
-            </p>
-            <span class="status-badge">Active</span>
-            <div class="admin-link-group">
-              <a class="ghost-link" href="index.html">Open Memorial</a>
-              <a class="ghost-link" href="totals.html">Open Totals Screen</a>
-            </div>
-          </div>
-
-          <div class="admin-item">
-            <h3>Fatima Begum</h3>
-            <p>
-              Age 74 · Bradford Community Mosque<br>
-              3rd Day Khatam: 20 March 2026<br>
-              40th Day Khatam: 26 April 2026
-            </p>
-            <span class="status-badge">Draft</span>
-            <div class="admin-link-group">
-              <a class="ghost-link" href="index.html">Open Memorial</a>
-              <a class="ghost-link" href="totals.html">Open Totals Screen</a>
-            </div>
-          </div>
+        <div class="admin-list" id="memorialList">
+          <div class="muted-text">Loading memorials...</div>
         </div>
 
         <div class="admin-mini-card mt-lg">
           <div class="section-header compact">
-            <h3>What comes next</h3>
+            <h3>How to use</h3>
           </div>
           <p class="muted-text" style="line-height:1.8;">
-            Next we connect this admin page to a database so it can:
-            create memorials, create 3rd-day and 40th-day campaigns,
-            save deadlines, and generate unique public pages.
+            Create a memorial, copy its unique public link, and share it with family or turn it into a QR code.
           </p>
         </div>
       </section>
@@ -237,5 +234,189 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
+  <script>
+    var adminClient = window.supabase.createClient(
+      window.APP_CONFIG.supabaseUrl,
+      window.APP_CONFIG.supabasePublishableKey
+    );
+
+    function slugify(text) {
+      return (text || "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\\s-]/g, "")
+        .replace(/\\s+/g, "-")
+        .replace(/-+/g, "-");
+    }
+
+    function getBaseUrl() {
+      var url = new URL(window.location.href);
+      return url.origin + url.pathname.replace(/admin\\.html$/, "");
+    }
+
+    function showNotice(html) {
+      var box = document.getElementById("adminNotice");
+      box.style.display = "block";
+      box.innerHTML = html;
+    }
+
+    function autoFillDates() {
+      var dateInput = document.getElementById("dateOfPassing");
+      var thirdInput = document.getElementById("thirdDayDeadline");
+      var fortiethInput = document.getElementById("fortiethDayDeadline");
+
+      if (!dateInput.value) {
+        alert("Please choose the date of passing first.");
+        return;
+      }
+
+      var base = new Date(dateInput.value + "T12:00:00");
+      var third = new Date(base);
+      third.setDate(third.getDate() + 3);
+
+      var fortieth = new Date(base);
+      fortieth.setDate(fortieth.getDate() + 40);
+
+      thirdInput.value = toDatetimeLocal(third);
+      fortiethInput.value = toDatetimeLocal(fortieth);
+    }
+
+    function toDatetimeLocal(date) {
+      var pad = function (n) { return String(n).padStart(2, "0"); };
+      return date.getFullYear() + "-" +
+        pad(date.getMonth() + 1) + "-" +
+        pad(date.getDate()) + "T" +
+        pad(date.getHours()) + ":" +
+        pad(date.getMinutes());
+    }
+
+    async function createMemorial() {
+      var fullName = document.getElementById("fullName").value.trim();
+      var age = document.getElementById("age").value.trim();
+      var dateOfPassing = document.getElementById("dateOfPassing").value;
+      var mosqueName = document.getElementById("mosqueName").value.trim();
+      var ukCity = document.getElementById("ukCityAdmin").value.trim();
+      var pakCity = document.getElementById("pakCityAdmin").value.trim();
+      var tribute = document.getElementById("tribute").value.trim();
+      var thirdDayDeadline = document.getElementById("thirdDayDeadline").value;
+      var fortiethDayDeadline = document.getElementById("fortiethDayDeadline").value;
+
+      if (!fullName) {
+        alert("Please enter the full name.");
+        return;
+      }
+
+      var slug = slugify(fullName);
+      if (dateOfPassing) {
+        slug += "-" + dateOfPassing;
+      }
+
+      var memorialInsert = await adminClient
+        .from("memorials")
+        .insert({
+          slug: slug,
+          full_name: fullName,
+          age: age ? parseInt(age, 10) : null,
+          mosque_name: mosqueName || null,
+          uk_city: ukCity || null,
+          pak_city: pakCity || null,
+          tribute: tribute || null,
+          date_of_passing: dateOfPassing || null
+        })
+        .select()
+        .single();
+
+      if (memorialInsert.error) {
+        console.error("create memorial error:", memorialInsert.error);
+        alert("Could not create memorial.");
+        return;
+      }
+
+      var memorial = memorialInsert.data;
+
+      if (thirdDayDeadline) {
+        await adminClient.from("khatam_campaigns").insert({
+          memorial_id: memorial.id,
+          title: "3rd Day Khatam",
+          deadline: new Date(thirdDayDeadline).toISOString(),
+          campaign_type: "third_day"
+        });
+      }
+
+      if (fortiethDayDeadline) {
+        await adminClient.from("khatam_campaigns").insert({
+          memorial_id: memorial.id,
+          title: "40th Day Khatam",
+          deadline: new Date(fortiethDayDeadline).toISOString(),
+          campaign_type: "fortieth_day"
+        });
+      }
+
+      var baseUrl = getBaseUrl();
+      var memorialUrl = baseUrl + "index.html?slug=" + encodeURIComponent(memorial.slug);
+      var totalsUrl = baseUrl + "totals.html?slug=" + encodeURIComponent(memorial.slug);
+
+      showNotice(
+        "<strong>Memorial created successfully.</strong><br><br>" +
+        "Memorial URL:<div class='link-box'>" + memorialUrl + "</div>" +
+        "Totals URL:<div class='link-box'>" + totalsUrl + "</div>"
+      );
+
+      document.getElementById("memorialForm").reset();
+      await loadMemorials();
+    }
+
+    async function loadMemorials() {
+      var list = document.getElementById("memorialList");
+      list.innerHTML = "<div class='muted-text'>Loading memorials...</div>";
+
+      var result = await adminClient
+        .from("memorials")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (result.error) {
+        console.error("load memorials error:", result.error);
+        list.innerHTML = "<div class='muted-text'>Could not load memorials.</div>";
+        return;
+      }
+
+      if (!result.data || !result.data.length) {
+        list.innerHTML = "<div class='muted-text'>No memorials found yet.</div>";
+        return;
+      }
+
+      var baseUrl = getBaseUrl();
+
+      list.innerHTML = result.data.map(function (memorial) {
+        var memorialUrl = baseUrl + "index.html?slug=" + encodeURIComponent(memorial.slug);
+        var totalsUrl = baseUrl + "totals.html?slug=" + encodeURIComponent(memorial.slug);
+
+        return `
+          <div class="admin-item">
+            <h3>${memorial.full_name}</h3>
+            <p>
+              Age: ${memorial.age ?? "-"}<br>
+              Mosque: ${memorial.mosque_name ?? "-"}<br>
+              Slug: ${memorial.slug}
+            </p>
+            <span class="status-badge">Active</span>
+            <div class="admin-link-group">
+              <a class="ghost-link" href="${memorialUrl}" target="_blank">Open Memorial</a>
+              <a class="ghost-link" href="${totalsUrl}" target="_blank">Open Totals</a>
+            </div>
+            <div class="link-box">${memorialUrl}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("createMemorialBtn").addEventListener("click", createMemorial);
+    document.getElementById("autoFillDatesBtn").addEventListener("click", autoFillDates);
+
+    document.addEventListener("DOMContentLoaded", function () {
+      loadMemorials();
+    });
+  </script>
 </body>
 </html>
