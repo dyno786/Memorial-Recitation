@@ -418,3 +418,44 @@ document.addEventListener("DOMContentLoaded",async function(){
   bindTabs(); bindButtons(); updateDetailsBadge();
   await loadMemorial(); bindRealtime();
 });
+
+// ── Collective Fatiha ─────────────────────────────────────────
+function bindFatiha() {
+  var btn = document.getElementById("collectiveFatihaBtn");
+  var submitBtn = document.getElementById("submitFatihaBtn");
+  var closeBtn = document.getElementById("closeFatihaModal");
+  var overlay = document.getElementById("fatihaModal");
+
+  if (btn) btn.addEventListener("click", function() {
+    // Pre-fill name from saved details
+    var saved = loadSavedDetails();
+    var nameInput = document.getElementById("fatihaName");
+    if (nameInput && saved && saved.name) nameInput.value = saved.name;
+    openModal("fatihaModal");
+  });
+
+  if (submitBtn) submitBtn.addEventListener("click", async function() {
+    var nameInput = document.getElementById("fatihaName");
+    var name = (nameInput ? nameInput.value : "").trim();
+    if (!name) { showToast("Please enter your name"); return; }
+    if (!currentMemorial) { showToast("Memorial not loaded"); return; }
+
+    var r = await memorialClient.from("fatiha_requests").insert({
+      memorial_id: currentMemorial.id,
+      participant_name: name
+    });
+
+    if (r.error) { console.error(r.error); showToast("Could not send — try again"); return; }
+
+    closeModal("fatihaModal");
+    showToast("Fatiha request sent to live screen 🤲");
+  });
+
+  if (closeBtn) closeBtn.addEventListener("click", function() { closeModal("fatihaModal"); });
+  if (overlay) overlay.addEventListener("click", function(e) { if (e.target===overlay) closeModal("fatihaModal"); });
+}
+
+// Re-run DOMContentLoaded additions
+document.addEventListener("DOMContentLoaded", function() {
+  bindFatiha();
+});
