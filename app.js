@@ -14,6 +14,15 @@ function getSlugFromUrl() {
   return params.get("slug");
 }
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function updateLinksForSlug() {
   var totalsLink = document.getElementById("totalsLink");
   if (!totalsLink) return;
@@ -30,7 +39,6 @@ function updateLinksForSlug() {
 function showChooser() {
   var chooser = document.getElementById("chooserWrap");
   var app = document.getElementById("memorialApp");
-
   if (chooser) chooser.style.display = "block";
   if (app) app.style.display = "none";
 }
@@ -38,20 +46,15 @@ function showChooser() {
 function showMemorialApp() {
   var chooser = document.getElementById("chooserWrap");
   var app = document.getElementById("memorialApp");
-
   if (chooser) chooser.style.display = "none";
   if (app) app.style.display = "block";
 }
 
 async function loadMemorialChooser() {
-  var chooserWrap = document.getElementById("chooserWrap");
   var dropdown = document.getElementById("memorialDropdown");
   var openBtn = document.getElementById("openMemorialBtn");
 
-  if (!chooserWrap || !dropdown || !openBtn) {
-    console.warn("Chooser elements not found on this page.");
-    return;
-  }
+  if (!dropdown || !openBtn) return;
 
   dropdown.innerHTML = '<option value="">Loading memorials...</option>';
   openBtn.disabled = true;
@@ -70,7 +73,7 @@ async function loadMemorialChooser() {
   allMemorials = result.data || [];
 
   if (!allMemorials.length) {
-    dropdown.innerHTML = '<option value="">No memorials found</option>';
+    dropdown.innerHTML = '<option value="">No memorials created yet</option>';
     return;
   }
 
@@ -81,32 +84,22 @@ async function loadMemorialChooser() {
       if (memorial.mosque_name) {
         label += " — " + memorial.mosque_name;
       }
-      return '<option value="' + memorial.slug + '">' + escapeHtml(label) + '</option>';
+      return '<option value="' + escapeHtml(memorial.slug) + '">' + escapeHtml(label) + '</option>';
     }).join("");
 
   openBtn.disabled = false;
 
-  openBtn.onclick = function () {
-    var selectedSlug = dropdown.value;
-    if (!selectedSlug) {
+  dropdown.addEventListener("change", function () {
+    openBtn.disabled = !dropdown.value;
+  });
+
+  openBtn.addEventListener("click", function () {
+    if (!dropdown.value) {
       alert("Please choose a memorial first.");
       return;
     }
-    window.location.href = "index.html?slug=" + encodeURIComponent(selectedSlug);
-  };
-
-  dropdown.onchange = function () {
-    openBtn.disabled = !dropdown.value;
-  };
-}
-
-function escapeHtml(value) {
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    window.location.href = "index.html?slug=" + encodeURIComponent(dropdown.value);
+  });
 }
 
 function count(id, val) {
@@ -116,8 +109,8 @@ function count(id, val) {
   var num = parseInt(el.innerText || "0", 10);
   num += val;
   if (num < 0) num = 0;
-
   el.innerText = String(num);
+
   updateSummary();
 }
 
@@ -169,8 +162,8 @@ function bindTabs() {
         b.classList.remove("active");
       });
 
-      document.querySelectorAll(".tab-content").forEach(function (panel) {
-        panel.classList.remove("active");
+      document.querySelectorAll(".tab-content").forEach(function (p) {
+        p.classList.remove("active");
       });
 
       btn.classList.add("active");
@@ -194,12 +187,26 @@ async function getMemorialWithRetry() {
     }
 
     console.error("Memorial fetch attempt " + attempt + " failed:", result.error || "No data");
+
     await new Promise(function (resolve) {
       setTimeout(resolve, 400 * attempt);
     });
   }
 
   return null;
+}
+
+function renderCampaignPills(campaign) {
+  var pillRow = document.querySelector(".stats-toolbar .pill-row");
+  if (!pillRow || !campaign) return;
+
+  var deadlineText = campaign.deadline
+    ? new Date(campaign.deadline).toLocaleString()
+    : "No deadline set";
+
+  pillRow.innerHTML =
+    '<div class="pill">Campaign: ' + escapeHtml(campaign.title || "Untitled") + '</div>' +
+    '<div class="pill">Deadline: ' + escapeHtml(deadlineText) + '</div>';
 }
 
 async function loadMemorial() {
@@ -217,7 +224,7 @@ async function loadMemorial() {
   var memorial = await getMemorialWithRetry();
 
   if (!memorial) {
-    alert("Could not load memorial. Please check the slug and Supabase public read policy.");
+    alert("Could not load memorial.");
     showChooser();
     await loadMemorialChooser();
     return;
@@ -226,9 +233,7 @@ async function loadMemorial() {
   currentMemorial = memorial;
 
   var nameEl = document.querySelector(".memorial-name");
-  if (nameEl) {
-    nameEl.textContent = currentMemorial.full_name || "Memorial";
-  }
+  if (nameEl) nameEl.textContent = currentMemorial.full_name || "Memorial";
 
   var metaEl = document.querySelector(".meta");
   if (metaEl) {
@@ -257,34 +262,20 @@ async function loadMemorial() {
   await loadJuzBoard();
 }
 
-function renderCampaignPills(campaign) {
-  var pillRow = document.querySelector(".stats-toolbar .pill-row");
-  if (!pillRow || !campaign) return;
-
-  var deadlineText = campaign.deadline
-    ? new Date(campaign.deadline).toLocaleString()
-    : "No deadline set";
-
-  pillRow.innerHTML =
-    '<div class="pill">Campaign: ' + escapeHtml(campaign.title || "Untitled") + '</div>' +
-    '<div class="pill">Deadline: ' + escapeHtml(deadlineText) + '</div>';
-}
-
 async function saveParticipant() {
   if (!currentMemorial) {
     alert("Memorial not loaded yet.");
     return;
   }
 
-  var nameInput = document.getElementById("readerName");
-  var ukCityInput = document.getElementById("ukCity");
-  var pakCityInput = document.getElementById("pakCity");
-  var relationInput = document.getElementById("relation");
+  var name = (document.getElementById("readerName") || {}).value || "";
+  var ukCity = (document.getElementById("ukCity") || {}).value || "";
+  var pakCity = (document.getElementById("pakCity") || {}).value || "";
+  var relation = (document.getElementById("relation") || {}).value || "";
 
-  var name = nameInput ? nameInput.value.trim() : "";
-  var ukCity = ukCityInput ? ukCityInput.value.trim() : "";
-  var pakCity = pakCityInput ? pakCityInput.value.trim() : "";
-  var relation = relationInput ? relationInput.value : "";
+  name = name.trim();
+  ukCity = ukCity.trim();
+  pakCity = pakCity.trim();
 
   if (!name && relation !== "Anonymous") {
     alert("Please enter your name or choose Anonymous.");
@@ -340,7 +331,6 @@ async function submitQuickRecitations() {
       var label = item[0];
       var id = item[1];
       var el = document.getElementById(id);
-
       return {
         memorial_id: currentMemorial.id,
         participant_id: currentParticipant.id,
@@ -422,17 +412,12 @@ async function loadJuzBoard() {
     card.className = "juz-card";
     card.innerHTML =
       '<div class="juz-meta">' +
-        '<strong>Juz ' + i + '</strong>' +
-        '<span>' +
-          (isCompleted
-            ? "Completed"
-            : isClaimed
-              ? "Already reserved by a reader"
-              : "Available to claim") +
-        '</span>' +
-      '</div>' +
+      '<strong>Juz ' + i + '</strong>' +
+      '<span>' +
+      (isCompleted ? "Completed" : isClaimed ? "Already reserved by a reader" : "Available to claim") +
+      '</span></div>' +
       '<button type="button" class="juz-btn ' + (isClaimed ? "claimed" : "available") + '">' +
-        (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") +
+      (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") +
       '</button>';
 
     var btn = card.querySelector("button");
@@ -471,26 +456,18 @@ async function loadJuzBoard() {
 
 function bindButtons() {
   var saveBtn = document.getElementById("saveDetailsBtn");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", saveParticipant);
-  }
+  if (saveBtn) saveBtn.addEventListener("click", saveParticipant);
 
   var submitBtn = document.getElementById("submitQuickBtn");
-  if (submitBtn) {
-    submitBtn.addEventListener("click", submitQuickRecitations);
-  }
+  if (submitBtn) submitBtn.addEventListener("click", submitQuickRecitations);
 }
 
 function bindRealtime() {
   memorialClient
     .channel("live-khatam")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "khatam_claims" },
-      async function () {
-        await loadJuzBoard();
-      }
-    )
+    .on("postgres_changes", { event: "*", schema: "public", table: "khatam_claims" }, async function () {
+      await loadJuzBoard();
+    })
     .subscribe();
 }
 
