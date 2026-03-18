@@ -34,12 +34,15 @@
       user-select: none;
       text-align: center;
     }
+    .collapse-header > div { text-align: center; width: 100%; }
     .collapse-header:hover { background: rgba(255,255,255,.03); }
     .collapse-title { font-size: 16px; font-weight: bold; margin: 0; }
     .collapse-sub { font-size: 12px; color: #c9c7b9; margin: 0; }
     .collapse-arrow { font-size: 12px; color: #c9c7b9; transition: transform .25s; margin-left: auto; flex-shrink:0; }
     .collapse-card.open .collapse-arrow { transform: rotate(180deg); }
-    .collapse-body { display: none; padding: 0 18px 16px; border-top: 1px solid rgba(255,255,255,.06); }
+    .collapse-body { display: none; padding: 0 18px 16px; border-top: 1px solid rgba(255,255,255,.06); text-align: center; }
+    .collapse-body .field, .collapse-body .field-grid, .collapse-body form { text-align: left; }
+    .collapse-body .deceased-meta, .collapse-body .hadith-box { text-align: center; }
     .collapse-card.open .collapse-body { display: block; }
 
     /* deceased card specifics */
@@ -219,7 +222,7 @@
 
               <!-- QUICK -->
               <div id="quickPanel" class="tab-content active">
-                <div class="section-header compact">
+                <div class="section-header compact" style="text-align:center;">
                   <h2>Quick Recitations</h2>
                   <p>Tap + to instantly record a recitation.</p>
                 </div>
@@ -237,21 +240,17 @@
 
               <!-- KHATAM -->
               <div id="khatamPanel" class="tab-content">
-                <div class="section-header compact">
+                <div class="section-header compact" style="text-align:center;">
                   <h2>Quran Khatam</h2>
                   <p>Claim one available Juz below.</p>
                 </div>
-                <div class="stats-toolbar mt-lg">
-                  <div class="pill-row">
+                <div class="stats-toolbar mt-lg" style="justify-content:center;">
+                  <div class="pill-row" style="justify-content:center;">
                     <div class="pill">Campaign: Loading...</div>
                     <div class="pill">Status: Syncing</div>
                   </div>
                 </div>
-                <div class="my-assignment-card mt-md">
-                  <h3>Your Current Assignment</h3>
-                  <div>Save your details first, then claim any available Juz below.</div>
-                </div>
-                <div class="juz-grid mt-lg" id="juzList"></div>
+                <div class="juz-grid mt-lg" id="juzList" style="grid-template-columns:1fr 1fr;"></div>
               </div>
             </section>
 
