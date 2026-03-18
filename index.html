@@ -8,127 +8,96 @@
   <link rel="stylesheet" href="styles.css" />
   <style>
     .chooser-wrap { display: none; }
-    .chooser-select {
-      width: 100%;
-      border: none;
-      outline: none;
-      border-radius: 14px;
-      padding: 14px;
-      background: #1a3028;
-      color: #fff;
-      font-size: 16px;
-      margin-top: 12px;
-    }
-    .chooser-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .chooser-select { width:100%; border:none; outline:none; border-radius:14px; padding:14px; background:#1a3028; color:#fff; font-size:16px; margin-top:12px; }
+    .chooser-actions { margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; }
     .memorial-app { display: none; }
 
     /* centred topbar */
-    .topbar { text-align: center; flex-direction: column; align-items: center; gap: 10px; }
-    .topbar-links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .topbar { text-align:center; flex-direction:column; align-items:center; gap:10px; }
+    .topbar-links { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 
     /* info bar */
-    .memorial-info-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      background: linear-gradient(90deg,#0d1e18,#10241d);
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 18px;
-      padding: 14px 18px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
-    }
-    .memorial-info-bar .memorial-name { font-size: 22px; margin: 0; }
-    .memorial-info-bar .meta { font-size: 13px; color: #c9c7b9; line-height: 1.6; }
-    .btn-info {
-      background: rgba(202,168,92,.12);
-      border: 1px solid rgba(202,168,92,.35);
-      color: #caa85c;
-      border-radius: 12px;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .btn-info:hover { background: rgba(202,168,92,.2); }
+    .memorial-info-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; background:linear-gradient(90deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.06); border-radius:18px; padding:14px 18px; margin-bottom:18px; flex-wrap:wrap; }
+    .memorial-info-bar .memorial-name { font-size:22px; margin:0; }
+    .memorial-info-bar .meta { font-size:13px; color:#c9c7b9; line-height:1.6; }
+    .btn-info { background:rgba(202,168,92,.12); border:1px solid rgba(202,168,92,.35); color:#caa85c; border-radius:12px; padding:10px 16px; font-size:14px; font-weight:bold; cursor:pointer; white-space:nowrap; }
+    .btn-info:hover { background:rgba(202,168,92,.2); }
 
     /* modal */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.75);
-      z-index: 200;
-      overflow-y: auto;
-      padding: 40px 16px;
-    }
-    .modal-overlay.open { display: block; }
-    .modal-box {
-      background: #0d1e18;
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 22px;
-      padding: 24px;
-      width: min(560px, 100%);
-      margin: 0 auto;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-    .modal-header h2 { margin: 0; font-size: 20px; }
-    .modal-close {
-      background: rgba(255,255,255,.08);
-      border: none;
-      color: #f5f5f0;
-      border-radius: 10px;
-      width: 36px;
-      height: 36px;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-close:hover { background: rgba(255,255,255,.15); }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:200; overflow-y:auto; padding:40px 16px; }
+    .modal-overlay.open { display:block; }
+    .modal-box { background:#0d1e18; border:1px solid rgba(255,255,255,.1); border-radius:22px; padding:24px; width:min(560px,100%); margin:0 auto; }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+    .modal-header h2 { margin:0; font-size:20px; }
+    .modal-close { background:rgba(255,255,255,.08); border:none; color:#f5f5f0; border-radius:10px; width:36px; height:36px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .modal-close:hover { background:rgba(255,255,255,.15); }
 
     /* saved badge */
-    .saved-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #173026;
-      border: 1px solid rgba(202,168,92,.3);
-      color: #caa85c;
-      border-radius: 999px;
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 10px;
+    .saved-badge { display:inline-flex; align-items:center; gap:6px; background:#173026; border:1px solid rgba(202,168,92,.3); color:#caa85c; border-radius:999px; padding:6px 14px; font-size:13px; font-weight:bold; margin-bottom:10px; }
+    .details-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+
+    /* ── compact recitation grid (1) no subtitle, (3) centred ── */
+    .counter-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
     }
-    .details-bar {
+    .counter-item {
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding: 12px 10px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 8px;
+      text-align: center;
     }
+    .counter-name { font-size: 15px; font-weight: bold; }
+    /* hide the old counter-top wrapper */
+    .counter-top { display: none; }
+    .counter-controls { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; }
+    .count-btn { width: 44px; height: 44px; border:none; border-radius:10px; background:#caa85c; color:#111; font-size:24px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .count-btn:active { transform: scale(0.93); }
+    .count-display { min-width: 40px; height: 44px; border-radius:10px; background:#173026; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:bold; }
+
+    /* toast feedback */
+    .rec-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: #173026;
+      border: 1px solid rgba(202,168,92,.4);
+      color: #caa85c;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      z-index: 300;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .rec-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* juz claimed-by label */
+    .juz-claimer { font-size: 12px; color: #caa85c; margin-top: 2px; display: block; }
+
+    .my-juz { border: 1px solid rgba(202,168,92,.5) !important; }
+    .juz-btn.completed { background:#2f6d4f; color:#fff; cursor:default; }
 
     @media (max-width: 720px) {
-      .memorial-info-bar { flex-direction: column; align-items: flex-start; }
-      .sidebar { display: none; }
+      .memorial-info-bar { flex-direction:column; align-items:flex-start; }
+      .sidebar { display:none; }
     }
-    .my-juz { border: 1px solid rgba(202,168,92,.5) !important; }
-    .juz-btn.completed { background: #2f6d4f; color: #fff; cursor: default; }
-    .already-submitted { opacity: 0.6; }
+    @media (max-width: 480px) {
+      .counter-list { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
   <div class="app-shell">
-
     <header class="topbar container">
       <div>
         <p class="eyebrow">Masjid Memorial Recitation</p>
@@ -148,9 +117,7 @@
           <h2>Select a Memorial</h2>
           <p>Choose from the list below.</p>
         </div>
-        <select id="memorialDropdown" class="chooser-select">
-          <option value="">Loading memorials...</option>
-        </select>
+        <select id="memorialDropdown" class="chooser-select"><option value="">Loading memorials...</option></select>
         <div class="chooser-actions">
           <button type="button" class="btn btn-primary" id="openMemorialBtn">Open Memorial</button>
         </div>
@@ -183,9 +150,7 @@
                     <p>Used for recitations and Juz claims.</p>
                   </div>
                 </div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                  <button class="btn btn-secondary" id="openDetailsModalBtn">Enter / update details</button>
-                </div>
+                <button class="btn btn-secondary" id="openDetailsModalBtn">Enter / update details</button>
               </div>
             </section>
 
@@ -196,32 +161,81 @@
                 <button type="button" class="tab-btn" data-tab="khatamPanel">Quran Khatam</button>
               </div>
 
+              <!-- QUICK RECITATIONS -->
               <div id="quickPanel" class="tab-content active">
                 <div class="section-header compact">
                   <h2>Quick Recitations</h2>
-                  <p>Tap + and −, then submit once finished.</p>
+                  <p>Tap + to instantly record a recitation.</p>
                 </div>
                 <div class="counter-list">
-                  <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Bismillah</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('bismillah',-1)">−</button><div class="count-display" id="bismillah">0</div><button type="button" class="count-btn" onclick="count('bismillah',1)">+</button></div></div>
-                  <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Alhamdulillah</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('alhamdulillah',-1)">−</button><div class="count-display" id="alhamdulillah">0</div><button type="button" class="count-btn" onclick="count('alhamdulillah',1)">+</button></div></div>
-                  <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Subhanallah</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('subhanallah',-1)">−</button><div class="count-display" id="subhanallah">0</div><button type="button" class="count-btn" onclick="count('subhanallah',1)">+</button></div></div>
-                  <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Astaghfirullah</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('astaghfirullah',-1)">−</button><div class="count-display" id="astaghfirullah">0</div><button type="button" class="count-btn" onclick="count('astaghfirullah',1)">+</button></div></div>
-                  <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Durood Sharif</div><div class="counter-sub">Short recitation counter</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('durood',-1)">−</button><div class="count-display" id="durood">0</div><button type="button" class="count-btn" onclick="count('durood',1)">+</button></div></div>
-                  <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Surah Fatiha</div><div class="counter-sub">Completed recitations</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('fatiha',-1)">−</button><div class="count-display" id="fatiha">0</div><button type="button" class="count-btn" onclick="count('fatiha',1)">+</button></div></div>
-                  <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Surah Ikhlas</div><div class="counter-sub">Completed recitations</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('ikhlas',-1)">−</button><div class="count-display" id="ikhlas">0</div><button type="button" class="count-btn" onclick="count('ikhlas',1)">+</button></div></div>
-                  <div class="counter-item"><div class="counter-top"><div><div class="counter-name">Surah Yasin</div><div class="counter-sub">Completed recitations</div></div></div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('yasin',-1)">−</button><div class="count-display" id="yasin">0</div><button type="button" class="count-btn" onclick="count('yasin',1)">+</button></div></div>
-                </div>
-                <div class="summary-card mt-lg">
-                  <div class="section-header compact"><h3>Your Quick Summary</h3></div>
-                  <div class="summary-list" id="quickSummary">
-                    <div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>
+                  <div class="counter-item">
+                    <div class="counter-name">Bismillah</div>
+                    <div class="counter-controls">
+                      <button type="button" class="count-btn" onclick="count('bismillah','Bismillah',-1)">−</button>
+                      <div class="count-display" id="bismillah">0</div>
+                      <button type="button" class="count-btn" onclick="count('bismillah','Bismillah',1)">+</button>
+                    </div>
                   </div>
-                  <div class="actions-sticky mt-lg">
-                    <button type="button" class="btn btn-primary btn-block" id="submitQuickBtn">Submit quick recitations</button>
+                  <div class="counter-item">
+                    <div class="counter-name">Alhamdulillah</div>
+                    <div class="counter-controls">
+                      <button type="button" class="count-btn" onclick="count('alhamdulillah','Alhamdulillah',-1)">−</button>
+                      <div class="count-display" id="alhamdulillah">0</div>
+                      <button type="button" class="count-btn" onclick="count('alhamdulillah','Alhamdulillah',1)">+</button>
+                    </div>
+                  </div>
+                  <div class="counter-item">
+                    <div class="counter-name">Subhanallah</div>
+                    <div class="counter-controls">
+                      <button type="button" class="count-btn" onclick="count('subhanallah','Subhanallah',-1)">−</button>
+                      <div class="count-display" id="subhanallah">0</div>
+                      <button type="button" class="count-btn" onclick="count('subhanallah','Subhanallah',1)">+</button>
+                    </div>
+                  </div>
+                  <div class="counter-item">
+                    <div class="counter-name">Astaghfirullah</div>
+                    <div class="counter-controls">
+                      <button type="button" class="count-btn" onclick="count('astaghfirullah','Astaghfirullah',-1)">−</button>
+                      <div class="count-display" id="astaghfirullah">0</div>
+                      <button type="button" class="count-btn" onclick="count('astaghfirullah','Astaghfirullah',1)">+</button>
+                    </div>
+                  </div>
+                  <div class="counter-item">
+                    <div class="counter-name">Durood Sharif</div>
+                    <div class="counter-controls">
+                      <button type="button" class="count-btn" onclick="count('durood','Durood Sharif',-1)">−</button>
+                      <div class="count-display" id="durood">0</div>
+                      <button type="button" class="count-btn" onclick="count('durood','Durood Sharif',1)">+</button>
+                    </div>
+                  </div>
+                  <div class="counter-item">
+                    <div class="counter-name">Surah Fatiha</div>
+                    <div class="counter-controls">
+                      <button type="button" class="count-btn" onclick="count('fatiha','Surah Fatiha',-1)">−</button>
+                      <div class="count-display" id="fatiha">0</div>
+                      <button type="button" class="count-btn" onclick="count('fatiha','Surah Fatiha',1)">+</button>
+                    </div>
+                  </div>
+                  <div class="counter-item">
+                    <div class="counter-name">Surah Ikhlas</div>
+                    <div class="counter-controls">
+                      <button type="button" class="count-btn" onclick="count('ikhlas','Surah Ikhlas',-1)">−</button>
+                      <div class="count-display" id="ikhlas">0</div>
+                      <button type="button" class="count-btn" onclick="count('ikhlas','Surah Ikhlas',1)">+</button>
+                    </div>
+                  </div>
+                  <div class="counter-item">
+                    <div class="counter-name">Surah Yasin</div>
+                    <div class="counter-controls">
+                      <button type="button" class="count-btn" onclick="count('yasin','Surah Yasin',-1)">−</button>
+                      <div class="count-display" id="yasin">0</div>
+                      <button type="button" class="count-btn" onclick="count('yasin','Surah Yasin',1)">+</button>
+                    </div>
                   </div>
                 </div>
               </div>
 
+              <!-- KHATAM -->
               <div id="khatamPanel" class="tab-content">
                 <div class="section-header compact">
                   <h2>Quran Khatam</h2>
@@ -245,10 +259,7 @@
           <!-- SIDEBAR -->
           <aside class="sidebar">
             <section class="panel totals-panel">
-              <div class="section-header compact">
-                <h2>Live Stats</h2>
-                <p>Community contributions for this memorial.</p>
-              </div>
+              <div class="section-header compact"><h2>Live Stats</h2><p>Community contributions.</p></div>
               <div class="stats-grid two-up">
                 <div class="mini-stat"><span class="mini-stat__value" id="statReaders">—</span><span class="mini-stat__label">Readers</span></div>
                 <div class="mini-stat"><span class="mini-stat__value" id="statRecitations">—</span><span class="mini-stat__label">Recitations</span></div>
@@ -256,31 +267,22 @@
                 <div class="mini-stat"><span class="mini-stat__value" id="statJuzDone">—</span><span class="mini-stat__label">Juz Completed</span></div>
               </div>
             </section>
-
             <section class="panel leaderboard-panel">
-              <div class="section-header compact">
-                <h2>Leaderboard</h2>
-                <p>Top readers for this memorial.</p>
-              </div>
-              <div class="leaderboard-list" id="leaderboardList">
-                <div class="leaderboard-item"><span>Loading...</span><strong>—</strong></div>
-              </div>
+              <div class="section-header compact"><h2>Leaderboard</h2><p>Top readers.</p></div>
+              <div class="leaderboard-list" id="leaderboardList"><div class="leaderboard-item"><span>Loading...</span><strong>—</strong></div></div>
             </section>
-
             <section class="panel activity-panel">
-              <div class="section-header compact">
-                <h2>Recent Activity</h2>
-                <p>Latest recitations submitted.</p>
-              </div>
-              <div class="activity-list" id="activityList">
-                <div class="activity-item"><span>Loading...</span><strong>—</strong></div>
-              </div>
+              <div class="section-header compact"><h2>Recent Activity</h2><p>Latest recitations.</p></div>
+              <div class="activity-list" id="activityList"><div class="activity-item"><span>Loading...</span><strong>—</strong></div></div>
             </section>
           </aside>
         </div>
       </div>
     </main>
   </div>
+
+  <!-- toast -->
+  <div class="rec-toast" id="recToast"></div>
 
   <!-- MEMORIAL INFO MODAL -->
   <div class="modal-overlay" id="memorialInfoModal">
@@ -291,20 +293,14 @@
       </div>
       <div class="meta" id="modalMemorialMeta" style="line-height:1.8;margin-bottom:16px;"></div>
       <div class="hadith-box">
-        <div class="hadith-text">
-          "When a person dies, all their deeds come to an end except three:
-          ongoing charity, beneficial knowledge, or a righteous child who prays for them."
-        </div>
+        <div class="hadith-text">"When a person dies, all their deeds come to an end except three: ongoing charity, beneficial knowledge, or a righteous child who prays for them."</div>
         <div class="hadith-ref">— Sahih Muslim</div>
-        <div class="hadith-note" id="modalTribute">
-          Please recite, make du'a, and take part in the collective Qur'an reading
-          with the intention of reward for the deceased.
-        </div>
+        <div class="hadith-note" id="modalTribute">Please recite, make du'a, and take part in the collective Qur'an reading with the intention of reward for the deceased.</div>
       </div>
     </div>
   </div>
 
-  <!-- YOUR DETAILS MODAL -->
+  <!-- DETAILS MODAL -->
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-box">
       <div class="modal-header">
@@ -313,19 +309,10 @@
       </div>
       <p class="muted-text" style="margin:0 0 16px;">Saved in your browser — you won't need to re-enter these next visit.</p>
       <form class="stack-lg" onsubmit="return false;">
-        <div class="field">
-          <label for="readerName">Name</label>
-          <input id="readerName" type="text" placeholder="Enter your name" />
-        </div>
+        <div class="field"><label for="readerName">Name</label><input id="readerName" type="text" placeholder="Enter your name" /></div>
         <div class="field-grid two-up">
-          <div class="field">
-            <label for="ukCity">UK City</label>
-            <input id="ukCity" type="text" placeholder="e.g. Leeds" />
-          </div>
-          <div class="field">
-            <label for="pakCity">Pakistani City</label>
-            <input id="pakCity" type="text" placeholder="e.g. Lahore" />
-          </div>
+          <div class="field"><label for="ukCity">UK City</label><input id="ukCity" type="text" placeholder="e.g. Leeds" /></div>
+          <div class="field"><label for="pakCity">Pakistani City</label><input id="pakCity" type="text" placeholder="e.g. Lahore" /></div>
         </div>
         <div class="field">
           <label for="relation">Relation</label>
