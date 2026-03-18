@@ -11,8 +11,11 @@
     .login-box{ background:linear-gradient(90deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.08); border-radius:22px; padding:36px; width:min(420px,100%); text-align:center; }
     .login-box h1{ margin:0 0 6px; font-size:26px; }
     .login-box p{ color:#c9c7b9; margin:0 0 24px; }
-    .login-box input{ width:100%; border:none; outline:none; border-radius:14px; padding:14px; background:#1a3028; color:#fff; font-size:16px; margin-bottom:14px; box-sizing:border-box; text-align:center; letter-spacing:3px; }
-    .login-error{ color:#e87070; font-size:14px; margin-top:10px; display:none; }
+    .login-box .field{ margin-bottom:14px; text-align:left; }
+    .login-box .field label{ display:block; font-size:13px; color:#c9c7b9; margin-bottom:6px; }
+    .login-box .field input{ width:100%; border:none; outline:none; border-radius:14px; padding:14px; background:#1a3028; color:#fff; font-size:15px; box-sizing:border-box; }
+    .login-error{ color:#e87070; font-size:14px; margin-top:12px; display:none; padding:10px; background:rgba(232,112,112,.1); border-radius:10px; }
+    .login-loading{ color:#c9c7b9; font-size:14px; margin-top:12px; display:none; }
     /* admin shell */
     .admin-shell{ display:none; width:min(1200px,calc(100% - 32px)); margin:0 auto; padding:24px 0 40px; }
     .admin-grid{ display:grid; grid-template-columns:1.2fr .8fr; gap:18px; }
@@ -37,7 +40,7 @@
     .modal-header h2{ margin:0; font-size:22px; }
     .modal-close{ background:rgba(255,255,255,.08); border:none; color:#f5f5f0; border-radius:10px; width:36px; height:36px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
     .modal-close:hover{ background:rgba(255,255,255,.15); }
-    /* buttons */
+    /* action buttons */
     .btn-edit{ background:#1a3a2a; color:#caa85c; border:1px solid rgba(202,168,92,.3); border-radius:10px; padding:8px 14px; font-size:13px; font-weight:bold; cursor:pointer; }
     .btn-edit:hover{ background:#243d2e; }
     .btn-delete{ background:#2a1a1a; color:#e87070; border:1px solid rgba(232,112,112,.3); border-radius:10px; padding:8px 14px; font-size:13px; font-weight:bold; cursor:pointer; }
@@ -58,6 +61,8 @@
     /* qr */
     .qr-container{ text-align:center; padding:20px 0; }
     .qr-url{ margin-top:12px; font-size:13px; color:#c9c7b9; word-break:break-all; }
+    /* session badge */
+    .session-badge{ font-size:13px; color:#c9c7b9; }
     @media (max-width:920px){ .admin-grid{ grid-template-columns:1fr; } }
   </style>
 </head>
@@ -68,23 +73,31 @@
     <div class="login-box">
       <p class="eyebrow">Mosque Admin</p>
       <h1>Memorial Dashboard</h1>
-      <p>Enter the admin password to continue.</p>
-      <input type="password" id="passwordInput" placeholder="••••••••" />
-      <button class="btn btn-primary" style="width:100%;" id="loginBtn">Sign in</button>
-      <div class="login-error" id="loginError">Incorrect password. Please try again.</div>
+      <p>Sign in with your admin account.</p>
+      <div class="field">
+        <label for="loginEmail">Email address</label>
+        <input type="email" id="loginEmail" placeholder="admin@yourmosque.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px;" id="loginBtn">Sign in</button>
+      <div class="login-error" id="loginError"></div>
+      <div class="login-loading" id="loginLoading">Signing in...</div>
     </div>
   </div>
 
-  <!-- ADMIN SHELL (shown after login) -->
+  <!-- ADMIN SHELL -->
   <div class="admin-shell" id="adminShell">
     <header class="topbar">
       <div>
         <p class="eyebrow">Mosque Admin</p>
         <h1 class="page-title">Memorial Dashboard</h1>
       </div>
-      <div class="pill-row">
+      <div class="pill-row" style="align-items:center;">
         <div class="pill">Admin Mode</div>
-        <div class="pill">URL Based Memorials</div>
+        <span class="session-badge" id="sessionEmail"></span>
         <button class="btn btn-secondary" style="padding:10px 14px;font-size:13px;" id="logoutBtn">Sign out</button>
       </div>
     </header>
@@ -96,7 +109,6 @@
           <h2>Create Memorial</h2>
           <p>Create a deceased profile and generate a unique memorial URL.</p>
         </div>
-
         <form id="memorialForm" class="stack-lg" onsubmit="return false;">
           <div class="field-grid two-up">
             <div class="field"><label for="fullName">Full Name</label><input id="fullName" type="text" placeholder="Ahmed Khan" /></div>
@@ -116,7 +128,7 @@
           </div>
           <div class="field">
             <label>Memorial Photo (optional)</label>
-            <div class="image-upload-area" id="createUploadArea">
+            <div class="image-upload-area">
               <input type="file" id="createImageFile" accept="image/*" />
               <div id="createUploadLabel">Click or drag to upload a photo</div>
               <img id="createImagePreview" class="image-preview" alt="Preview" />
@@ -131,7 +143,6 @@
             <button class="btn btn-secondary" type="button" id="autoFillDatesBtn">Auto-fill 3rd &amp; 40th Day</button>
           </div>
         </form>
-
         <div class="notice-box" id="adminNotice"></div>
         <div class="helper-box">
           Each memorial gets a unique URL like:<br /><br />
@@ -144,12 +155,12 @@
       <section class="panel">
         <div class="section-header compact">
           <h2>Saved Memorials</h2>
-          <p>Edit, export, QR code, or delete each memorial.</p>
+          <p>Edit, export, generate QR codes, or delete.</p>
         </div>
         <div class="admin-list" id="memorialList"><div class="muted-text">Loading memorials...</div></div>
         <div class="admin-mini-card mt-lg">
           <div class="section-header compact"><h3>How to use</h3></div>
-          <p class="muted-text" style="line-height:1.8;">Create a memorial, copy its unique public link, and share it with family or turn it into a QR code.</p>
+          <p class="muted-text" style="line-height:1.8;">Create a memorial, copy its unique public link, and share it with family or turn it into a QR code to display at the mosque.</p>
         </div>
       </section>
     </main>
@@ -198,17 +209,17 @@
     </div>
   </div>
 
-  <!-- QR CODE MODAL -->
+  <!-- QR MODAL -->
   <div class="modal-overlay" id="qrModal">
     <div class="modal-box" style="max-width:400px;">
       <div class="modal-header">
-        <h2>QR Code</h2>
+        <h2 id="qrModalTitle">QR Code</h2>
         <button class="modal-close" id="closeQrModal">&#x2715;</button>
       </div>
       <div class="qr-container">
         <canvas id="qrCanvas"></canvas>
         <div class="qr-url" id="qrUrlText"></div>
-        <button class="btn btn-secondary btn-download-qr" id="downloadQrBtn">Download QR Code</button>
+        <button class="btn btn-secondary" style="margin-top:14px;" id="downloadQrBtn">Download QR Code</button>
       </div>
     </div>
   </div>
@@ -217,51 +228,7 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="config.js"></script>
   <script>
-    // ── password config — change this to your password ──
-    var ADMIN_PASSWORD = "mosque2024";
-    var LS_AUTH_KEY = "memorial_admin_auth";
-
-    // ── auth ─────────────────────────────────────────────
-    function checkAuth() {
-      return localStorage.getItem(LS_AUTH_KEY) === "true";
-    }
-
-    function showAdmin() {
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("adminShell").style.display = "block";
-      loadMemorials();
-    }
-
-    function showLogin() {
-      document.getElementById("loginScreen").style.display = "flex";
-      document.getElementById("adminShell").style.display = "none";
-    }
-
-    document.getElementById("loginBtn").addEventListener("click", function () {
-      var pw = document.getElementById("passwordInput").value;
-      var err = document.getElementById("loginError");
-      if (pw === ADMIN_PASSWORD) {
-        localStorage.setItem(LS_AUTH_KEY, "true");
-        err.style.display = "none";
-        showAdmin();
-      } else {
-        err.style.display = "block";
-        document.getElementById("passwordInput").value = "";
-      }
-    });
-
-    document.getElementById("passwordInput").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") document.getElementById("loginBtn").click();
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", function () {
-      localStorage.removeItem(LS_AUTH_KEY);
-      showLogin();
-    });
-
-    if (checkAuth()) { showAdmin(); } else { showLogin(); }
-
-    // ── supabase ──────────────────────────────────────────
+    // ── Supabase client ───────────────────────────────────
     var adminClient = window.supabase.createClient(
       window.APP_CONFIG.supabaseUrl,
       window.APP_CONFIG.supabasePublishableKey
@@ -269,6 +236,80 @@
 
     var editingMemorial = null;
     var editingCampaigns = [];
+    var currentQrName = "";
+
+    // ── auth: check session on load ───────────────────────
+    async function initAuth() {
+      var sessionResult = await adminClient.auth.getSession();
+      var session = sessionResult.data && sessionResult.data.session;
+      if (session) {
+        showAdmin(session.user.email);
+      } else {
+        showLoginScreen();
+      }
+
+      // Listen for auth state changes (e.g. session expiry)
+      adminClient.auth.onAuthStateChange(function (event, session) {
+        if (event === "SIGNED_IN" && session) {
+          showAdmin(session.user.email);
+        } else if (event === "SIGNED_OUT") {
+          showLoginScreen();
+        }
+      });
+    }
+
+    function showAdmin(email) {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("adminShell").style.display = "block";
+      var badge = document.getElementById("sessionEmail");
+      if (badge) badge.textContent = email || "";
+      loadMemorials();
+    }
+
+    function showLoginScreen() {
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("adminShell").style.display = "none";
+    }
+
+    // ── login ─────────────────────────────────────────────
+    async function doLogin() {
+      var email = document.getElementById("loginEmail").value.trim();
+      var password = document.getElementById("loginPassword").value;
+      var errorEl = document.getElementById("loginError");
+      var loadingEl = document.getElementById("loginLoading");
+      var btn = document.getElementById("loginBtn");
+
+      errorEl.style.display = "none";
+      loadingEl.style.display = "block";
+      btn.disabled = true;
+
+      var result = await adminClient.auth.signInWithPassword({ email: email, password: password });
+
+      loadingEl.style.display = "none";
+      btn.disabled = false;
+
+      if (result.error) {
+        errorEl.textContent = result.error.message === "Invalid login credentials"
+          ? "Incorrect email or password. Please try again."
+          : result.error.message;
+        errorEl.style.display = "block";
+        document.getElementById("loginPassword").value = "";
+        return;
+      }
+
+      // onAuthStateChange handles the rest
+    }
+
+    // ── logout ────────────────────────────────────────────
+    async function doLogout() {
+      await adminClient.auth.signOut();
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", doLogin);
+    document.getElementById("logoutBtn").addEventListener("click", doLogout);
+    document.getElementById("loginPassword").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") doLogin();
+    });
 
     // ── helpers ───────────────────────────────────────────
     function slugify(text) {
@@ -288,7 +329,7 @@
     }
 
     function toDatetimeLocal(date) {
-      var pad = function (n) { return String(n).padStart(2, "0"); };
+      var pad = function(n) { return String(n).padStart(2, "0"); };
       return date.getFullYear() + "-" + pad(date.getMonth()+1) + "-" + pad(date.getDate()) +
         "T" + pad(date.getHours()) + ":" + pad(date.getMinutes());
     }
@@ -301,10 +342,8 @@
       var fortieth = new Date(base); fortieth.setDate(fortieth.getDate() + 40);
       document.getElementById("thirdDayDeadline").value = toDatetimeLocal(third);
       document.getElementById("fortiethDayDeadline").value = toDatetimeLocal(fortieth);
-      var tl = document.getElementById("thirdDayLabel");
-      var fl = document.getElementById("fortiethDayLabel");
-      if (tl) tl.textContent = "3rd Day Deadline (estimated — " + third.toLocaleDateString() + ")";
-      if (fl) fl.textContent = "40th Day Deadline (estimated — " + fortieth.toLocaleDateString() + ")";
+      document.getElementById("thirdDayLabel").textContent = "3rd Day Deadline (estimated — " + third.toLocaleDateString() + ")";
+      document.getElementById("fortiethDayLabel").textContent = "40th Day Deadline (estimated — " + fortieth.toLocaleDateString() + ")";
     }
 
     // ── image preview ─────────────────────────────────────
@@ -313,11 +352,11 @@
       var preview = document.getElementById(previewId);
       var label = document.getElementById(labelId);
       if (!input) return;
-      input.addEventListener("change", function () {
+      input.addEventListener("change", function() {
         var file = input.files[0];
         if (!file) return;
         var reader = new FileReader();
-        reader.onload = function (e) {
+        reader.onload = function(e) {
           preview.src = e.target.result; preview.style.display = "block";
           if (label) label.textContent = file.name;
         };
@@ -325,16 +364,16 @@
       });
     }
 
-    // ── image upload ──────────────────────────────────────
+    // ── image upload to Supabase Storage ──────────────────
     async function uploadImage(file, slug) {
       var ext = file.name.split(".").pop();
       var path = "memorials/" + slug + "-" + Date.now() + "." + ext;
-      var uploadResult = await adminClient.storage.from("memorial-images").upload(path, file, { upsert: true });
-      if (uploadResult.error) { console.error("Image upload error:", uploadResult.error); return null; }
+      var result = await adminClient.storage.from("memorial-images").upload(path, file, { upsert: true });
+      if (result.error) { console.error("Image upload error:", result.error); return null; }
       return adminClient.storage.from("memorial-images").getPublicUrl(path).data.publicUrl || null;
     }
 
-    // ── create ────────────────────────────────────────────
+    // ── create memorial ───────────────────────────────────
     async function createMemorial() {
       var fullName = document.getElementById("fullName").value.trim();
       var age = document.getElementById("age").value.trim();
@@ -346,27 +385,51 @@
       var thirdDayDeadline = document.getElementById("thirdDayDeadline").value;
       var fortiethDayDeadline = document.getElementById("fortiethDayDeadline").value;
       var imageFile = document.getElementById("createImageFile").files[0];
+
       if (!fullName) { alert("Please enter the full name."); return; }
+
       var slug = slugify(fullName);
       var imageUrl = imageFile ? await uploadImage(imageFile, slug) : null;
 
       var memorialInsert = await adminClient.from("memorials").insert({
-        slug, full_name: fullName, age: age ? parseInt(age,10) : null,
+        slug, full_name: fullName,
+        age: age ? parseInt(age, 10) : null,
         mosque_name: mosqueName || null, uk_city: ukCity || null,
         pak_city: pakCity || null, tribute: tribute || null,
         date_of_passing: dateOfPassing || null, image_url: imageUrl || null
       }).select().single();
 
-      if (memorialInsert.error) { console.error(memorialInsert.error); alert("Could not create memorial. Slug may already exist."); return; }
+      if (memorialInsert.error) {
+        console.error(memorialInsert.error);
+        alert("Could not create memorial. The name may already exist as a slug.");
+        return;
+      }
 
       var memorial = memorialInsert.data;
-      if (thirdDayDeadline) await adminClient.from("khatam_campaigns").insert({ memorial_id: memorial.id, title: "3rd Day Khatam", deadline: new Date(thirdDayDeadline).toISOString(), campaign_type: "third_day" });
-      if (fortiethDayDeadline) await adminClient.from("khatam_campaigns").insert({ memorial_id: memorial.id, title: "40th Day Khatam", deadline: new Date(fortiethDayDeadline).toISOString(), campaign_type: "fortieth_day" });
+
+      if (thirdDayDeadline) {
+        await adminClient.from("khatam_campaigns").insert({
+          memorial_id: memorial.id, title: "3rd Day Khatam",
+          deadline: new Date(thirdDayDeadline).toISOString(), campaign_type: "third_day"
+        });
+      }
+      if (fortiethDayDeadline) {
+        await adminClient.from("khatam_campaigns").insert({
+          memorial_id: memorial.id, title: "40th Day Khatam",
+          deadline: new Date(fortiethDayDeadline).toISOString(), campaign_type: "fortieth_day"
+        });
+      }
 
       var baseUrl = getBaseUrl();
       var memorialUrl = baseUrl + "index.html?slug=" + encodeURIComponent(memorial.slug);
       var totalsUrl = baseUrl + "totals.html?slug=" + encodeURIComponent(memorial.slug);
-      showNotice("<strong>Memorial created successfully.</strong><br><br>Memorial URL:<div class='link-box'>" + memorialUrl + "</div>Totals URL:<div class='link-box'>" + totalsUrl + "</div>");
+
+      showNotice(
+        "<strong>Memorial created successfully.</strong><br><br>" +
+        "Memorial URL:<div class='link-box'>" + memorialUrl + "</div>" +
+        "Totals URL:<div class='link-box'>" + totalsUrl + "</div>"
+      );
+
       document.getElementById("memorialForm").reset();
       document.getElementById("createImagePreview").style.display = "none";
       document.getElementById("createUploadLabel").textContent = "Click or drag to upload a photo";
@@ -375,18 +438,34 @@
       await loadMemorials();
     }
 
-    // ── load list ─────────────────────────────────────────
+    // ── load memorials list ───────────────────────────────
     async function loadMemorials() {
       var list = document.getElementById("memorialList");
       list.innerHTML = "<div class='muted-text'>Loading memorials...</div>";
+
       var result = await adminClient.from("memorials").select("*").order("created_at", { ascending: false });
-      if (result.error) { list.innerHTML = "<div class='muted-text'>Could not load memorials.</div>"; return; }
-      if (!result.data || !result.data.length) { list.innerHTML = "<div class='muted-text'>No memorials found yet.</div>"; return; }
+
+      if (result.error) {
+        list.innerHTML = "<div class='muted-text'>Could not load memorials.</div>";
+        console.error(result.error);
+        return;
+      }
+
+      if (!result.data || !result.data.length) {
+        list.innerHTML = "<div class='muted-text'>No memorials found yet.</div>";
+        return;
+      }
+
       var baseUrl = getBaseUrl();
-      list.innerHTML = result.data.map(function (m) {
+
+      list.innerHTML = result.data.map(function(m) {
         var memorialUrl = baseUrl + "index.html?slug=" + encodeURIComponent(m.slug);
         var totalsUrl = baseUrl + "totals.html?slug=" + encodeURIComponent(m.slug);
-        var imgHtml = m.image_url ? "<img src='" + m.image_url + "' style='width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;' />" : "";
+        var safeName = m.full_name.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+        var safeUrl = memorialUrl.replace(/'/g, "\\'");
+        var imgHtml = m.image_url
+          ? "<img src='" + m.image_url + "' style='width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;' />"
+          : "";
         return `<div class="admin-item">
           <h3>${imgHtml}${m.full_name}</h3>
           <p>Age: ${m.age ?? "-"}<br>Mosque: ${m.mosque_name ?? "-"}<br>Slug: ${m.slug}</p>
@@ -395,9 +474,9 @@
             <a class="ghost-link" href="${memorialUrl}" target="_blank">Open Memorial</a>
             <a class="ghost-link" href="${totalsUrl}" target="_blank">Open Totals</a>
             <button class="btn-edit" onclick="openEditModal('${m.id}')">Edit</button>
-            <button class="btn-qr" onclick="openQrModal('${memorialUrl}', '${m.full_name.replace(/'/g,"\\'")}')">QR Code</button>
-            <button class="btn-export" onclick="exportMemorial('${m.id}', '${m.full_name.replace(/'/g,"\\'")}')">Export CSV</button>
-            <button class="btn-delete" onclick="deleteMemorial('${m.id}', '${m.full_name.replace(/'/g,"\\'")}')">Delete</button>
+            <button class="btn-qr" onclick="openQrModal('${safeUrl}', '${safeName}')">QR Code</button>
+            <button class="btn-export" onclick="exportMemorial('${m.id}', '${safeName}')">Export CSV</button>
+            <button class="btn-delete" onclick="deleteMemorial('${m.id}', '${safeName}')">Delete</button>
           </div>
           <div class="link-box">${memorialUrl}</div>
         </div>`;
@@ -405,19 +484,16 @@
     }
 
     // ── QR code ───────────────────────────────────────────
-    var currentQrUrl = "";
-    var currentQrName = "";
-
     async function openQrModal(url, name) {
-      currentQrUrl = url;
       currentQrName = name;
+      document.getElementById("qrModalTitle").textContent = "QR Code — " + name;
       document.getElementById("qrUrlText").textContent = url;
       var canvas = document.getElementById("qrCanvas");
       await QRCode.toCanvas(canvas, url, { width: 280, margin: 2, color: { dark: "#000000", light: "#ffffff" } });
       document.getElementById("qrModal").classList.add("open");
     }
 
-    document.getElementById("downloadQrBtn").addEventListener("click", function () {
+    document.getElementById("downloadQrBtn").addEventListener("click", function() {
       var canvas = document.getElementById("qrCanvas");
       var link = document.createElement("a");
       link.download = "qr-" + (currentQrName || "memorial").replace(/\s+/g, "-").toLowerCase() + ".png";
@@ -425,14 +501,18 @@
       link.click();
     });
 
-    document.getElementById("closeQrModal").addEventListener("click", function () { document.getElementById("qrModal").classList.remove("open"); });
-    document.getElementById("qrModal").addEventListener("click", function (e) { if (e.target === this) this.classList.remove("open"); });
+    document.getElementById("closeQrModal").addEventListener("click", function() { document.getElementById("qrModal").classList.remove("open"); });
+    document.getElementById("qrModal").addEventListener("click", function(e) { if (e.target === this) this.classList.remove("open"); });
 
     // ── export CSV ────────────────────────────────────────
     async function exportMemorial(memorialId, name) {
       var participantsResult = await adminClient.from("participants").select("*").eq("memorial_id", memorialId);
       var recitationsResult = await adminClient.from("quick_recitations").select("*").eq("memorial_id", memorialId);
-      var claimsResult = await adminClient.from("khatam_claims").select("*");
+      var campaignsResult = await adminClient.from("khatam_campaigns").select("id").eq("memorial_id", memorialId);
+      var campaignIds = (campaignsResult.data || []).map(function(c) { return c.id; });
+      var claimsResult = campaignIds.length
+        ? await adminClient.from("khatam_claims").select("*").in("campaign_id", campaignIds)
+        : { data: [] };
 
       var participants = participantsResult.data || [];
       var recitations = recitationsResult.data || [];
@@ -441,24 +521,30 @@
       var participantMap = {};
       participants.forEach(function(p) { participantMap[p.id] = p.name || "Anonymous"; });
 
-      var rows = [["Type","Name","Detail","Count/Status","Date"]];
+      var rows = [["Type", "Participant", "Detail", "Count / Status", "Date"]];
 
       recitations.forEach(function(r) {
-        rows.push(["Recitation", participantMap[r.participant_id] || "Unknown", r.recitation_name, r.recitation_count, r.created_at ? new Date(r.created_at).toLocaleDateString() : ""]);
+        rows.push(["Recitation", participantMap[r.participant_id] || "Unknown",
+          r.recitation_name, r.recitation_count,
+          r.created_at ? new Date(r.created_at).toLocaleDateString() : ""]);
       });
 
       claims.forEach(function(c) {
-        rows.push(["Juz Claim", participantMap[c.participant_id] || "Unknown", "Juz " + c.juz_number, c.status, c.claimed_at ? new Date(c.claimed_at).toLocaleDateString() : ""]);
+        rows.push(["Juz Claim", participantMap[c.participant_id] || "Unknown",
+          "Juz " + c.juz_number, c.status,
+          c.claimed_at ? new Date(c.claimed_at).toLocaleDateString() : ""]);
       });
 
       var csv = rows.map(function(row) {
-        return row.map(function(cell) { return '"' + String(cell || "").replace(/"/g, '""') + '"'; }).join(",");
+        return row.map(function(cell) {
+          return '"' + String(cell == null ? "" : cell).replace(/"/g, '""') + '"';
+        }).join(",");
       }).join("\n");
 
-      var blob = new Blob([csv], { type: "text/csv" });
+      var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       var link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "memorial-" + name.replace(/\s+/g,"-").toLowerCase() + ".csv";
+      link.download = "memorial-" + name.replace(/\s+/g, "-").toLowerCase() + ".csv";
       link.click();
     }
 
@@ -466,6 +552,7 @@
     async function openEditModal(memorialId) {
       var result = await adminClient.from("memorials").select("*").eq("id", memorialId).maybeSingle();
       if (result.error || !result.data) { alert("Could not load memorial for editing."); return; }
+
       editingMemorial = result.data;
       document.getElementById("editMemorialId").value = editingMemorial.id;
       document.getElementById("editFullName").value = editingMemorial.full_name || "";
@@ -475,23 +562,38 @@
       document.getElementById("editUkCity").value = editingMemorial.uk_city || "";
       document.getElementById("editPakCity").value = editingMemorial.pak_city || "";
       document.getElementById("editTribute").value = editingMemorial.tribute || "";
+
       var preview = document.getElementById("editImagePreview");
       var label = document.getElementById("editUploadLabel");
-      if (editingMemorial.image_url) { preview.src = editingMemorial.image_url; preview.style.display = "block"; label.textContent = "Current photo — click to replace"; }
-      else { preview.style.display = "none"; label.textContent = "Click or drag to upload a photo"; }
+      if (editingMemorial.image_url) {
+        preview.src = editingMemorial.image_url;
+        preview.style.display = "block";
+        label.textContent = "Current photo — click to replace";
+      } else {
+        preview.style.display = "none";
+        label.textContent = "Click or drag to upload a photo";
+      }
+
       var campaignResult = await adminClient.from("khatam_campaigns").select("*").eq("memorial_id", memorialId);
       editingCampaigns = campaignResult.data || [];
-      var third = editingCampaigns.find(function(c){ return c.campaign_type === "third_day"; });
-      var fortieth = editingCampaigns.find(function(c){ return c.campaign_type === "fortieth_day"; });
+
+      var third = editingCampaigns.find(function(c) { return c.campaign_type === "third_day"; });
+      var fortieth = editingCampaigns.find(function(c) { return c.campaign_type === "fortieth_day"; });
       document.getElementById("editThirdDeadline").value = third && third.deadline ? toDatetimeLocal(new Date(third.deadline)) : "";
       document.getElementById("editFortiethDeadline").value = fortieth && fortieth.deadline ? toDatetimeLocal(new Date(fortieth.deadline)) : "";
+
       document.getElementById("editModal").classList.add("open");
     }
 
-    function closeEditModal() { document.getElementById("editModal").classList.remove("open"); editingMemorial = null; editingCampaigns = []; }
+    function closeEditModal() {
+      document.getElementById("editModal").classList.remove("open");
+      editingMemorial = null;
+      editingCampaigns = [];
+    }
 
     async function saveEdit() {
       if (!editingMemorial) return;
+
       var fullName = document.getElementById("editFullName").value.trim();
       var age = document.getElementById("editAge").value.trim();
       var dateOfPassing = document.getElementById("editDateOfPassing").value;
@@ -502,50 +604,78 @@
       var thirdDeadline = document.getElementById("editThirdDeadline").value;
       var fortiethDeadline = document.getElementById("editFortiethDeadline").value;
       var imageFile = document.getElementById("editImageFile").files[0];
+
       if (!fullName) { alert("Full name is required."); return; }
+
       var imageUrl = editingMemorial.image_url || null;
-      if (imageFile) { var uploaded = await uploadImage(imageFile, editingMemorial.slug); if (uploaded) imageUrl = uploaded; }
-      var updateResult = await adminClient.from("memorials").update({ full_name: fullName, age: age ? parseInt(age,10) : null, date_of_passing: dateOfPassing || null, mosque_name: mosqueName || null, uk_city: ukCity || null, pak_city: pakCity || null, tribute: tribute || null, image_url: imageUrl }).eq("id", editingMemorial.id);
+      if (imageFile) {
+        var uploaded = await uploadImage(imageFile, editingMemorial.slug);
+        if (uploaded) imageUrl = uploaded;
+      }
+
+      var updateResult = await adminClient.from("memorials").update({
+        full_name: fullName, age: age ? parseInt(age, 10) : null,
+        date_of_passing: dateOfPassing || null, mosque_name: mosqueName || null,
+        uk_city: ukCity || null, pak_city: pakCity || null,
+        tribute: tribute || null, image_url: imageUrl
+      }).eq("id", editingMemorial.id);
+
       if (updateResult.error) { console.error(updateResult.error); alert("Could not save changes."); return; }
+
       await upsertCampaign(editingMemorial.id, "third_day", "3rd Day Khatam", thirdDeadline);
       await upsertCampaign(editingMemorial.id, "fortieth_day", "40th Day Khatam", fortiethDeadline);
+
       closeEditModal();
       await loadMemorials();
       alert("Memorial updated successfully.");
     }
 
     async function upsertCampaign(memorialId, campaignType, title, deadlineLocal) {
-      var existing = editingCampaigns.find(function(c){ return c.campaign_type === campaignType; });
-      if (!deadlineLocal) { if (existing) await adminClient.from("khatam_campaigns").delete().eq("id", existing.id); return; }
+      var existing = editingCampaigns.find(function(c) { return c.campaign_type === campaignType; });
+      if (!deadlineLocal) {
+        if (existing) await adminClient.from("khatam_campaigns").delete().eq("id", existing.id);
+        return;
+      }
       var isoDeadline = new Date(deadlineLocal).toISOString();
-      if (existing) { await adminClient.from("khatam_campaigns").update({ deadline: isoDeadline }).eq("id", existing.id); }
-      else { await adminClient.from("khatam_campaigns").insert({ memorial_id: memorialId, title, deadline: isoDeadline, campaign_type: campaignType }); }
+      if (existing) {
+        await adminClient.from("khatam_campaigns").update({ deadline: isoDeadline }).eq("id", existing.id);
+      } else {
+        await adminClient.from("khatam_campaigns").insert({
+          memorial_id: memorialId, title, deadline: isoDeadline, campaign_type: campaignType
+        });
+      }
     }
 
     // ── delete ────────────────────────────────────────────
     async function deleteMemorial(memorialId, name) {
-      if (!confirm("Are you sure you want to delete the memorial for " + name + "?\n\nThis will also delete all related data. This cannot be undone.")) return;
+      if (!confirm("Are you sure you want to delete the memorial for " + name + "?\n\nThis will also delete all campaigns, participants, recitations and Juz claims. This cannot be undone.")) return;
+
       var campaigns = await adminClient.from("khatam_campaigns").select("id").eq("memorial_id", memorialId);
-      var campaignIds = (campaigns.data || []).map(function(c){ return c.id; });
+      var campaignIds = (campaigns.data || []).map(function(c) { return c.id; });
       if (campaignIds.length) await adminClient.from("khatam_claims").delete().in("campaign_id", campaignIds);
       await adminClient.from("khatam_campaigns").delete().eq("memorial_id", memorialId);
       await adminClient.from("quick_recitations").delete().eq("memorial_id", memorialId);
       await adminClient.from("participants").delete().eq("memorial_id", memorialId);
+
       var deleteResult = await adminClient.from("memorials").delete().eq("id", memorialId);
       if (deleteResult.error) { console.error(deleteResult.error); alert("Could not delete memorial."); return; }
+
       await loadMemorials();
       alert(name + " has been deleted.");
     }
 
-    // ── bindings ──────────────────────────────────────────
+    // ── wire up ───────────────────────────────────────────
     document.getElementById("createMemorialBtn").addEventListener("click", createMemorial);
     document.getElementById("autoFillDatesBtn").addEventListener("click", autoFillDates);
     document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
     document.getElementById("closeEditModal").addEventListener("click", closeEditModal);
     document.getElementById("closeEditModal2").addEventListener("click", closeEditModal);
-    document.getElementById("editModal").addEventListener("click", function(e){ if(e.target===this) closeEditModal(); });
+    document.getElementById("editModal").addEventListener("click", function(e) { if (e.target === this) closeEditModal(); });
     wireImagePreview("createImageFile", "createImagePreview", "createUploadLabel");
     wireImagePreview("editImageFile", "editImagePreview", "editUploadLabel");
+
+    // ── init ──────────────────────────────────────────────
+    initAuth();
   </script>
 </body>
 </html>
