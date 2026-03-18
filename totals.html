@@ -397,6 +397,15 @@
     document.addEventListener("DOMContentLoaded", async function(){
       await loadMemorial();
       bindRealtime();
+      // Auto-refresh fallback every 30 seconds
+      setInterval(async function() {
+        if (currentMemorial) {
+          await Promise.all([
+            loadQuickBreakdown(), loadTopReaders(),
+            loadJuzProgress(), loadRecentActivity(), loadFatihaData()
+          ]);
+        }
+      }, 30000);
     });
   </script>
   <script src="nav.js"></script>
