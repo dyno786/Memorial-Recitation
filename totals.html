@@ -274,7 +274,7 @@
 
     function getSlugFromUrl() {
       var params = new URLSearchParams(window.location.search);
-      return params.get("slug") || "ahmed-khan";
+      return params.get("slug");
     }
 
     function formatDateTime(value) {
@@ -284,6 +284,12 @@
 
     async function loadMemorial() {
       memorialSlug = getSlugFromUrl();
+
+      if (!memorialSlug) {
+        document.getElementById("monitorName").textContent = "No memorial selected";
+        document.getElementById("monitorSubtitle").textContent = "Open this page with ?slug=memorial-slug";
+        return;
+      }
 
       var result = await totalsClient
         .from("memorials")
