@@ -299,11 +299,11 @@
 
           <div class="field-grid two-up">
             <div class="field">
-              <label for="thirdDayDeadline">3rd Day Deadline</label>
+              <label for="thirdDayDeadline" id="thirdDayLabel">3rd Day Deadline</label>
               <input id="thirdDayDeadline" type="datetime-local" />
             </div>
             <div class="field">
-              <label for="fortiethDayDeadline">40th Day Deadline</label>
+              <label for="fortiethDayDeadline" id="fortiethDayLabel">40th Day Deadline</label>
               <input id="fortiethDayDeadline" type="datetime-local" />
             </div>
           </div>
@@ -517,6 +517,10 @@
       var fortieth = new Date(base); fortieth.setDate(fortieth.getDate() + 40);
       document.getElementById("thirdDayDeadline").value = toDatetimeLocal(third);
       document.getElementById("fortiethDayDeadline").value = toDatetimeLocal(fortieth);
+      var tl = document.getElementById("thirdDayLabel");
+      var fl = document.getElementById("fortiethDayLabel");
+      if (tl) tl.textContent = "3rd Day Deadline (estimated — " + third.toLocaleDateString() + ")";
+      if (fl) fl.textContent = "40th Day Deadline (estimated — " + fortieth.toLocaleDateString() + ")";
     }
 
     // ── create memorial ──────────────────────────────────────
