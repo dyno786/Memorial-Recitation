@@ -459,3 +459,11 @@ function bindFatiha() {
 document.addEventListener("DOMContentLoaded", function() {
   bindFatiha();
 });
+
+// Auto-refresh fallback every 30 seconds
+setInterval(async function() {
+  if (currentMemorial) {
+    await loadSidebarStats();
+    await loadJuzBoard();
+  }
+}, 30000);
