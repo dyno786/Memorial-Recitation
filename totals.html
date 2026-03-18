@@ -159,7 +159,7 @@
         <!-- QR CODE for mobile users to join -->
         <section class="panel qr-panel">
           <h2 class="monitor-section-title" style="margin-bottom:10px;">Join on your phone</h2>
-          <canvas id="qrCanvas"></canvas>
+          <div id="qrDiv" style="display:inline-block;"></div>
           <p class="qr-label">Scan to open the recitation page</p>
         </section>
       </div>
@@ -189,7 +189,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="config.js"></script>
   <script>
     var totalsClient = window.supabase.createClient(
@@ -209,10 +209,11 @@
 
     // ── QR code ───────────────────────────────────────────
     function generateQR() {
-      var canvas = document.getElementById("qrCanvas");
-      if (!canvas || !memorialSlug) return;
+      var el = document.getElementById("qrDiv");
+      if (!el || !memorialSlug) return;
       var url = window.location.origin + window.location.pathname.replace("totals.html","index.html") + "?slug=" + encodeURIComponent(memorialSlug);
-      QRCode.toCanvas(canvas, url, { width: 180, margin: 1, color: { dark:"#000", light:"#fff" } });
+      el.innerHTML = "";
+      new QRCode(el, { text: url, width: 180, height: 180, colorDark:"#000", colorLight:"#fff" });
     }
 
     // ── Fatiha overlay ────────────────────────────────────
