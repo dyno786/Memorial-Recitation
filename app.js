@@ -10,6 +10,7 @@ var memorialSlug = null;
 var allMemorials = [];
 
 var LS_KEY = "memorial_user_details";
+var LS_SUBMITTED_KEY = "memorial_submitted_recitations"; // duplicate prevention
 
 // ── URL helpers ───────────────────────────────────────────────
 function getSlugFromUrl() {
@@ -52,29 +53,21 @@ function showMemorialApp() {
 
 // ── localStorage user details ─────────────────────────────────
 function loadSavedDetails() {
-  try {
-    var raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) { return null; }
+  try { var raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : null; }
+  catch (e) { return null; }
 }
 
 function saveDetailsLocally(name, ukCity, pakCity, relation) {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify({ name: name, ukCity: ukCity, pakCity: pakCity, relation: relation }));
-  } catch (e) {}
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ name: name, ukCity: ukCity, pakCity: pakCity, relation: relation })); }
+  catch (e) {}
 }
 
 function populateDetailsForm() {
   var saved = loadSavedDetails();
   if (!saved) return;
-  var nameEl = document.getElementById("readerName");
-  var ukEl = document.getElementById("ukCity");
-  var pakEl = document.getElementById("pakCity");
-  var relEl = document.getElementById("relation");
-  if (nameEl) nameEl.value = saved.name || "";
-  if (ukEl) ukEl.value = saved.ukCity || "";
-  if (pakEl) pakEl.value = saved.pakCity || "";
-  if (relEl) relEl.value = saved.relation || "";
+  var f = function(id, val) { var el = document.getElementById(id); if (el) el.value = val || ""; };
+  f("readerName", saved.name); f("ukCity", saved.ukCity);
+  f("pakCity", saved.pakCity); f("relation", saved.relation);
 }
 
 function updateDetailsBadge() {
@@ -90,23 +83,37 @@ function updateDetailsBadge() {
   }
 }
 
-// ── modal helpers ─────────────────────────────────────────────
-function openModal(id) {
-  var el = document.getElementById(id);
-  if (el) el.classList.add("open");
+// ── duplicate submission tracking ─────────────────────────────
+function getSubmittedKey() {
+  return LS_SUBMITTED_KEY + "_" + (memorialSlug || "default");
 }
 
-function closeModal(id) {
-  var el = document.getElementById(id);
-  if (el) el.classList.remove("open");
+function getSubmittedRecitations() {
+  try { var raw = localStorage.getItem(getSubmittedKey()); return raw ? JSON.parse(raw) : {}; }
+  catch (e) { return {}; }
 }
+
+function markRecitationsSubmitted(names) {
+  try {
+    var submitted = getSubmittedRecitations();
+    names.forEach(function(n) { submitted[n] = true; });
+    localStorage.setItem(getSubmittedKey(), JSON.stringify(submitted));
+  } catch (e) {}
+}
+
+function getAlreadySubmitted(names) {
+  var submitted = getSubmittedRecitations();
+  return names.filter(function(n) { return submitted[n]; });
+}
+
+// ── modal helpers ─────────────────────────────────────────────
+function openModal(id) { var el = document.getElementById(id); if (el) el.classList.add("open"); }
+function closeModal(id) { var el = document.getElementById(id); if (el) el.classList.remove("open"); }
 
 function bindModalClose(overlayId, closeBtnIds) {
   var overlay = document.getElementById(overlayId);
   if (!overlay) return;
-  overlay.addEventListener("click", function (e) {
-    if (e.target === overlay) closeModal(overlayId);
-  });
+  overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(overlayId); });
   closeBtnIds.forEach(function (btnId) {
     var btn = document.getElementById(btnId);
     if (btn) btn.addEventListener("click", function () { closeModal(overlayId); });
@@ -136,19 +143,21 @@ function count(id, val) {
   updateSummary();
 }
 
+var RECITATION_ITEMS = [
+  ["Bismillah","bismillah"],["Alhamdulillah","alhamdulillah"],
+  ["Subhanallah","subhanallah"],["Astaghfirullah","astaghfirullah"],
+  ["Durood Sharif","durood"],["Surah Fatiha","fatiha"],
+  ["Surah Ikhlas","ikhlas"],["Surah Yasin","yasin"]
+];
+
 function updateSummary() {
-  var items = [
-    ["Bismillah","bismillah"],["Alhamdulillah","alhamdulillah"],
-    ["Subhanallah","subhanallah"],["Astaghfirullah","astaghfirullah"],
-    ["Durood Sharif","durood"],["Surah Fatiha","fatiha"],
-    ["Surah Ikhlas","ikhlas"],["Surah Yasin","yasin"]
-  ];
   var summary = document.getElementById("quickSummary");
   if (!summary) return;
-  var active = items.map(function (item) {
+  var submitted = getSubmittedRecitations();
+  var active = RECITATION_ITEMS.map(function (item) {
     var el = document.getElementById(item[1]);
-    return [item[0], parseInt((el && el.innerText) || "0", 10)];
-  }).filter(function (row) { return row[1] > 0; });
+    return { label: item[0], id: item[1], count: parseInt((el && el.innerText) || "0", 10) };
+  }).filter(function (row) { return row.count > 0; });
 
   if (!active.length) {
     summary.innerHTML = '<div class="summary-row"><span>No recitations added yet</span><strong>0</strong></div>';
@@ -156,16 +165,17 @@ function updateSummary() {
   }
   var total = 0;
   summary.innerHTML = active.map(function (row) {
-    total += row[1];
-    return '<div class="summary-row"><span>' + row[0] + '</span><strong>' + row[1] + '</strong></div>';
+    total += row.count;
+    var alreadyDone = submitted[row.label];
+    return '<div class="summary-row' + (alreadyDone ? ' already-submitted" title="Already submitted"' : '"') + '>' +
+      '<span>' + row.label + (alreadyDone ? ' ⚠' : '') + '</span><strong>' + row.count + '</strong></div>';
   }).join("") + '<div class="summary-row"><span>Total</span><strong>' + total + '</strong></div>';
 }
 
 // ── load memorial ─────────────────────────────────────────────
 async function getMemorialWithRetry() {
   for (var attempt = 1; attempt <= 3; attempt++) {
-    var result = await memorialClient.from("memorials").select("*")
-      .eq("slug", memorialSlug).maybeSingle();
+    var result = await memorialClient.from("memorials").select("*").eq("slug", memorialSlug).maybeSingle();
     if (!result.error && result.data) return result.data;
     await new Promise(function (resolve) { setTimeout(resolve, 400 * attempt); });
   }
@@ -185,25 +195,14 @@ async function loadMemorial() {
   memorialSlug = getSlugFromUrl();
   updateLinksForSlug();
 
-  if (!memorialSlug) {
-    showChooser();
-    await loadMemorialChooser();
-    return;
-  }
+  if (!memorialSlug) { showChooser(); await loadMemorialChooser(); return; }
 
   showMemorialApp();
-
   var memorial = await getMemorialWithRetry();
-  if (!memorial) {
-    alert("Could not load memorial.");
-    showChooser();
-    await loadMemorialChooser();
-    return;
-  }
+  if (!memorial) { alert("Could not load memorial."); showChooser(); await loadMemorialChooser(); return; }
 
   currentMemorial = memorial;
 
-  // Info bar
   var nameEl = document.querySelector(".memorial-name");
   if (nameEl) nameEl.textContent = currentMemorial.full_name || "Memorial";
 
@@ -215,7 +214,6 @@ async function loadMemorial() {
       "Mosque: " + (currentMemorial.mosque_name ?? "-");
   }
 
-  // Memorial info modal
   var modalName = document.getElementById("modalMemorialName");
   if (modalName) modalName.textContent = currentMemorial.full_name || "Memorial";
 
@@ -230,14 +228,18 @@ async function loadMemorial() {
   }
 
   var modalTribute = document.getElementById("modalTribute");
-  if (modalTribute && currentMemorial.tribute) {
-    modalTribute.textContent = currentMemorial.tribute;
+  if (modalTribute && currentMemorial.tribute) modalTribute.textContent = currentMemorial.tribute;
+
+  // WhatsApp share button
+  var waBtn = document.getElementById("whatsappShareBtn");
+  if (waBtn) {
+    var shareUrl = window.location.origin + window.location.pathname + "?slug=" + encodeURIComponent(memorialSlug);
+    var shareMsg = "Please recite and make dua for " + (currentMemorial.full_name || "the deceased") + ". Join the collective Quran Khatam here: " + shareUrl;
+    waBtn.href = "https://wa.me/?text=" + encodeURIComponent(shareMsg);
   }
 
-  // Check for existing participant in localStorage then try to re-link to DB
   await restoreParticipant();
 
-  // Campaign
   var campaignResult = await memorialClient.from("khatam_campaigns").select("*")
     .eq("memorial_id", currentMemorial.id).order("created_at", { ascending: true });
 
@@ -250,24 +252,16 @@ async function loadMemorial() {
   await loadSidebarStats();
 }
 
-// ── restore participant from localStorage ─────────────────────
+// ── restore participant ───────────────────────────────────────
 async function restoreParticipant() {
   var saved = loadSavedDetails();
   updateDetailsBadge();
   if (!saved || !currentMemorial) return;
-
-  // Try to find an existing participant row matching this person + memorial
   var name = saved.relation === "Anonymous" ? "Anonymous" : (saved.name || "");
   if (!name) return;
-
   var result = await memorialClient.from("participants").select("*")
-    .eq("memorial_id", currentMemorial.id)
-    .eq("name", name)
-    .limit(1);
-
-  if (!result.error && result.data && result.data.length) {
-    currentParticipant = result.data[0];
-  }
+    .eq("memorial_id", currentMemorial.id).eq("name", name).limit(1);
+  if (!result.error && result.data && result.data.length) currentParticipant = result.data[0];
 }
 
 // ── chooser ───────────────────────────────────────────────────
@@ -275,33 +269,19 @@ async function loadMemorialChooser() {
   var dropdown = document.getElementById("memorialDropdown");
   var openBtn = document.getElementById("openMemorialBtn");
   if (!dropdown || !openBtn) return;
-
   dropdown.innerHTML = '<option value="">Loading memorials...</option>';
   openBtn.disabled = true;
-
-  var result = await memorialClient.from("memorials").select("*")
-    .order("full_name", { ascending: true });
-
-  if (result.error) {
-    dropdown.innerHTML = '<option value="">Could not load memorials</option>';
-    return;
-  }
-
+  var result = await memorialClient.from("memorials").select("*").order("full_name", { ascending: true });
+  if (result.error) { dropdown.innerHTML = '<option value="">Could not load memorials</option>'; return; }
   allMemorials = result.data || [];
-  if (!allMemorials.length) {
-    dropdown.innerHTML = '<option value="">No memorials created yet</option>';
-    return;
-  }
-
+  if (!allMemorials.length) { dropdown.innerHTML = '<option value="">No memorials created yet</option>'; return; }
   dropdown.innerHTML = '<option value="">Select a memorial</option>' +
     allMemorials.map(function (m) {
       var label = m.full_name || m.slug || "Memorial";
       if (m.mosque_name) label += " — " + m.mosque_name;
       return '<option value="' + escapeHtml(m.slug) + '">' + escapeHtml(label) + '</option>';
     }).join("");
-
   openBtn.disabled = false;
-
   dropdown.addEventListener("change", function () { openBtn.disabled = !dropdown.value; });
   openBtn.addEventListener("click", function () {
     if (!dropdown.value) { alert("Please choose a memorial first."); return; }
@@ -312,89 +292,78 @@ async function loadMemorialChooser() {
 // ── save participant ──────────────────────────────────────────
 async function saveParticipant() {
   if (!currentMemorial) { alert("Memorial not loaded yet."); return; }
-
   var name = (document.getElementById("readerName") || {}).value || "";
   var ukCity = (document.getElementById("ukCity") || {}).value || "";
   var pakCity = (document.getElementById("pakCity") || {}).value || "";
   var relation = (document.getElementById("relation") || {}).value || "";
-
   name = name.trim(); ukCity = ukCity.trim(); pakCity = pakCity.trim();
-
-  if (!name && relation !== "Anonymous") {
-    alert("Please enter your name or choose Anonymous.");
-    return;
-  }
-
+  if (!name && relation !== "Anonymous") { alert("Please enter your name or choose Anonymous."); return; }
   var finalName = relation === "Anonymous" ? "Anonymous" : name;
-
-  // Save to localStorage
   saveDetailsLocally(name, ukCity, pakCity, relation);
   updateDetailsBadge();
-
-  // Check if a participant row already exists for this name + memorial
   var existing = await memorialClient.from("participants").select("*")
-    .eq("memorial_id", currentMemorial.id)
-    .eq("name", finalName).limit(1);
-
+    .eq("memorial_id", currentMemorial.id).eq("name", finalName).limit(1);
   if (!existing.error && existing.data && existing.data.length) {
     currentParticipant = existing.data[0];
     closeModal("detailsModal");
-    alert("Details saved.");
+    alert("Details saved. Welcome back, " + finalName + ".");
     return;
   }
-
-  // Insert new participant
   var result = await memorialClient.from("participants").insert({
-    memorial_id: currentMemorial.id,
-    name: finalName,
-    uk_city: ukCity || null,
-    pak_city: pakCity || null,
-    relation: relation || null
+    memorial_id: currentMemorial.id, name: finalName,
+    uk_city: ukCity || null, pak_city: pakCity || null, relation: relation || null
   }).select().single();
-
-  if (result.error) {
-    console.error("saveParticipant error:", result.error);
-    alert("Could not save participant.");
-    return;
-  }
-
+  if (result.error) { console.error("saveParticipant error:", result.error); alert("Could not save participant."); return; }
   currentParticipant = result.data;
   closeModal("detailsModal");
-  alert("Details saved.");
+  alert("Details saved. JazakAllah Khair.");
   await loadSidebarStats();
 }
 
-// ── submit recitations ────────────────────────────────────────
+// ── submit recitations (with duplicate prevention) ────────────
 async function submitQuickRecitations() {
   if (!currentMemorial) { alert("Memorial not loaded yet."); return; }
   if (!currentParticipant) { alert("Please save your details first."); openModal("detailsModal"); return; }
 
-  var items = [
-    ["Bismillah","bismillah"],["Alhamdulillah","alhamdulillah"],
-    ["Subhanallah","subhanallah"],["Astaghfirullah","astaghfirullah"],
-    ["Durood Sharif","durood"],["Surah Fatiha","fatiha"],
-    ["Surah Ikhlas","ikhlas"],["Surah Yasin","yasin"]
-  ];
-
-  var rows = items.map(function (item) {
+  var rows = RECITATION_ITEMS.map(function (item) {
     var el = document.getElementById(item[1]);
-    return {
-      memorial_id: currentMemorial.id,
-      participant_id: currentParticipant.id,
-      recitation_name: item[0],
-      recitation_count: parseInt((el && el.innerText) || "0", 10)
-    };
-  }).filter(function (row) { return row.recitation_count > 0; });
+    return { label: item[0], id: item[1], count: parseInt((el && el.innerText) || "0", 10) };
+  }).filter(function (row) { return row.count > 0; });
 
   if (!rows.length) { alert("Add recitations first."); return; }
 
-  var result = await memorialClient.from("quick_recitations").insert(rows);
+  // Check duplicates
+  var alreadyDone = getAlreadySubmitted(rows.map(function(r) { return r.label; }));
+  if (alreadyDone.length) {
+    var names = alreadyDone.join(", ");
+    var proceed = confirm(
+      "You have already submitted: " + names + ".\n\n" +
+      "To avoid counting the same recitations twice, these will be skipped.\n\nContinue with the remaining recitations?"
+    );
+    if (!proceed) return;
+    rows = rows.filter(function(r) { return !alreadyDone.includes(r.label); });
+    if (!rows.length) { alert("No new recitations to submit."); return; }
+  }
+
+  var insertRows = rows.map(function(r) {
+    return {
+      memorial_id: currentMemorial.id,
+      participant_id: currentParticipant.id,
+      recitation_name: r.label,
+      recitation_count: r.count
+    };
+  });
+
+  var result = await memorialClient.from("quick_recitations").insert(insertRows);
   if (result.error) { console.error("submitQuickRecitations error:", result.error); alert("Could not submit recitations."); return; }
+
+  // Mark as submitted in localStorage
+  markRecitationsSubmitted(rows.map(function(r) { return r.label; }));
 
   alert("Recitations submitted. JazakAllah Khair.");
 
-  ["bismillah","alhamdulillah","subhanallah","astaghfirullah","durood","fatiha","ikhlas","yasin"].forEach(function (id) {
-    var el = document.getElementById(id);
+  RECITATION_ITEMS.forEach(function (item) {
+    var el = document.getElementById(item[1]);
     if (el) el.innerText = "0";
   });
 
@@ -402,7 +371,7 @@ async function submitQuickRecitations() {
   await loadSidebarStats();
 }
 
-// ── Juz board ─────────────────────────────────────────────────
+// ── Juz board (with Mark as Completed) ───────────────────────
 async function loadJuzBoard() {
   var juzList = document.getElementById("juzList");
   if (!juzList) return;
@@ -424,33 +393,48 @@ async function loadJuzBoard() {
     var claim = data.find(function (x) { return x.juz_number === i; });
     var isClaimed = !!claim;
     var isCompleted = claim && claim.status === "completed";
+    var isMyJuz = claim && currentParticipant && claim.participant_id === currentParticipant.id;
 
     var card = document.createElement("div");
-    card.className = "juz-card";
+    card.className = "juz-card" + (isMyJuz ? " my-juz" : "");
+
+    var statusText = isCompleted ? "Completed ✓" : isClaimed ? (isMyJuz ? "Claimed by you" : "Already reserved") : "Available";
+    var btnClass = isCompleted ? "completed" : isClaimed ? "claimed" : "available";
+    var btnText = isCompleted ? "Completed" : (isMyJuz && !isCompleted) ? "Mark done" : isClaimed ? "Claimed" : "Claim";
+
     card.innerHTML =
-      '<div class="juz-meta"><strong>Juz ' + i + '</strong><span>' +
-      (isCompleted ? "Completed" : isClaimed ? "Already reserved" : "Available") +
-      '</span></div>' +
-      '<button type="button" class="juz-btn ' + (isClaimed ? "claimed" : "available") + '">' +
-      (isCompleted ? "Completed" : isClaimed ? "Claimed" : "Claim") + '</button>';
+      '<div class="juz-meta"><strong>Juz ' + i + '</strong><span>' + statusText + '</span></div>' +
+      '<button type="button" class="juz-btn ' + btnClass + '">' + btnText + '</button>';
 
     var btn = card.querySelector("button");
+
     if (!isClaimed && btn) {
+      // Claim juz
       (function (juzNumber) {
         btn.addEventListener("click", async function () {
           if (!currentParticipant) { alert("Save your details first."); openModal("detailsModal"); return; }
           var insertResult = await memorialClient.from("khatam_claims").insert({
-            campaign_id: currentCampaign.id,
-            participant_id: currentParticipant.id,
-            juz_number: juzNumber,
-            status: "claimed"
+            campaign_id: currentCampaign.id, participant_id: currentParticipant.id,
+            juz_number: juzNumber, status: "claimed"
           });
           if (insertResult.error) { console.error("claim error:", insertResult.error); alert("Could not claim this Juz."); return; }
-          await loadJuzBoard();
-          await loadSidebarStats();
+          await loadJuzBoard(); await loadSidebarStats();
         });
       })(i);
+    } else if (isMyJuz && !isCompleted && btn) {
+      // Mark as completed
+      (function (claimId) {
+        btn.addEventListener("click", async function () {
+          if (!confirm("Mark Juz " + i + " as completed?")) return;
+          var updateResult = await memorialClient.from("khatam_claims")
+            .update({ status: "completed", completed_at: new Date().toISOString() })
+            .eq("id", claimId);
+          if (updateResult.error) { console.error("complete error:", updateResult.error); alert("Could not mark as completed."); return; }
+          await loadJuzBoard(); await loadSidebarStats();
+        });
+      })(claim.id);
     }
+
     juzList.appendChild(card);
   }
 }
@@ -458,39 +442,26 @@ async function loadJuzBoard() {
 // ── live sidebar stats ────────────────────────────────────────
 async function loadSidebarStats() {
   if (!currentMemorial) return;
-
-  // Readers count
-  var readersResult = await memorialClient.from("participants").select("id", { count: "exact", head: true })
-    .eq("memorial_id", currentMemorial.id);
+  var readersResult = await memorialClient.from("participants")
+    .select("id", { count: "exact", head: true }).eq("memorial_id", currentMemorial.id);
   var readerCount = readersResult.count ?? 0;
 
-  // Recitations total
   var recResult = await memorialClient.from("quick_recitations")
     .select("recitation_count").eq("memorial_id", currentMemorial.id);
   var recTotal = 0;
   (recResult.data || []).forEach(function (r) { recTotal += r.recitation_count; });
 
-  // Juz stats
   var juzClaimed = 0, juzDone = 0;
   if (currentCampaign) {
-    var claimsResult = await memorialClient.from("khatam_claims").select("status")
-      .eq("campaign_id", currentCampaign.id);
-    (claimsResult.data || []).forEach(function (c) {
-      juzClaimed++;
-      if (c.status === "completed") juzDone++;
-    });
+    var claimsResult = await memorialClient.from("khatam_claims").select("status").eq("campaign_id", currentCampaign.id);
+    (claimsResult.data || []).forEach(function (c) { juzClaimed++; if (c.status === "completed") juzDone++; });
   }
 
   var set = function (id, val) { var el = document.getElementById(id); if (el) el.textContent = val; };
-  set("statReaders", readerCount);
-  set("statRecitations", recTotal);
-  set("statJuz", juzClaimed);
-  set("statJuzDone", juzDone);
+  set("statReaders", readerCount); set("statRecitations", recTotal);
+  set("statJuz", juzClaimed); set("statJuzDone", juzDone);
 
-  // Leaderboard
   await loadLeaderboard();
-
-  // Recent activity
   await loadRecentActivity();
 }
 
@@ -498,28 +469,17 @@ async function loadLeaderboard() {
   if (!currentMemorial) return;
   var list = document.getElementById("leaderboardList");
   if (!list) return;
-
-  var participantsResult = await memorialClient.from("participants").select("id, name")
-    .eq("memorial_id", currentMemorial.id);
-  var recResult = await memorialClient.from("quick_recitations")
-    .select("participant_id, recitation_count").eq("memorial_id", currentMemorial.id);
-
-  if (participantsResult.error || recResult.error) { return; }
-
+  var participantsResult = await memorialClient.from("participants").select("id, name").eq("memorial_id", currentMemorial.id);
+  var recResult = await memorialClient.from("quick_recitations").select("participant_id, recitation_count").eq("memorial_id", currentMemorial.id);
+  if (participantsResult.error || recResult.error) return;
   var totals = {};
-  (recResult.data || []).forEach(function (r) {
-    totals[r.participant_id] = (totals[r.participant_id] || 0) + r.recitation_count;
-  });
-
+  (recResult.data || []).forEach(function (r) { totals[r.participant_id] = (totals[r.participant_id] || 0) + r.recitation_count; });
   var ranked = (participantsResult.data || []).map(function (p) {
     return { name: p.name || "Anonymous", total: totals[p.id] || 0 };
   }).sort(function (a, b) { return b.total - a.total; }).slice(0, 5);
-
   if (!ranked.length || ranked.every(function (r) { return r.total === 0; })) {
-    list.innerHTML = '<div class="leaderboard-item"><span>No recitations yet</span><strong>—</strong></div>';
-    return;
+    list.innerHTML = '<div class="leaderboard-item"><span>No recitations yet</span><strong>—</strong></div>'; return;
   }
-
   list.innerHTML = ranked.map(function (r, i) {
     return '<div class="leaderboard-item"><span>' + (i + 1) + '. ' + escapeHtml(r.name) + '</span><strong>' + r.total + '</strong></div>';
   }).join("");
@@ -529,17 +489,12 @@ async function loadRecentActivity() {
   if (!currentMemorial) return;
   var list = document.getElementById("activityList");
   if (!list) return;
-
   var recResult = await memorialClient.from("quick_recitations")
-    .select("recitation_name, recitation_count, created_at")
-    .eq("memorial_id", currentMemorial.id)
+    .select("recitation_name, recitation_count, created_at").eq("memorial_id", currentMemorial.id)
     .order("created_at", { ascending: false }).limit(6);
-
   if (recResult.error || !recResult.data || !recResult.data.length) {
-    list.innerHTML = '<div class="activity-item"><span>No activity yet</span><strong>—</strong></div>';
-    return;
+    list.innerHTML = '<div class="activity-item"><span>No activity yet</span><strong>—</strong></div>'; return;
   }
-
   list.innerHTML = recResult.data.map(function (r) {
     var time = new Date(r.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     return '<div class="activity-item"><span>' + escapeHtml(r.recitation_name) + ' (' + r.recitation_count + ')</span><strong>' + time + '</strong></div>';
@@ -555,60 +510,26 @@ function bindButtons() {
   if (submitBtn) submitBtn.addEventListener("click", submitQuickRecitations);
 
   var openDetailsBtn = document.getElementById("openDetailsModalBtn");
-  if (openDetailsBtn) openDetailsBtn.addEventListener("click", function () {
-    populateDetailsForm();
-    openModal("detailsModal");
-  });
+  if (openDetailsBtn) openDetailsBtn.addEventListener("click", function () { populateDetailsForm(); openModal("detailsModal"); });
 
   var showInfoBtn = document.getElementById("showMemorialInfoBtn");
   if (showInfoBtn) showInfoBtn.addEventListener("click", function () { openModal("memorialInfoModal"); });
 
-  // Modal close buttons
   bindModalClose("memorialInfoModal", ["closeInfoModal"]);
   bindModalClose("detailsModal", ["closeDetailsModal", "cancelDetailsBtn"]);
 }
 
 // ── realtime ──────────────────────────────────────────────────
 function bindRealtime() {
-  memorialClient
-    .channel("live-khatam")
-    .on("postgres_changes", { event: "*", schema: "public", table: "khatam_claims" }, async function () {
-      await loadJuzBoard();
-      await loadSidebarStats();
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "quick_recitations" }, async function () {
-      await loadSidebarStats();
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "participants" }, async function () {
-      await loadSidebarStats();
-    })
+  memorialClient.channel("live-khatam")
+    .on("postgres_changes", { event: "*", schema: "public", table: "khatam_claims" }, async function () { await loadJuzBoard(); await loadSidebarStats(); })
+    .on("postgres_changes", { event: "*", schema: "public", table: "quick_recitations" }, async function () { await loadSidebarStats(); })
+    .on("postgres_changes", { event: "*", schema: "public", table: "participants" }, async function () { await loadSidebarStats(); })
     .subscribe();
-}
-
-// ── admin: auto-fill dates ────────────────────────────────────
-// Called from admin.html — kept here for convenience
-function adminAutoFillDates(dateInputId, thirdInputId, fortiethInputId) {
-  var dateVal = (document.getElementById(dateInputId) || {}).value;
-  if (!dateVal) { alert("Please choose the date of passing first."); return; }
-  var pad = function (n) { return String(n).padStart(2, "0"); };
-  function fmt(d) {
-    return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
-  }
-  var base = new Date(dateVal + "T12:00:00");
-  var third = new Date(base); third.setDate(third.getDate() + 3);
-  var fortieth = new Date(base); fortieth.setDate(fortieth.getDate() + 40);
-  var thirdEl = document.getElementById(thirdInputId);
-  var fortiethEl = document.getElementById(fortiethInputId);
-  if (thirdEl) { thirdEl.value = fmt(third); thirdEl.placeholder = "Estimated 3rd day"; }
-  if (fortiethEl) { fortiethEl.value = fmt(fortieth); fortiethEl.placeholder = "Estimated 40th day"; }
 }
 
 // ── init ──────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async function () {
-  bindTabs();
-  bindButtons();
-  updateSummary();
-  updateDetailsBadge();
-  await loadMemorial();
-  bindRealtime();
+  bindTabs(); bindButtons(); updateSummary(); updateDetailsBadge();
+  await loadMemorial(); bindRealtime();
 });
