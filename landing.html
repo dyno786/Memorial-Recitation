@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khatam — Islamic Memorial & Esaal-e-Sawab Platform</title>
+  <meta name="description" content="Organise Quran Khatam, track recitations and unite your community in Esaal-e-Sawab for your loved ones." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #03110f; color: #f5f5f0; font-family: Arial, Helvetica, sans-serif; }
+
+    /* ── hero ── */
+    .hero {
+      min-height: 92vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 60px 24px 80px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(202,168,92,.12) 0%, transparent 70%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ""; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23caa85c' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .hero-bismillah { font-size: clamp(16px,3vw,22px); color: #caa85c; margin-bottom: 20px; letter-spacing: 2px; direction: rtl; }
+    .hero-eyebrow { color: #caa85c; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 16px; }
+    .hero h1 { font-size: clamp(32px,6vw,68px); margin: 0 0 16px; line-height: 1.1; max-width: 800px; }
+    .hero h1 em { color: #caa85c; font-style: normal; }
+    .hero-sub { font-size: clamp(16px,2vw,20px); color: #c9c7b9; max-width: 600px; line-height: 1.7; margin: 0 0 32px; }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-bottom: 48px; }
+    .hero-cta-primary { background: #caa85c; color: #111; border: none; border-radius: 14px; padding: 16px 32px; font-size: 16px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+    .hero-cta-primary:hover { background: #d4b46a; }
+    .hero-cta-secondary { background: transparent; color: #f5f5f0; border: 1px solid rgba(255,255,255,.2); border-radius: 14px; padding: 16px 32px; font-size: 16px; cursor: pointer; text-decoration: none; display: inline-block; }
+    .hero-cta-secondary:hover { background: rgba(255,255,255,.06); }
+    .hero-stats { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
+    .hero-stat { text-align: center; }
+    .hero-stat-num { font-size: 32px; font-weight: bold; color: #caa85c; display: block; }
+    .hero-stat-label { font-size: 13px; color: #c9c7b9; }
+
+    /* ── story section ── */
+    .story-section { padding: 80px 24px; max-width: 800px; margin: 0 auto; text-align: center; }
+    .story-section .eyebrow { color: #caa85c; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 16px; }
+    .story-section h2 { font-size: clamp(24px,4vw,40px); margin: 0 0 24px; line-height: 1.2; }
+    .story-section p { font-size: 17px; color: #c9c7b9; line-height: 1.9; margin: 0 0 20px; }
+    .story-section p strong { color: #f5f5f0; }
+    .story-quote { margin: 32px 0; padding: 24px 28px; background: rgba(202,168,92,.08); border: 1px solid rgba(202,168,92,.25); border-radius: 18px; font-style: italic; color: #e4decb; font-size: 16px; line-height: 1.8; }
+    .story-quote cite { display: block; margin-top: 12px; font-style: normal; font-size: 13px; color: #caa85c; font-weight: bold; }
+
+    /* ── how it works ── */
+    .how-section { padding: 80px 24px; background: rgba(255,255,255,.015); }
+    .how-inner { max-width: 1100px; margin: 0 auto; }
+    .section-head { text-align: center; margin-bottom: 48px; }
+    .section-head .eyebrow { color: #caa85c; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
+    .section-head h2 { font-size: clamp(24px,4vw,40px); margin: 0; }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .step-card { background: linear-gradient(135deg,#0d1e18,#10241d); border: 1px solid rgba(255,255,255,.06); border-radius: 20px; padding: 28px 24px; text-align: center; }
+    .step-num { width: 44px; height: 44px; border-radius: 50%; background: rgba(202,168,92,.15); border: 1px solid rgba(202,168,92,.3); color: #caa85c; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .step-icon { font-size: 32px; margin-bottom: 12px; }
+    .step-card h3 { font-size: 18px; margin: 0 0 10px; }
+    .step-card p { font-size: 14px; color: #c9c7b9; line-height: 1.7; margin: 0; }
+
+    /* ── features ── */
+    .features-section { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature-card { background: linear-gradient(135deg,#0d1e18,#10241d); border: 1px solid rgba(255,255,255,.06); border-radius: 18px; padding: 24px; }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 16px; margin: 0 0 8px; }
+    .feature-card p { font-size: 13px; color: #c9c7b9; line-height: 1.7; margin: 0; }
+
+    /* ── who it's for ── */
+    .who-section { padding: 80px 24px; background: rgba(255,255,255,.015); }
+    .who-inner { max-width: 900px; margin: 0 auto; }
+    .who-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
+    .who-card { background: linear-gradient(135deg,#0d1e18,#10241d); border: 1px solid rgba(255,255,255,.08); border-radius: 20px; padding: 28px; }
+    .who-card.mosque { border-color: rgba(202,168,92,.3); }
+    .who-card h3 { font-size: 20px; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+    .who-card ul { margin: 0; padding: 0 0 0 18px; color: #c9c7b9; font-size: 14px; line-height: 2; }
+    .who-card .who-cta { display: inline-block; margin-top: 18px; padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: bold; text-decoration: none; }
+    .who-card.public .who-cta { background: rgba(255,255,255,.08); color: #f5f5f0; }
+    .who-card.mosque .who-cta { background: rgba(202,168,92,.15); color: #caa85c; border: 1px solid rgba(202,168,92,.3); }
+
+    /* ── hadith ── */
+    .hadith-section { padding: 80px 24px; text-align: center; max-width: 700px; margin: 0 auto; }
+    .hadith-arabic { font-size: clamp(20px,3vw,32px); color: #caa85c; line-height: 1.8; margin-bottom: 16px; direction: rtl; }
+    .hadith-english { font-size: 17px; color: #c9c7b9; font-style: italic; line-height: 1.8; margin-bottom: 10px; }
+    .hadith-ref { font-size: 13px; color: #caa85c; font-weight: bold; }
+
+    /* ── cta section ── */
+    .cta-section { padding: 80px 24px; text-align: center; background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(202,168,92,.1) 0%, transparent 70%); }
+    .cta-section h2 { font-size: clamp(24px,4vw,44px); margin: 0 0 16px; }
+    .cta-section p { font-size: 17px; color: #c9c7b9; margin: 0 0 32px; }
+
+    /* ── footer ── */
+    .site-footer { padding: 40px 24px; border-top: 1px solid rgba(255,255,255,.06); text-align: center; color: #5a7a6a; font-size: 13px; line-height: 1.8; }
+    .site-footer a { color: #caa85c; }
+
+    /* ── id anchors ── */
+    #how-it-works, #pricing, #about { scroll-margin-top: 70px; }
+
+    @media (max-width: 768px) {
+      .steps-grid, .features-grid { grid-template-columns: 1fr; }
+      .who-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+    <p class="hero-eyebrow">Esaal-e-Sawab &amp; Quran Khatam Platform</p>
+    <h1>Honour your loved ones<br />with <em>collective recitation</em></h1>
+    <p class="hero-sub">
+      A beautiful, simple way for families and mosques to organise Quran Khatam,
+      track Esaal-e-Sawab recitations, and unite communities in dua for the deceased.
+    </p>
+    <div class="hero-actions">
+      <a href="register.html" class="hero-cta-primary">Create a free account</a>
+      <a href="login.html" class="hero-cta-secondary">Sign in</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-num">30</span><span class="hero-stat-label">Juz tracking</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">8+</span><span class="hero-stat-label">Recitation types</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">Live</span><span class="hero-stat-label">Realtime updates</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">Free</span><span class="hero-stat-label">To get started</span></div>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="story-section" id="about">
+    <p class="eyebrow">Our story</p>
+    <h2>Built in memory.<br />Shared with love.</h2>
+    <p>
+      This platform was created after the passing of <strong>my mother and my wife</strong> —
+      two of the most beloved people in my life. When they passed, I wanted to do something meaningful.
+      I wanted to organise the community, bring people together, and make it easy for everyone to
+      contribute their recitations and duas in their memory.
+    </p>
+    <p>
+      But organising it was hard. People didn't know which Juz had been claimed.
+      Recitations were being done but never tracked. There was no central place for the family
+      to see the love pouring in. So I built one.
+    </p>
+    <div class="story-quote">
+      "In loving memory of my mother and my wife — offered as Sadaqah Jariyah.
+      May Allah grant them the highest place in Jannah, and may every recitation made
+      through this platform reach them. Ameen."
+      <cite>— The founder</cite>
+    </div>
+    <p>
+      What started as something personal has grown into a platform for <strong>all Muslim families</strong>
+      and mosques. Because every family deserves a beautiful, dignified way to honour their loved ones —
+      and every recitation deserves to be counted.
+    </p>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how-it-works">
+    <div class="how-inner">
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2>Simple for everyone</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon">📝</div>
+          <div class="step-num">1</div>
+          <h3>Create a memorial</h3>
+          <p>Enter the name of the deceased, mosque details and set the 3rd and 40th day khatam deadlines.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon">🔗</div>
+          <div class="step-num">2</div>
+          <h3>Share the link</h3>
+          <p>Share a unique link or QR code via WhatsApp with family, friends and the community.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon">🤲</div>
+          <div class="step-num">3</div>
+          <h3>Recite together</h3>
+          <p>Everyone claims their Juz, logs their recitations, and watches the khatam complete in realtime.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section">
+    <div class="section-head">
+      <p class="eyebrow">Features</p>
+      <h2>Everything you need</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">📖</div><h3>Quran Khatam board</h3><p>All 30 Juz visible at once. Claim yours, mark it complete, see who's doing what — live.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔢</div><h3>Recitation counters</h3><p>Track Bismillah, Durood Sharif, Surah Fatiha, Yasin and more with one tap. Instantly saved.</p></div>
+      <div class="feature-card"><div class="feature-icon">📺</div><h3>Live TV display</h3><p>Put the totals screen on a TV at the mosque. Everyone sees progress updating in realtime.</p></div>
+      <div class="feature-card"><div class="feature-icon">🤲</div><h3>Collective Fatiha</h3><p>Request a collective Fatiha from your phone. It appears on the TV screen for all to recite together.</p></div>
+      <div class="feature-card"><div class="feature-icon">📱</div><h3>WhatsApp sharing</h3><p>Share the memorial link directly to WhatsApp groups with one tap. No app download needed.</p></div>
+      <div class="feature-card"><div class="feature-icon">🏆</div><h3>Leaderboard</h3><p>See the most active readers and celebrate community contributions.</p></div>
+      <div class="feature-card"><div class="feature-icon">📊</div><h3>Live statistics</h3><p>Total readers, recitations, Juz claimed and completed — all updating in realtime.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔒</div><h3>Secure &amp; private</h3><p>Your data is stored securely. Only people with the link can access a memorial.</p></div>
+      <div class="feature-card"><div class="feature-icon">🕌</div><h3>Mosque tools</h3><p>Mosques get additional tools — funeral announcements, poster generation and community management.</p></div>
+    </div>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section class="who-section" id="pricing">
+    <div class="who-inner">
+      <div class="section-head">
+        <p class="eyebrow">Who it's for</p>
+        <h2>For families and mosques</h2>
+      </div>
+      <div class="who-grid">
+        <div class="who-card public">
+          <h3>🤲 Families &amp; individuals</h3>
+          <ul>
+            <li>Create a memorial for a loved one</li>
+            <li>Organise Quran Khatam (3rd, 40th day, yearly)</li>
+            <li>Share with family via WhatsApp</li>
+            <li>Track all recitations in one place</li>
+            <li>Request collective Fatiha</li>
+            <li>Free to get started</li>
+          </ul>
+          <a href="register.html" class="who-cta">Create free account →</a>
+        </div>
+        <div class="who-card mosque">
+          <h3>🕌 Mosques &amp; Islamic centres</h3>
+          <ul>
+            <li>Manage multiple memorials</li>
+            <li>Post funeral announcements</li>
+            <li>Generate printable posters with QR codes</li>
+            <li>Display live totals on mosque TV screen</li>
+            <li>Multiple admin accounts</li>
+            <li>Community analytics</li>
+          </ul>
+          <a href="register.html" class="who-cta">Register your mosque →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HADITH -->
+  <section class="hadith-section">
+    <div class="hadith-arabic">إِذَا مَاتَ الْإِنْسَانُ انْقَطَعَ عَنْهُ عَمَلُهُ إِلَّا مِنْ ثَلَاثَةٍ</div>
+    <p class="hadith-english">
+      "When a person dies, all their deeds come to an end except three:
+      ongoing charity, beneficial knowledge, or a righteous child who prays for them."
+    </p>
+    <p class="hadith-ref">— Sahih Muslim</p>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Begin your first memorial today</h2>
+    <p>Free to create. Takes 2 minutes. Your loved ones deserve to be remembered.</p>
+    <div class="hero-actions">
+      <a href="register.html" class="hero-cta-primary">Create a free account</a>
+      <a href="login.html" class="hero-cta-secondary">I already have an account</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p style="font-size:20px;margin-bottom:8px;">🤲</p>
+    <p>Built with love, in memory of those we've lost.<br />
+    May Allah grant them Jannah al-Firdaus. Ameen.</p>
+    <p style="margin-top:16px;">
+      <a href="register.html">Register</a> &nbsp;·&nbsp;
+      <a href="login.html">Sign in</a> &nbsp;·&nbsp;
+      <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
+      <a href="#">Terms of Service</a>
+    </p>
+    <p style="margin-top:12px;color:#3a5a4a;">© 2026 Khatam Platform. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="nav.js"></script>
+</body>
+</html>
