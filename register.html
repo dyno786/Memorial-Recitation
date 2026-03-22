@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — Memorial App</title>
+  <meta name="theme-color" content="#03110f" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; background:#03110f; }
+
+    .reg-shell { width:min(520px,100%); }
+
+    .reg-logo { text-align:center; margin-bottom:28px; }
+    .reg-logo .eyebrow { color:#caa85c; font-size:13px; margin:0 0 6px; }
+    .reg-logo h1 { font-size:28px; margin:0; }
+    .reg-logo p { color:#c9c7b9; font-size:14px; margin:8px 0 0; }
+
+    /* type selector */
+    .type-selector { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
+    .type-card { border-radius:16px; padding:18px 14px; text-align:center; cursor:pointer; border:2px solid rgba(255,255,255,.06); background:linear-gradient(90deg,#0d1e18,#10241d); transition:border-color .2s, background .2s; user-select:none; }
+    .type-card:hover { border-color:rgba(202,168,92,.3); }
+    .type-card.selected { border-color:#caa85c; background:rgba(202,168,92,.08); }
+    .type-card .type-icon { font-size:28px; margin-bottom:8px; }
+    .type-card .type-name { font-size:15px; font-weight:bold; margin:0 0 4px; }
+    .type-card .type-desc { font-size:12px; color:#c9c7b9; line-height:1.5; margin:0; }
+    .type-card.selected .type-name { color:#caa85c; }
+
+    /* form */
+    .reg-panel { background:linear-gradient(90deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.06); border-radius:22px; padding:28px; }
+
+    .reg-panel h2 { margin:0 0 6px; font-size:20px; }
+    .reg-panel .sub { color:#c9c7b9; font-size:13px; margin:0 0 22px; line-height:1.6; }
+
+    .field { margin-bottom:16px; }
+    .field label { display:block; font-size:13px; color:#c9c7b9; margin-bottom:6px; }
+    .field label .opt { color:#666; font-size:11px; margin-left:4px; }
+    .field input, .field select { width:100%; border:none; outline:none; border-radius:12px; padding:13px 14px; background:#1a3028; color:#fff; font-size:15px; box-sizing:border-box; }
+    .field input:focus, .field select:focus { box-shadow:0 0 0 2px rgba(202,168,92,.4); }
+    .field input::placeholder { color:#5a7a6a; }
+
+    .two-up { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+    /* mosque notice */
+    .mosque-notice { display:none; margin-bottom:16px; padding:14px 16px; border-radius:14px; background:rgba(202,168,92,.08); border:1px solid rgba(202,168,92,.28); color:#e4decb; font-size:13px; line-height:1.7; }
+    .mosque-notice.show { display:block; }
+
+    /* opt-in */
+    .opt-in-box { background:rgba(255,255,255,.03); border-radius:14px; padding:16px; margin-bottom:20px; }
+    .opt-in-row { display:flex; gap:12px; align-items:flex-start; margin-bottom:10px; }
+    .opt-in-row:last-child { margin-bottom:0; }
+    .opt-in-row input[type="checkbox"] { width:18px; height:18px; flex-shrink:0; margin-top:2px; accent-color:#caa85c; cursor:pointer; }
+    .opt-in-row label { font-size:13px; color:#c9c7b9; line-height:1.6; cursor:pointer; }
+    .opt-in-row label strong { color:#f5f5f0; }
+    .opt-in-row label a { color:#caa85c; text-decoration:none; }
+
+    /* password strength */
+    .pw-strength { margin-top:6px; height:4px; border-radius:999px; background:#173026; overflow:hidden; }
+    .pw-strength-fill { height:100%; border-radius:999px; transition:width .3s, background .3s; width:0%; }
+
+    /* submit */
+    .reg-btn { width:100%; padding:15px; border:none; border-radius:14px; background:#caa85c; color:#111; font-size:16px; font-weight:bold; cursor:pointer; margin-bottom:14px; transition:background .2s; }
+    .reg-btn:hover { background:#d9bc72; }
+    .reg-btn:disabled { background:#3a3a2a; color:#666; cursor:not-allowed; }
+
+    .reg-error { display:none; padding:12px 14px; background:rgba(232,112,112,.1); border:1px solid rgba(232,112,112,.3); border-radius:12px; color:#e87070; font-size:13px; margin-bottom:14px; line-height:1.6; }
+    .reg-error.show { display:block; }
+
+    .reg-success { display:none; padding:16px; background:rgba(61,214,140,.1); border:1px solid rgba(61,214,140,.3); border-radius:12px; color:#3dd68c; font-size:14px; margin-bottom:14px; line-height:1.7; text-align:center; }
+    .reg-success.show { display:block; }
+
+    .login-link { text-align:center; font-size:13px; color:#c9c7b9; margin-top:8px; }
+    .login-link a { color:#caa85c; text-decoration:none; }
+
+    /* tabs inside form */
+    .form-tabs { display:flex; gap:10px; margin-bottom:20px; }
+    .form-tab { flex:1; padding:10px; border-radius:12px; text-align:center; font-size:14px; font-weight:bold; cursor:pointer; background:#11241d; color:#c9c7b9; border:none; transition:background .2s, color .2s; }
+    .form-tab.active { background:#caa85c; color:#111; }
+
+    /* divider */
+    .divider { display:flex; align-items:center; gap:12px; margin:18px 0; color:#5a7a6a; font-size:12px; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.06); }
+
+    @media(max-width:480px) { .two-up { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+  <div class="reg-shell">
+
+    <div class="reg-logo">
+      <p class="eyebrow">Islamic Memorial Platform</p>
+      <h1>Create your account</h1>
+      <p>Join thousands of families keeping the memory of their loved ones alive through recitation and prayer.</p>
+    </div>
+
+    <!-- Type selector -->
+    <div class="type-selector">
+      <div class="type-card selected" id="typePublic" onclick="selectType('public')">
+        <div class="type-icon">🤲</div>
+        <p class="type-name">General Public</p>
+        <p class="type-desc">For families running a personal memorial or khatam</p>
+      </div>
+      <div class="type-card" id="typeMosque" onclick="selectType('mosque')">
+        <div class="type-icon">🕌</div>
+        <p class="type-name">Mosque</p>
+        <p class="type-desc">For mosques managing funeral announcements and community memorials</p>
+      </div>
+    </div>
+
+    <div class="reg-panel">
+
+      <!-- Mosque pending notice -->
+      <div class="mosque-notice" id="mosqueNotice">
+        🕌 <strong>Mosque accounts require approval.</strong> After registering, your account will be reviewed within 24 hours. You'll receive an email once approved and can then access all mosque features.
+      </div>
+
+      <div class="form-tabs">
+        <button class="form-tab active" id="tabRegister" onclick="showTab('register')">Register</button>
+        <button class="form-tab" id="tabLogin" onclick="showTab('login')">Sign in</button>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="registerForm">
+        <div class="two-up">
+          <div class="field">
+            <label for="regName">Full name</label>
+            <input id="regName" type="text" placeholder="Ahmed Khan" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="regPhone">Phone <span class="opt">(optional)</span></label>
+            <input id="regPhone" type="tel" placeholder="+44 7700 000000" autocomplete="tel" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="regEmail">Email address</label>
+          <input id="regEmail" type="email" placeholder="ahmed@example.com" autocomplete="email" />
+        </div>
+
+        <div class="two-up">
+          <div class="field">
+            <label for="regCity">City</label>
+            <input id="regCity" type="text" placeholder="Leeds" />
+          </div>
+          <div class="field">
+            <label for="regMosque">Mosque you attend <span class="opt">(optional)</span></label>
+            <input id="regMosque" type="text" placeholder="Leeds Islamic Centre" />
+          </div>
+        </div>
+
+        <!-- Mosque only field -->
+        <div class="field" id="mosqueOrgField" style="display:none;">
+          <label for="regMosqueOrg">Mosque / organisation name</label>
+          <input id="regMosqueOrg" type="text" placeholder="Leeds Grand Mosque" />
+        </div>
+
+        <div class="field">
+          <label for="regPassword">Password</label>
+          <input id="regPassword" type="password" placeholder="At least 8 characters" autocomplete="new-password" oninput="checkPasswordStrength(this.value)" />
+          <div class="pw-strength"><div class="pw-strength-fill" id="pwFill"></div></div>
+        </div>
+
+        <div class="field">
+          <label for="regPasswordConfirm">Confirm password</label>
+          <input id="regPasswordConfirm" type="password" placeholder="Repeat password" autocomplete="new-password" />
+        </div>
+
+        <!-- Consent checkboxes -->
+        <div class="opt-in-box">
+          <div class="opt-in-row">
+            <input type="checkbox" id="consentTerms" />
+            <label for="consentTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. <strong>Required.</strong></label>
+          </div>
+          <div class="opt-in-row">
+            <input type="checkbox" id="consentMarketing" />
+            <label for="consentMarketing">I'd like to receive updates, offers and news from the platform and selected partners. You can unsubscribe at any time. <span style="color:#5a7a6a;">(Optional)</span></label>
+          </div>
+          <div class="opt-in-row">
+            <input type="checkbox" id="consentDiscounts" />
+            <label for="consentDiscounts">I'd like to be notified about exclusive discounts and rewards from partner businesses when I reach recitation milestones. <span style="color:#5a7a6a;">(Optional)</span></label>
+          </div>
+        </div>
+
+        <div class="reg-error" id="regError"></div>
+        <div class="reg-success" id="regSuccess"></div>
+
+        <button class="reg-btn" id="regBtn" onclick="doRegister()">Create account</button>
+        <div class="login-link">Already have an account? <a href="#" onclick="showTab('login');return false;">Sign in</a></div>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="loginForm" style="display:none;">
+        <div class="field">
+          <label for="loginEmail">Email address</label>
+          <input id="loginEmail" type="email" placeholder="ahmed@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <div class="reg-error" id="loginError"></div>
+        <button class="reg-btn" id="loginBtn" onclick="doLogin()">Sign in</button>
+        <div class="login-link"><a href="#" onclick="doForgotPassword();return false;">Forgot your password?</a></div>
+        <div class="divider">or</div>
+        <div class="login-link">Don't have an account? <a href="#" onclick="showTab('register');return false;">Register free</a></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    var client = window.supabase.createClient(
+      window.APP_CONFIG.supabaseUrl,
+      window.APP_CONFIG.supabasePublishableKey
+    );
+
+    var currentType = "public";
+
+    // ── type selector ─────────────────────────────────────
+    function selectType(type) {
+      currentType = type;
+      document.getElementById("typePublic").classList.toggle("selected", type === "public");
+      document.getElementById("typeMosque").classList.toggle("selected", type === "mosque");
+      document.getElementById("mosqueNotice").classList.toggle("show", type === "mosque");
+      document.getElementById("mosqueOrgField").style.display = type === "mosque" ? "block" : "none";
+    }
+
+    // ── tabs ──────────────────────────────────────────────
+    function showTab(tab) {
+      document.getElementById("registerForm").style.display = tab === "register" ? "block" : "none";
+      document.getElementById("loginForm").style.display = tab === "login" ? "block" : "none";
+      document.getElementById("tabRegister").classList.toggle("active", tab === "register");
+      document.getElementById("tabLogin").classList.toggle("active", tab === "login");
+    }
+
+    // ── password strength ─────────────────────────────────
+    function checkPasswordStrength(pw) {
+      var fill = document.getElementById("pwFill");
+      var score = 0;
+      if (pw.length >= 8) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      var colours = ["#e87070","#e8a870","#caa85c","#3dd68c"];
+      var widths = ["25%","50%","75%","100%"];
+      fill.style.width = pw.length ? widths[score-1] || "10%" : "0%";
+      fill.style.background = pw.length ? colours[score-1] || "#e87070" : "transparent";
+    }
+
+    function showError(id, msg) {
+      var el = document.getElementById(id);
+      el.textContent = msg; el.classList.add("show");
+    }
+    function clearError(id) {
+      var el = document.getElementById(id);
+      el.classList.remove("show");
+    }
+
+    // ── register ──────────────────────────────────────────
+    async function doRegister() {
+      clearError("regError");
+      var name     = document.getElementById("regName").value.trim();
+      var email    = document.getElementById("regEmail").value.trim();
+      var phone    = document.getElementById("regPhone").value.trim();
+      var city     = document.getElementById("regCity").value.trim();
+      var mosque   = document.getElementById("regMosque").value.trim();
+      var mosqueOrg= document.getElementById("regMosqueOrg").value.trim();
+      var password = document.getElementById("regPassword").value;
+      var confirm  = document.getElementById("regPasswordConfirm").value;
+      var terms    = document.getElementById("consentTerms").checked;
+      var marketing= document.getElementById("consentMarketing").checked;
+      var discounts= document.getElementById("consentDiscounts").checked;
+
+      if (!name)  { showError("regError","Please enter your full name."); return; }
+      if (!email) { showError("regError","Please enter your email address."); return; }
+      if (!city)  { showError("regError","Please enter your city."); return; }
+      if (password.length < 8) { showError("regError","Password must be at least 8 characters."); return; }
+      if (password !== confirm) { showError("regError","Passwords do not match."); return; }
+      if (!terms) { showError("regError","You must agree to the Terms of Service to continue."); return; }
+      if (currentType === "mosque" && !mosqueOrg) { showError("regError","Please enter your mosque or organisation name."); return; }
+
+      var btn = document.getElementById("regBtn");
+      btn.disabled = true; btn.textContent = "Creating account...";
+
+      var signUpResult = await client.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: name,
+            account_type: currentType
+          }
+        }
+      });
+
+      if (signUpResult.error) {
+        showError("regError", signUpResult.error.message);
+        btn.disabled = false; btn.textContent = "Create account";
+        return;
+      }
+
+      var userId = signUpResult.data.user && signUpResult.data.user.id;
+
+      // Update profile with extra fields
+      if (userId) {
+        await client.from("profiles").upsert({
+          id: userId,
+          full_name: name,
+          email: email,
+          phone: phone || null,
+          city: city,
+          mosque_name: currentType === "mosque" ? mosqueOrg : (mosque || null),
+          account_type: currentType,
+          mosque_status: currentType === "mosque" ? "pending" : null,
+          marketing_opt_in: marketing || discounts
+        });
+      }
+
+      btn.disabled = false; btn.textContent = "Create account";
+
+      var successMsg = currentType === "mosque"
+        ? "✓ Mosque account created! Please check your email to verify your address. Your account will then be reviewed and approved within 24 hours."
+        : "✓ Account created! Please check your email to verify your address, then you can sign in.";
+
+      var successEl = document.getElementById("regSuccess");
+      successEl.textContent = successMsg;
+      successEl.classList.add("show");
+
+      document.getElementById("registerForm").querySelectorAll("input").forEach(function(el){ el.value=""; });
+      document.getElementById("consentTerms").checked = false;
+      document.getElementById("consentMarketing").checked = false;
+      document.getElementById("consentDiscounts").checked = false;
+    }
+
+    // ── login ─────────────────────────────────────────────
+    async function doLogin() {
+      clearError("loginError");
+      var email    = document.getElementById("loginEmail").value.trim();
+      var password = document.getElementById("loginPassword").value;
+      if (!email || !password) { showError("loginError","Please enter your email and password."); return; }
+
+      var btn = document.getElementById("loginBtn");
+      btn.disabled = true; btn.textContent = "Signing in...";
+
+      var result = await client.auth.signInWithPassword({ email, password });
+
+      btn.disabled = false; btn.textContent = "Sign in";
+
+      if (result.error) {
+        showError("loginError", result.error.message === "Invalid login credentials"
+          ? "Incorrect email or password." : result.error.message);
+        return;
+      }
+
+      // Check account type and redirect
+      var profile = await client.from("profiles").select("*").eq("id", result.data.user.id).maybeSingle();
+      var p = profile.data;
+
+      if (p && p.account_type === "mosque") {
+        if (p.mosque_status === "pending") {
+          await client.auth.signOut();
+          showError("loginError","Your mosque account is pending approval. You'll receive an email once it's approved.");
+          return;
+        }
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    }
+
+    // ── forgot password ───────────────────────────────────
+    async function doForgotPassword() {
+      var email = document.getElementById("loginEmail").value.trim();
+      if (!email) { showError("loginError","Enter your email address above first."); return; }
+      var r = await client.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/register.html" });
+      if (r.error) { showError("loginError", r.error.message); return; }
+      showError("loginError","✓ Password reset email sent. Check your inbox.");
+      document.getElementById("loginError").style.color = "#3dd68c";
+    }
+
+    // ── check if already logged in ────────────────────────
+    client.auth.getSession().then(function(result) {
+      if (result.data && result.data.session) {
+        client.from("profiles").select("account_type").eq("id", result.data.session.user.id).maybeSingle().then(function(p) {
+          if (p.data && p.data.account_type === "mosque") {
+            window.location.href = "admin.html";
+          } else {
+            window.location.href = "index.html";
+          }
+        });
+      }
+    });
+
+    // Enter key on login
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        var loginVisible = document.getElementById("loginForm").style.display !== "none";
+        if (loginVisible) doLogin();
+      }
+    });
+  </script>
+</body>
+</html>

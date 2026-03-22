@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mosque Approvals</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .shell { width:min(900px,calc(100% - 32px)); margin:0 auto; padding:24px 0 90px; }
+    .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .login-box { background:linear-gradient(90deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.08); border-radius:22px; padding:36px; width:min(420px,100%); text-align:center; }
+    .login-box h1 { margin:0 0 6px; font-size:24px; }
+    .login-box p { color:#c9c7b9; margin:0 0 20px; font-size:14px; }
+    .login-box .field { text-align:left; margin-bottom:14px; }
+    .login-box .field label { display:block; font-size:13px; color:#c9c7b9; margin-bottom:6px; }
+    .login-box .field input { width:100%; border:none; outline:none; border-radius:12px; padding:13px 14px; background:#1a3028; color:#fff; font-size:15px; box-sizing:border-box; }
+    .login-error { color:#e87070; font-size:13px; margin-top:10px; display:none; }
+
+    /* app cards */
+    .app-card { background:linear-gradient(90deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.06); border-radius:18px; padding:22px; margin-bottom:14px; }
+    .app-card.pending  { border-left:4px solid #caa85c; }
+    .app-card.approved { border-left:4px solid #3dd68c; }
+    .app-card.rejected { border-left:4px solid #e87070; opacity:.7; }
+    .app-name { font-size:20px; font-weight:bold; margin:0 0 4px; }
+    .app-meta { font-size:13px; color:#c9c7b9; line-height:1.8; margin:0 0 14px; }
+    .app-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .btn-approve { background:#173026; color:#3dd68c; border:1px solid rgba(61,214,140,.3); border-radius:10px; padding:9px 16px; font-size:13px; font-weight:bold; cursor:pointer; }
+    .btn-approve:hover { background:#1f3d2e; }
+    .btn-reject  { background:#2a1a1a; color:#e87070; border:1px solid rgba(232,112,112,.3); border-radius:10px; padding:9px 16px; font-size:13px; font-weight:bold; cursor:pointer; }
+    .btn-reject:hover { background:#3a2020; }
+    .status-pill { display:inline-block; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:bold; }
+    .pill-pending  { background:rgba(202,168,92,.15); color:#caa85c; }
+    .pill-approved { background:rgba(61,214,140,.12); color:#3dd68c; }
+    .pill-rejected { background:rgba(232,112,112,.12); color:#e87070; }
+    .empty-state { text-align:center; padding:40px; color:#c9c7b9; }
+
+    /* tabs */
+    .filter-tabs { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+    .filter-tab { background:#11241d; border:none; color:#c9c7b9; border-radius:10px; padding:8px 16px; font-size:13px; cursor:pointer; }
+    .filter-tab.active { background:#caa85c; color:#111; font-weight:bold; }
+
+    /* users table */
+    .users-table { width:100%; border-collapse:collapse; }
+    .users-table th { text-align:left; padding:10px 14px; font-size:12px; color:#c9c7b9; border-bottom:1px solid rgba(255,255,255,.06); }
+    .users-table td { padding:12px 14px; font-size:13px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+    .users-table tr:last-child td { border-bottom:none; }
+    .marketing-yes { color:#3dd68c; font-weight:bold; }
+    .marketing-no  { color:#5a7a6a; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <p class="eyebrow">Super Admin</p>
+      <h1>Approvals Dashboard</h1>
+      <p>Sign in with your admin account to review mosque applications.</p>
+      <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="admin@yourmosque.com" /></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" /></div>
+      <button class="btn btn-primary" style="width:100%;" id="loginBtn">Sign in</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="shell" id="dashboard" style="display:none;">
+    <header class="topbar" style="margin-bottom:24px;">
+      <div>
+        <p class="eyebrow">Super Admin</p>
+        <h1 class="page-title">Mosque Approvals</h1>
+      </div>
+      <div class="pill-row">
+        <span id="adminEmail" class="muted-text" style="font-size:13px;"></span>
+        <button class="btn btn-secondary" style="padding:10px 14px;font-size:13px;" id="logoutBtn">Sign out</button>
+      </div>
+    </header>
+
+    <!-- Applications section -->
+    <section class="panel" style="margin-bottom:18px;">
+      <div class="section-header compact">
+        <h2>Mosque Applications</h2>
+        <p>Review and approve or reject mosque registration requests.</p>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterApps('all', this)">All</button>
+        <button class="filter-tab" onclick="filterApps('pending', this)">Pending</button>
+        <button class="filter-tab" onclick="filterApps('approved', this)">Approved</button>
+        <button class="filter-tab" onclick="filterApps('rejected', this)">Rejected</button>
+      </div>
+      <div id="appList"><div class="empty-state">Loading applications...</div></div>
+    </section>
+
+    <!-- Registered users section -->
+    <section class="panel">
+      <div class="section-header compact">
+        <h2>Registered Users</h2>
+        <p>All public registrations. Marketing opt-in shown for partner use.</p>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="users-table" id="usersTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>City</th>
+              <th>Mosque attended</th>
+              <th>Type</th>
+              <th>Marketing opt-in</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody">
+            <tr><td colspan="7" style="text-align:center;color:#c9c7b9;padding:20px;">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    var client = window.supabase.createClient(
+      window.APP_CONFIG.supabaseUrl,
+      window.APP_CONFIG.supabasePublishableKey
+    );
+
+    var allApps = [];
+    var currentFilter = "all";
+
+    // ── auth ──────────────────────────────────────────────
+    async function initAuth() {
+      var s = await client.auth.getSession();
+      if (s.data && s.data.session) {
+        showDashboard(s.data.session.user.email);
+      }
+      client.auth.onAuthStateChange(function(event, session) {
+        if (event === "SIGNED_IN" && session) showDashboard(session.user.email);
+        else if (event === "SIGNED_OUT") showLogin();
+      });
+    }
+
+    function showDashboard(email) {
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+      document.getElementById("adminEmail").textContent = email || "";
+      loadApplications();
+      loadUsers();
+    }
+
+    function showLogin() {
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("dashboard").style.display = "none";
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", async function() {
+      var btn = this;
+      var email = document.getElementById("loginEmail").value.trim();
+      var pw    = document.getElementById("loginPassword").value;
+      var err   = document.getElementById("loginError");
+      err.style.display = "none";
+      btn.disabled = true; btn.textContent = "Signing in...";
+      var r = await client.auth.signInWithPassword({ email, password: pw });
+      if (r.error) {
+        err.textContent = "Incorrect email or password.";
+        err.style.display = "block";
+        btn.disabled = false; btn.textContent = "Sign in";
+      }
+    });
+
+    document.getElementById("loginPassword").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") document.getElementById("loginBtn").click();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", function() {
+      client.auth.signOut();
+    });
+
+    // ── applications ──────────────────────────────────────
+    async function loadApplications() {
+      var r = await client.from("mosque_applications").select("*").order("applied_at", { ascending: false });
+      if (r.error) { console.error(r.error); return; }
+      allApps = r.data || [];
+      renderApps();
+    }
+
+    function filterApps(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-tab").forEach(function(t) { t.classList.remove("active"); });
+      if (btn) btn.classList.add("active");
+      renderApps();
+    }
+
+    function renderApps() {
+      var list = document.getElementById("appList");
+      var filtered = currentFilter === "all" ? allApps : allApps.filter(function(a) { return a.status === currentFilter; });
+
+      if (!filtered.length) {
+        list.innerHTML = '<div class="empty-state">No ' + (currentFilter === "all" ? "" : currentFilter + " ") + 'applications found.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(function(app) {
+        var statusClass = app.status === "approved" ? "pill-approved" : app.status === "rejected" ? "pill-rejected" : "pill-pending";
+        var cardClass   = "app-card " + app.status;
+        var actions = app.status === "pending"
+          ? '<button class="btn-approve" onclick="updateApp(\'' + app.id + '\', \'approved\')">Approve</button>' +
+            '<button class="btn-reject" onclick="updateApp(\'' + app.id + '\', \'rejected\')">Reject</button>'
+          : '<span class="muted-text" style="font-size:13px;">Reviewed ' + (app.reviewed_at ? new Date(app.reviewed_at).toLocaleDateString() : "") + '</span>';
+
+        return '<div class="' + cardClass + '">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
+          '<h3 class="app-name">' + app.mosque_name + '</h3>' +
+          '<span class="status-pill ' + statusClass + '">' + app.status.charAt(0).toUpperCase() + app.status.slice(1) + '</span>' +
+          '</div>' +
+          '<p class="app-meta">' +
+          '📍 ' + (app.mosque_address || "-") + ', ' + (app.mosque_postcode || "") + ', ' + (app.mosque_city || "") + '<br>' +
+          '👤 ' + app.contact_name + ' &nbsp;·&nbsp; ' +
+          '✉️ ' + app.contact_email +
+          (app.contact_phone ? ' &nbsp;·&nbsp; 📞 ' + app.contact_phone : '') + '<br>' +
+          '📅 Applied ' + new Date(app.applied_at).toLocaleDateString() +
+          '</p>' +
+          '<div class="app-actions">' + actions + '</div>' +
+          '</div>';
+      }).join("");
+    }
+
+    async function updateApp(appId, status) {
+      var r = await client.from("mosque_applications")
+        .update({ status: status, reviewed_at: new Date().toISOString() })
+        .eq("id", appId);
+      if (r.error) { alert("Could not update application."); return; }
+
+      // Also update the profile account_type if approved
+      if (status === "approved") {
+        var app = allApps.find(function(a) { return a.id === appId; });
+        if (app) {
+          await client.from("profiles").update({ account_type: "mosque_approved" }).eq("id", app.user_id);
+        }
+      }
+
+      await loadApplications();
+    }
+
+    // ── users ─────────────────────────────────────────────
+    async function loadUsers() {
+      var r = await client.from("profiles").select("*").order("created_at", { ascending: false });
+      if (r.error) { console.error(r.error); return; }
+      var users = r.data || [];
+      var tbody = document.getElementById("usersBody");
+
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#c9c7b9;padding:20px;">No users registered yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(function(u) {
+        return '<tr>' +
+          '<td>' + (u.full_name || "-") + '</td>' +
+          '<td>' + (u.email || "-") + '</td>' +
+          '<td>' + (u.city || "-") + '</td>' +
+          '<td>' + (u.mosque_attended || "-") + '</td>' +
+          '<td><span class="status-pill ' + (u.account_type === "mosque_approved" ? "pill-approved" : u.account_type === "mosque" ? "pill-pending" : "pill-pending") + '">' + (u.account_type || "public") + '</span></td>' +
+          '<td class="' + (u.marketing_opt_in ? "marketing-yes" : "marketing-no") + '">' + (u.marketing_opt_in ? "✓ Yes" : "✕ No") + '</td>' +
+          '<td>' + (u.created_at ? new Date(u.created_at).toLocaleDateString() : "-") + '</td>' +
+          '</tr>';
+      }).join("");
+    }
+
+    initAuth();
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

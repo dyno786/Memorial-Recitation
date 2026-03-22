@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; background:#03110f; }
+    .login-shell { width:min(460px,100%); }
+    .login-header { text-align:center; margin-bottom:28px; }
+    .login-header .eyebrow { color:#caa85c; font-size:13px; margin:0 0 6px; }
+    .login-header h1 { font-size:28px; margin:0 0 8px; }
+    .login-header p { color:#c9c7b9; font-size:14px; margin:0; }
+    .login-card { background:linear-gradient(90deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.08); border-radius:22px; padding:28px; }
+    .field { margin-bottom:14px; }
+    .field label { display:block; font-size:13px; color:#c9c7b9; margin-bottom:6px; }
+    .field input { width:100%; border:none; outline:none; border-radius:12px; padding:13px 14px; background:#1a3028; color:#fff; font-size:15px; box-sizing:border-box; }
+    .field input::placeholder { color:#5a7a6a; }
+    .forgot { text-align:right; margin-top:-8px; margin-bottom:14px; }
+    .forgot a { font-size:12px; color:#caa85c; }
+    .notice { padding:12px 16px; border-radius:12px; font-size:14px; line-height:1.6; margin-top:14px; display:none; }
+    .notice.error { background:rgba(232,112,112,.1); border:1px solid rgba(232,112,112,.3); color:#e87070; }
+    .notice.info { background:rgba(202,168,92,.08); border:1px solid rgba(202,168,92,.25); color:#caa85c; }
+    .divider { text-align:center; color:#5a7a6a; font-size:13px; margin:18px 0; }
+    .register-link { text-align:center; margin-top:20px; font-size:14px; color:#c9c7b9; }
+    .register-link a { color:#caa85c; }
+    .pending-badge { background:rgba(202,168,92,.1); border:1px solid rgba(202,168,92,.25); border-radius:14px; padding:14px 16px; font-size:13px; color:#caa85c; line-height:1.7; display:none; margin-top:14px; }
+  </style>
+</head>
+<body>
+  <div class="login-shell">
+    <div class="login-header">
+      <p class="eyebrow">Memorial Recitation Platform</p>
+      <h1>Welcome back</h1>
+      <p>Sign in to your account</p>
+    </div>
+
+    <div class="login-card">
+      <div class="field">
+        <label for="loginEmail">Email address</label>
+        <input type="email" id="loginEmail" placeholder="ahmed@example.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="forgot"><a href="reset.html">Forgot password?</a></div>
+
+      <button class="btn btn-primary" style="width:100%;padding:16px;font-size:16px;" id="loginBtn">Sign in</button>
+
+      <div class="notice error" id="loginError"></div>
+      <div class="pending-badge" id="pendingBadge">
+        🕌 Your mosque account is currently <strong>pending approval</strong>. You'll receive an email once it's been reviewed. In the meantime you can still use the app as a general user.
+      </div>
+    </div>
+
+    <div class="register-link">
+      Don't have an account? <a href="register.html">Create one free</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    var client = window.supabase.createClient(
+      window.APP_CONFIG.supabaseUrl,
+      window.APP_CONFIG.supabasePublishableKey
+    );
+
+    document.getElementById("loginBtn").addEventListener("click", async function() {
+      var btn = this;
+      var email    = document.getElementById("loginEmail").value.trim();
+      var password = document.getElementById("loginPassword").value;
+      var errEl    = document.getElementById("loginError");
+
+      errEl.style.display = "none";
+      document.getElementById("pendingBadge").style.display = "none";
+
+      if (!email || !password) { errEl.textContent = "Please enter your email and password."; errEl.style.display = "block"; return; }
+
+      btn.disabled = true; btn.textContent = "Signing in...";
+
+      var result = await client.auth.signInWithPassword({ email, password });
+
+      if (result.error) {
+        errEl.textContent = result.error.message === "Invalid login credentials"
+          ? "Incorrect email or password."
+          : result.error.message;
+        errEl.style.display = "block";
+        btn.disabled = false; btn.textContent = "Sign in";
+        return;
+      }
+
+      // Check if mosque account is pending
+      var profileResult = await client.from("profiles").select("account_type").eq("id", result.data.user.id).maybeSingle();
+      if (profileResult.data && profileResult.data.account_type === "mosque") {
+        var appResult = await client.from("mosque_applications").select("status").eq("user_id", result.data.user.id).maybeSingle();
+        if (appResult.data && appResult.data.status === "pending") {
+          document.getElementById("pendingBadge").style.display = "block";
+          btn.disabled = false; btn.textContent = "Sign in";
+          return;
+        }
+      }
+
+      // Redirect based on type
+      if (profileResult.data && profileResult.data.account_type === "mosque") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    document.getElementById("loginPassword").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") document.getElementById("loginBtn").click();
+    });
+  </script>
+</body>
+</html>
