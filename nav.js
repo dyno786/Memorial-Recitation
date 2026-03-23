@@ -156,6 +156,7 @@
     if (user) {
       // Logged in links
       leftLinks =
+        '<a href="dashboard.html" class="' + (isDashboard ? "active" : "") + '">🏠 Dashboard</a>' +
         '<a href="recite.html' + q + '" class="' + (isHome ? "active" : "") + '">🤲 Recite</a>' +
         '<a href="totals.html' + q + '" class="' + (isTotals ? "active" : "") + '">📊 Live Totals</a>';
 
@@ -210,6 +211,7 @@
 
     if (user) {
       nav.innerHTML =
+        '<a href="dashboard.html" class="' + (isDashboard ? "active" : "") + '"><span class="bn-icon">🏠</span>Dashboard</a>' +
         '<a href="recite.html' + q + '" class="' + (isHome ? "active" : "") + '"><span class="bn-icon">🤲</span>Recite</a>' +
         '<a href="totals.html' + q + '" class="' + (isTotals ? "active" : "") + '"><span class="bn-icon">📊</span>Totals</a>' +
         (isApprovedMosque || isSuperAdmin ? '<a href="admin.html" class="' + (isAdmin ? "active" : "") + '"><span class="bn-icon">🕌</span>Admin</a>' : '') +

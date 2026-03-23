@@ -467,3 +467,93 @@ setInterval(async function() {
     await loadJuzBoard();
   }
 }, 30000);
+
+// ── Memory Wall ───────────────────────────────────────────────
+var selectedNoteColour = "yellow";
+
+function selectNoteColour(colour, btn) {
+  selectedNoteColour = colour;
+  document.querySelectorAll(".colour-dot").forEach(function(d){ d.classList.remove("active"); });
+  if (btn) btn.classList.add("active");
+}
+
+function updateNoteCount(textarea) {
+  var remaining = 280 - textarea.value.length;
+  var el = document.getElementById("noteCount");
+  if (el) el.textContent = remaining + " characters remaining";
+}
+
+async function loadMemoryWall() {
+  if (!currentMemorial) return;
+  var wall = document.getElementById("memoryWall");
+  if (!wall) return;
+
+  // Show/hide form based on login
+  var session = await memorialClient.auth.getSession();
+  var isLoggedIn = session.data && session.data.session;
+  var formEl = document.getElementById("memoryNoteForm");
+  var promptEl = document.getElementById("memoryLoginPrompt");
+  if (formEl) formEl.style.display = isLoggedIn ? "block" : "none";
+  if (promptEl) promptEl.style.display = isLoggedIn ? "none" : "block";
+
+  var r = await memorialClient.from("memory_notes").select("*")
+    .eq("memorial_id", currentMemorial.id)
+    .order("created_at", { ascending: false });
+
+  if (r.error) { wall.innerHTML = '<div class="muted-text" style="text-align:center;padding:24px;">Could not load memories.</div>'; return; }
+
+  if (!r.data || !r.data.length) {
+    wall.innerHTML = '<div class="muted-text" style="text-align:center;padding:24px;grid-column:1/-1;">No memories yet — be the first to leave one.</div>';
+    return;
+  }
+
+  wall.innerHTML = r.data.map(function(note) {
+    var colourClass = "sn-" + (note.colour || "yellow");
+    var time = new Date(note.created_at).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+    return '<div class="sticky-note ' + colourClass + '">' +
+      '<div class="sn-author">' + escapeHtml(note.author_name) + '</div>' +
+      escapeHtml(note.message) +
+      '<div class="sn-time">' + time + '</div>' +
+      '</div>';
+  }).join("");
+}
+
+async function submitMemoryNote() {
+  if (!currentMemorial) return;
+  var textEl = document.getElementById("memoryNoteText");
+  var message = textEl ? textEl.value.trim() : "";
+  if (!message) { showToast("Please write a message first"); return; }
+
+  var saved = loadSavedDetails();
+  var authorName = saved ? (saved.relation === "Anonymous" ? "Anonymous" : saved.name) : "";
+  if (!authorName) { showToast("Please save your details first"); return; }
+
+  var r = await memorialClient.from("memory_notes").insert({
+    memorial_id: currentMemorial.id,
+    author_name: authorName,
+    message: message,
+    colour: selectedNoteColour
+  });
+
+  if (r.error) { console.error(r.error); showToast("Could not post note"); return; }
+
+  if (textEl) textEl.value = "";
+  updateNoteCount({ value: "" });
+  showToast("Memory posted 🌸");
+  await loadMemoryWall();
+}
+
+// Bind memory wall on tab switch
+document.addEventListener("DOMContentLoaded", function() {
+  var submitNoteBtn = document.getElementById("submitNoteBtn");
+  if (submitNoteBtn) submitNoteBtn.addEventListener("click", submitMemoryNote);
+
+  // Load memory wall when tab is clicked
+  document.querySelectorAll(".tab-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      if (btn.dataset.tab === "memoryPanel") {
+        loadMemoryWall();
+      }
+    });
+  });
+});

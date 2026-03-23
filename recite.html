@@ -84,6 +84,37 @@
     .dedication-footer{margin-top:32px;padding:18px 24px;background:rgba(202,168,92,.06);border:1px solid rgba(202,168,92,.18);border-radius:16px;text-align:center;color:#c9c7b9;font-size:13px;line-height:1.8;font-style:italic;}
     .dedication-footer strong{color:#caa85c;font-style:normal;}
 
+
+    /* memory wall */
+    .memory-note-composer { background:rgba(255,255,255,.03); border-radius:16px; padding:16px; margin-bottom:16px; border:1px solid rgba(255,255,255,.08); }
+    .memory-note-composer textarea { width:100%; border:none; outline:none; background:transparent; color:#f5f5f0; font-size:14px; resize:none; height:80px; font-family:Arial,Helvetica,sans-serif; box-sizing:border-box; }
+    .memory-note-composer textarea::placeholder { color:#5a7a6a; }
+    .note-composer-footer { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+    .note-count { font-size:11px; }
+    .colour-picker { display:flex; gap:6px; align-items:center; }
+    .colour-dot { width:20px; height:20px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:transform .15s; }
+    .colour-dot:hover { transform:scale(1.2); }
+    .colour-dot.active { border-color:#fff; transform:scale(1.15); }
+    .cd-yellow { background:#f9e04b; }
+    .cd-green  { background:#7dd8a0; }
+    .cd-pink   { background:#f4a0c0; }
+    .cd-blue   { background:#80c8f0; }
+    .memory-login-prompt { background:rgba(202,168,92,.06); border:1px solid rgba(202,168,92,.2); border-radius:14px; padding:16px; text-align:center; margin-bottom:16px; font-size:14px; color:#c9c7b9; }
+    .memory-login-prompt p { margin:0 0 10px; }
+    .memory-wall { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px; }
+    .sticky-note { border-radius:4px; padding:14px; font-size:13px; line-height:1.7; position:relative; word-break:break-word; }
+    .sticky-note::after { content:""; position:absolute; bottom:0; right:0; width:0; height:0; border-style:solid; border-width:0 0 16px 16px; }
+    .sn-yellow { background:#fff9c4; color:#3a3000; border:1px solid #e8d800; }
+    .sn-yellow::after { border-color:transparent transparent #c8ba00 transparent; }
+    .sn-green  { background:#c8f5d8; color:#0a3320; border:1px solid #6ac888; }
+    .sn-green::after  { border-color:transparent transparent #4aaa68 transparent; }
+    .sn-pink   { background:#ffd6e7; color:#4a0028; border:1px solid #e890b8; }
+    .sn-pink::after   { border-color:transparent transparent #cc6090 transparent; }
+    .sn-blue   { background:#d0eeff; color:#002840; border:1px solid #70b8e8; }
+    .sn-blue::after   { border-color:transparent transparent #4090c8 transparent; }
+    .sn-author { font-weight:bold; font-size:11px; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; opacity:.7; }
+    .sn-time   { font-size:10px; opacity:.5; margin-top:8px; }
+    @media(max-width:480px) { .memory-wall { grid-template-columns:1fr; } }
     @media(max-width:720px){.sidebar{display:none;}.totals-bar{grid-template-columns:repeat(2,1fr);}}
   </style>
 </head>
@@ -172,6 +203,7 @@
               <div class="tabs">
                 <button type="button" class="tab-btn active" data-tab="quickPanel">Quick Recitations</button>
                 <button type="button" class="tab-btn" data-tab="khatamPanel">Quran Khatam</button>
+                <button type="button" class="tab-btn" data-tab="memoryPanel">Memory Wall 🌸</button>
               </div>
 
               <div id="quickPanel" class="tab-content active">
@@ -197,6 +229,41 @@
                   </div>
                 </div>
                 <div class="juz-grid mt-lg" id="juzList"></div>
+              <div id="memoryPanel" class="tab-content">
+                <div class="section-header compact" style="text-align:center;">
+                  <h2>Memory Wall 🌸</h2>
+                  <p>Leave a message, dua or memory for the deceased.</p>
+                </div>
+
+                <!-- Add note form (logged in users only) -->
+                <div id="memoryNoteForm" style="display:none;">
+                  <div class="memory-note-composer">
+                    <textarea id="memoryNoteText" placeholder="Write a memory, dua or message..." maxlength="280" oninput="updateNoteCount(this)"></textarea>
+                    <div class="note-composer-footer">
+                      <span class="note-count muted-text" id="noteCount">280 characters remaining</span>
+                      <div style="display:flex;gap:8px;align-items:center;">
+                        <div class="colour-picker">
+                          <button type="button" class="colour-dot cd-yellow active" onclick="selectNoteColour('yellow',this)" title="Yellow"></button>
+                          <button type="button" class="colour-dot cd-green" onclick="selectNoteColour('green',this)" title="Green"></button>
+                          <button type="button" class="colour-dot cd-pink" onclick="selectNoteColour('pink',this)" title="Pink"></button>
+                          <button type="button" class="colour-dot cd-blue" onclick="selectNoteColour('blue',this)" title="Blue"></button>
+                        </div>
+                        <button type="button" class="btn btn-primary" style="padding:8px 16px;font-size:13px;" id="submitNoteBtn">Post note</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="memoryLoginPrompt" style="display:none;">
+                  <div class="memory-login-prompt">
+                    <p>Sign in to leave a memory or dua on this wall.</p>
+                    <a href="login.html" class="btn btn-secondary" style="font-size:13px;padding:8px 16px;">Sign in</a>
+                  </div>
+                </div>
+
+                <div class="memory-wall" id="memoryWall">
+                  <div class="muted-text" style="text-align:center;padding:24px;">Loading memories...</div>
+                </div>
+              </div>
               </div>
             </section>
 
