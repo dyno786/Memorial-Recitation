@@ -3,124 +3,103 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Dashboard — Khatam</title>
+  <title>Home — Khatam</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     body { background:#03110f; color:#f5f5f0; }
-    .shell { width:min(1100px,calc(100% - 32px)); margin:0 auto; padding:24px 0 90px; }
+    .shell { width:min(1000px,calc(100% - 32px)); margin:0 auto; padding:24px 0 90px; }
 
-    /* greeting */
-    .greeting { margin-bottom:24px; }
-    .greeting h1 { font-size:clamp(22px,4vw,36px); margin:0 0 4px; }
+    .greeting { margin-bottom:20px; }
+    .greeting h1 { font-size:clamp(20px,4vw,32px); margin:0 0 4px; }
     .greeting p { color:#c9c7b9; font-size:14px; margin:0; }
 
-    /* stats strip */
-    .stats-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
-    .stat-card { background:linear-gradient(135deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:16px; text-align:center; }
-    .stat-val { display:block; font-size:28px; font-weight:bold; color:#caa85c; }
-    .stat-label { display:block; font-size:12px; color:#c9c7b9; margin-top:4px; }
+    .stats-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:24px; }
+    .stat-card { background:linear-gradient(135deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:14px; text-align:center; }
+    .stat-val { display:block; font-size:26px; font-weight:bold; color:#caa85c; }
+    .stat-lbl { display:block; font-size:11px; color:#c9c7b9; margin-top:3px; }
 
-    /* section */
-    .dash-section { margin-bottom:28px; }
-    .dash-section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
-    .dash-section-head h2 { margin:0; font-size:18px; }
+    .dash-section { margin-bottom:24px; }
+    .dash-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+    .dash-head h2 { margin:0; font-size:17px; }
 
-    /* memorial cards */
-    .memorial-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
-    .memorial-card { background:linear-gradient(135deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.06); border-radius:18px; padding:20px; display:flex; flex-direction:column; gap:10px; transition:border-color .2s; }
-    .memorial-card:hover { border-color:rgba(202,168,92,.3); }
-    .memorial-card-img { width:100%; height:120px; object-fit:cover; border-radius:12px; }
-    .memorial-card-img-placeholder { width:100%; height:120px; border-radius:12px; background:rgba(202,168,92,.08); border:1px solid rgba(202,168,92,.15); display:flex; align-items:center; justify-content:center; font-size:36px; }
-    .memorial-card-name { font-size:18px; font-weight:bold; margin:0; }
-    .memorial-card-meta { font-size:12px; color:#c9c7b9; line-height:1.7; margin:0; }
-    .memorial-card-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
-    .mc-btn { padding:8px 14px; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer; border:none; text-decoration:none; display:inline-block; text-align:center; }
-    .mc-btn-primary { background:#caa85c; color:#111; }
-    .mc-btn-primary:hover { background:#d4b46a; }
-    .mc-btn-secondary { background:rgba(255,255,255,.06); color:#f5f5f0; border:1px solid rgba(255,255,255,.1); }
-    .mc-btn-secondary:hover { background:rgba(255,255,255,.1); }
+    .mem-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+    .mem-card { background:linear-gradient(135deg,#0d1e18,#10241d); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:10px; cursor:pointer; transition:border-color .2s; text-decoration:none; color:inherit; }
+    .mem-card:hover { border-color:rgba(202,168,92,.35); }
+    .mem-card-top { display:flex; gap:10px; align-items:flex-start; }
+    .mem-avatar { width:44px; height:44px; border-radius:10px; background:rgba(202,168,92,.1); border:1px solid rgba(202,168,92,.15); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; overflow:hidden; }
+    .mem-avatar img { width:100%; height:100%; object-fit:cover; }
+    .mem-name { font-size:15px; font-weight:bold; margin:0 0 3px; }
+    .mem-meta { font-size:11px; color:#c9c7b9; line-height:1.6; margin:0; }
+    .mem-progress { }
+    .mem-progress-label { display:flex; justify-content:space-between; font-size:10px; color:#c9c7b9; margin-bottom:4px; }
+    .mem-progress-bar { height:5px; background:#173026; border-radius:999px; overflow:hidden; }
+    .mem-progress-fill { height:100%; background:#caa85c; border-radius:999px; transition:width .6s; }
+    .mem-actions { display:flex; gap:6px; }
+    .mem-btn { flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; border:none; text-align:center; text-decoration:none; display:block; }
+    .mem-btn-primary { background:#caa85c; color:#111; }
+    .mem-btn-secondary { background:rgba(255,255,255,.06); color:#f5f5f0; border:1px solid rgba(255,255,255,.1); }
 
-    /* progress bar */
-    .mc-progress { margin-top:4px; }
-    .mc-progress-label { display:flex; justify-content:space-between; font-size:11px; color:#c9c7b9; margin-bottom:4px; }
-    .mc-progress-bar { height:6px; background:#173026; border-radius:999px; overflow:hidden; }
-    .mc-progress-fill { height:100%; background:#caa85c; border-radius:999px; transition:width .6s ease; }
+    .empty-state { text-align:center; padding:36px 20px; color:#c9c7b9; background:rgba(255,255,255,.02); border:1px dashed rgba(255,255,255,.1); border-radius:16px; }
+    .empty-icon { font-size:36px; margin-bottom:10px; }
+    .empty-state h3 { margin:0 0 6px; font-size:15px; color:#f5f5f0; }
+    .empty-state p { font-size:13px; margin:0 0 14px; }
 
-    /* empty state */
-    .empty-state { text-align:center; padding:48px 24px; color:#c9c7b9; }
-    .empty-state-icon { font-size:48px; margin-bottom:14px; }
-    .empty-state h3 { margin:0 0 8px; color:#f5f5f0; }
-    .empty-state p { font-size:14px; margin:0 0 20px; }
-
-    /* search */
-    .search-bar { display:flex; gap:10px; margin-bottom:14px; }
-    .search-input { flex:1; border:none; outline:none; border-radius:12px; padding:12px 16px; background:#1a3028; color:#fff; font-size:15px; }
+    .search-wrap { position:relative; margin-bottom:10px; }
+    .search-input { width:100%; border:none; outline:none; border-radius:12px; padding:12px 16px 12px 40px; background:#1a3028; color:#fff; font-size:14px; box-sizing:border-box; }
     .search-input::placeholder { color:#5a7a6a; }
+    .search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:16px; pointer-events:none; }
+    .search-results { display:none; }
 
-    /* recent activity */
-    .activity-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.06); font-size:14px; gap:12px; }
-    .activity-row:last-child { border-bottom:none; }
-    .activity-time { font-size:12px; color:#c9c7b9; white-space:nowrap; }
-
-    @media(max-width:720px) {
-      .stats-strip { grid-template-columns:repeat(2,1fr); }
-    }
+    @media(max-width:600px) { .stats-strip { grid-template-columns:repeat(2,1fr); } }
   </style>
 </head>
 <body>
   <div class="shell">
 
-    <!-- GREETING -->
     <div class="greeting">
       <h1 id="greetingText">Assalamu Alaikum 🤲</h1>
       <p id="greetingSubtext">Loading your dashboard...</p>
     </div>
 
-    <!-- STATS -->
     <div class="stats-strip">
-      <div class="stat-card"><span class="stat-val" id="myRecitations">—</span><span class="stat-label">My recitations</span></div>
-      <div class="stat-card"><span class="stat-val" id="myMemorials">—</span><span class="stat-label">My memorials</span></div>
-      <div class="stat-card"><span class="stat-val" id="myJuz">—</span><span class="stat-label">Juz claimed</span></div>
-      <div class="stat-card"><span class="stat-val" id="myNotes">—</span><span class="stat-label">Memory notes</span></div>
+      <div class="stat-card"><span class="stat-val" id="myRec">—</span><span class="stat-lbl">Recitations</span></div>
+      <div class="stat-card"><span class="stat-val" id="myMem">—</span><span class="stat-lbl">Memorials</span></div>
+      <div class="stat-card"><span class="stat-val" id="myJuz">—</span><span class="stat-lbl">Juz claimed</span></div>
+      <div class="stat-card"><span class="stat-val" id="myNotes">—</span><span class="stat-lbl">Memory notes</span></div>
     </div>
 
-    <!-- MY MEMORIALS -->
+    <!-- My Memorials -->
     <div class="dash-section">
-      <div class="dash-section-head">
-        <h2>My Memorials</h2>
-        <a href="admin.html" class="mc-btn mc-btn-primary" id="createMemorialBtn" style="display:none;">+ Create Memorial</a>
+      <div class="dash-head">
+        <h2>My memorials</h2>
+        <a href="admin.html" class="btn btn-primary" id="createBtn" style="display:none;padding:8px 16px;font-size:13px;">+ Create memorial</a>
       </div>
-      <div class="memorial-cards" id="myMemorialCards">
-        <div class="empty-state">
-          <div class="empty-state-icon">⏳</div>
-          <h3>Loading...</h3>
-        </div>
+      <div class="mem-grid" id="myMemGrid">
+        <div class="empty-state"><div class="empty-icon">⏳</div><h3>Loading...</h3></div>
       </div>
     </div>
 
-    <!-- MEMORIALS I'VE JOINED -->
+    <!-- Shared with me -->
     <div class="dash-section">
-      <div class="dash-section-head">
-        <h2>Memorials I've Joined</h2>
+      <div class="dash-head">
+        <h2>Shared with me</h2>
+        <p class="muted-text" style="margin:0;font-size:13px;">Memorials you've joined via a shared link</p>
       </div>
-      <div class="memorial-cards" id="joinedMemorialCards">
-        <div class="empty-state">
-          <div class="empty-state-icon">⏳</div>
-          <h3>Loading...</h3>
-        </div>
+      <div class="mem-grid" id="sharedMemGrid">
+        <div class="empty-state"><div class="empty-icon">⏳</div><h3>Loading...</h3></div>
       </div>
     </div>
 
-    <!-- FIND A MEMORIAL -->
+    <!-- Find a memorial -->
     <div class="dash-section">
-      <div class="dash-section-head">
-        <h2>Find a Memorial</h2>
-        <p class="muted-text" style="margin:0;font-size:13px;">Search by name or mosque</p>
+      <div class="dash-head">
+        <h2>Find a memorial</h2>
       </div>
-      <div class="search-bar">
-        <input type="text" class="search-input" id="memorialSearch" placeholder="Search by name, mosque or city..." oninput="searchMemorials(this.value)" />
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by name, mosque or city..." oninput="doSearch(this.value)" />
       </div>
-      <div class="memorial-cards" id="searchResults" style="display:none;"></div>
+      <div class="mem-grid search-results" id="searchResults"></div>
     </div>
 
   </div>
@@ -132,199 +111,131 @@
       window.APP_CONFIG.supabaseUrl,
       window.APP_CONFIG.supabasePublishableKey
     );
-
     var currentUser = null;
     var currentProfile = null;
-    var allMemorials = [];
-    var searchTimeout = null;
+    var searchTimer = null;
 
-    // ── init ──────────────────────────────────────────────
     async function init() {
       var s = await client.auth.getSession();
-      if (!s.data || !s.data.session) {
-        window.location.href = "login.html";
-        return;
-      }
+      if (!s.data || !s.data.session) { window.location.href = "login.html"; return; }
       currentUser = s.data.session.user;
-
-      // Load profile
       var p = await client.from("profiles").select("*").eq("id", currentUser.id).maybeSingle();
       currentProfile = p.data;
 
-      // Greeting
       var name = currentProfile ? currentProfile.full_name.split(" ")[0] : "there";
       var hour = new Date().getHours();
-      var greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-      document.getElementById("greetingText").textContent = greeting + ", " + name + " 🤲";
-      document.getElementById("greetingSubtext").textContent = "Here's your memorial activity at a glance.";
+      var greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+      document.getElementById("greetingText").textContent = greet + ", " + name + " 🤲";
+      document.getElementById("greetingSubtext").textContent = "May your recitations be accepted. Ameen.";
 
-      // Show create button for mosque accounts
-      var isApproved = currentProfile && (currentProfile.account_type === "mosque_approved");
-      var isSuperAdmin = currentUser.email === (window.APP_CONFIG && window.APP_CONFIG.superAdminEmail);
-      if (isApproved || isSuperAdmin) {
-        document.getElementById("createMemorialBtn").style.display = "inline-block";
-      }
-
-      await Promise.all([loadMyMemorials(), loadJoinedMemorials(), loadMyStats()]);
-    }
-
-    // ── memorial card builder ─────────────────────────────
-    function buildMemorialCard(memorial, showAdmin) {
-      var baseUrl = window.location.origin + window.location.pathname.replace("dashboard.html","");
-      var reciteUrl = "recite.html?slug=" + encodeURIComponent(memorial.slug);
-      var totalsUrl = "totals.html?slug=" + encodeURIComponent(memorial.slug);
-
-      var imgHtml = memorial.image_url
-        ? '<img class="memorial-card-img" src="' + memorial.image_url + '" alt="' + memorial.full_name + '" />'
-        : '<div class="memorial-card-img-placeholder">🕌</div>';
-
-      var progress = memorial.juzCompleted !== undefined
-        ? '<div class="mc-progress"><div class="mc-progress-label"><span>Khatam progress</span><span>' + (memorial.juzCompleted||0) + '/30 Juz</span></div><div class="mc-progress-bar"><div class="mc-progress-fill" style="width:' + ((memorial.juzCompleted||0)/30*100) + '%"></div></div></div>'
-        : '';
-
-      var adminBtn = showAdmin
-        ? '<a href="admin.html" class="mc-btn mc-btn-secondary">Edit</a>'
-        : '';
-
-      return '<div class="memorial-card">' +
-        imgHtml +
-        '<h3 class="memorial-card-name">' + memorial.full_name + '</h3>' +
-        '<p class="memorial-card-meta">' +
-        (memorial.mosque_name ? '🕌 ' + memorial.mosque_name + '<br>' : '') +
-        (memorial.date_of_passing ? '📅 Passed away: ' + memorial.date_of_passing + '<br>' : '') +
-        (memorial.uk_city ? '📍 ' + memorial.uk_city : '') +
-        '</p>' +
-        progress +
-        '<div class="memorial-card-actions">' +
-        '<a href="' + reciteUrl + '" class="mc-btn mc-btn-primary">Open Memorial</a>' +
-        '<a href="' + totalsUrl + '" class="mc-btn mc-btn-secondary">Totals</a>' +
-        adminBtn +
-        '</div>' +
-        '</div>';
-    }
-
-    // ── load my memorials (mosque accounts) ───────────────
-    async function loadMyMemorials() {
-      var container = document.getElementById("myMemorialCards");
       var isApproved = currentProfile && currentProfile.account_type === "mosque_approved";
       var isSuperAdmin = currentUser.email === (window.APP_CONFIG && window.APP_CONFIG.superAdminEmail);
+      if (isApproved || isSuperAdmin) document.getElementById("createBtn").style.display = "inline-block";
 
+      await Promise.all([loadMyMemorials(), loadSharedMemorials(), loadStats()]);
+    }
+
+    function memCard(m, isAdmin) {
+      var img = m.image_url
+        ? '<img src="'+m.image_url+'" alt="'+m.full_name+'" />'
+        : '🕌';
+      var progress = m.juzDone !== undefined
+        ? '<div class="mem-progress"><div class="mem-progress-label"><span>Khatam progress</span><span>'+(m.juzDone||0)+'/30 Juz</span></div><div class="mem-progress-bar"><div class="mem-progress-fill" style="width:'+((m.juzDone||0)/30*100)+'%"></div></div></div>'
+        : '';
+      var adminBtn = isAdmin ? '<a href="admin.html" class="mem-btn mem-btn-secondary">Manage</a>' : '';
+      return '<a href="recite.html?slug='+encodeURIComponent(m.slug)+'" class="mem-card">'+
+        '<div class="mem-card-top">'+
+        '<div class="mem-avatar">'+img+'</div>'+
+        '<div><p class="mem-name">'+escH(m.full_name)+'</p>'+
+        '<p class="mem-meta">'+(m.mosque_name?'🕌 '+escH(m.mosque_name)+'<br>':'')+(m.date_of_passing?'📅 '+escH(m.date_of_passing):'')+'</p></div>'+
+        '</div>'+progress+
+        '<div class="mem-actions">'+
+        '<a href="recite.html?slug='+encodeURIComponent(m.slug)+'" class="mem-btn mem-btn-primary" onclick="event.stopPropagation()">Recite</a>'+
+        '<a href="totals.html?slug='+encodeURIComponent(m.slug)+'" class="mem-btn mem-btn-secondary" onclick="event.stopPropagation()">Totals</a>'+
+        adminBtn+
+        '</div></a>';
+    }
+
+    async function loadMyMemorials() {
+      var grid = document.getElementById("myMemGrid");
+      var isApproved = currentProfile && currentProfile.account_type === "mosque_approved";
+      var isSuperAdmin = currentUser.email === (window.APP_CONFIG && window.APP_CONFIG.superAdminEmail);
       if (!isApproved && !isSuperAdmin) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🤲</div><h3>No memorials created yet</h3><p>Only mosque accounts can create memorials.<br>Ask your mosque to register and create one.</p></div>';
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🕌</div><h3>No memorials created</h3><p>Mosque accounts can create memorials.<br>Ask your mosque to register.</p></div>';
         return;
       }
-
-      var r = await client.from("memorials").select("*").order("created_at", { ascending: false });
-      if (r.error || !r.data || !r.data.length) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><h3>No memorials yet</h3><p>Create your first memorial to get started.</p></div>';
+      var r = await client.from("memorials").select("*").order("created_at",{ascending:false});
+      if (!r.data || !r.data.length) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><h3>No memorials yet</h3><p>Create your first memorial to get started.</p><a href="admin.html" class="btn btn-primary" style="font-size:13px;padding:8px 16px;">Create memorial</a></div>';
         return;
       }
-
-      // Get juz progress for each
-      var memorials = r.data;
-      for (var i = 0; i < memorials.length; i++) {
-        var cr = await client.from("khatam_campaigns").select("id").eq("memorial_id", memorials[i].id).limit(1);
-        if (!cr.error && cr.data && cr.data.length) {
-          var claims = await client.from("khatam_claims").select("status").eq("campaign_id", cr.data[0].id);
-          memorials[i].juzCompleted = (claims.data || []).filter(function(c){ return c.status === "completed"; }).length;
+      for (var i=0;i<r.data.length;i++) {
+        var cr = await client.from("khatam_campaigns").select("id").eq("memorial_id",r.data[i].id).limit(1);
+        if (!cr.error&&cr.data&&cr.data.length) {
+          var cl = await client.from("khatam_claims").select("status").eq("campaign_id",cr.data[0].id);
+          r.data[i].juzDone = (cl.data||[]).filter(function(c){return c.status==="completed";}).length;
         }
       }
-
-      container.innerHTML = memorials.map(function(m) { return buildMemorialCard(m, true); }).join("");
+      grid.innerHTML = r.data.map(function(m){return memCard(m,true);}).join("");
     }
 
-    // ── load memorials I've joined ────────────────────────
-    async function loadJoinedMemorials() {
-      var container = document.getElementById("joinedMemorialCards");
+    async function loadSharedMemorials() {
+      var grid = document.getElementById("sharedMemGrid");
       var saved = null;
-      try { var raw = localStorage.getItem("memorial_user_details"); if(raw) saved = JSON.parse(raw); } catch(e){}
-
-      if (!saved || !saved.name) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>No memorials joined yet</h3><p>Open a memorial link shared with you to join and start reciting.</p></div>';
+      try { var raw = localStorage.getItem("memorial_user_details"); if(raw) saved=JSON.parse(raw); } catch(e){}
+      var name = saved ? (saved.relation==="Anonymous"?"Anonymous":saved.name) : (currentProfile?currentProfile.full_name:null);
+      if (!name) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔗</div><h3>None yet</h3><p>Open a memorial link shared with you via WhatsApp to join it.</p></div>';
         return;
       }
-
-      var name = saved.relation === "Anonymous" ? "Anonymous" : saved.name;
-      var pr = await client.from("participants").select("memorial_id").eq("name", name);
-      if (pr.error || !pr.data || !pr.data.length) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>No memorials joined yet</h3><p>Open a memorial link shared with you to join.</p></div>';
+      var pr = await client.from("participants").select("memorial_id").eq("name",name);
+      if (!pr.data||!pr.data.length) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔗</div><h3>None yet</h3><p>Open a memorial link shared with you via WhatsApp to join it.</p></div>';
         return;
       }
-
-      var memorialIds = pr.data.map(function(p){ return p.memorial_id; });
-      var mr = await client.from("memorials").select("*").in("id", memorialIds);
-      if (mr.error || !mr.data || !mr.data.length) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>No memorials found</h3></div>';
-        return;
-      }
-
-      container.innerHTML = mr.data.map(function(m) { return buildMemorialCard(m, false); }).join("");
+      var ids = pr.data.map(function(p){return p.memorial_id;});
+      var mr = await client.from("memorials").select("*").in("id",ids);
+      if (!mr.data||!mr.data.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔗</div><h3>None found</h3></div>'; return; }
+      grid.innerHTML = mr.data.map(function(m){return memCard(m,false);}).join("");
     }
 
-    // ── load my stats ─────────────────────────────────────
-    async function loadMyStats() {
+    async function loadStats() {
       try {
         var saved = null;
-        try { var raw = localStorage.getItem("memorial_user_details"); if(raw) saved = JSON.parse(raw); } catch(e){}
-        var name = saved ? (saved.relation === "Anonymous" ? "Anonymous" : saved.name) : null;
-
-        var recTotal = 0;
-        var juzTotal = 0;
-        var notesTotal = 0;
-        var memorialsTotal = 0;
-
-        if (name) {
-          var pr = await client.from("participants").select("id, memorial_id").eq("name", name);
-          var participantIds = (pr.data || []).map(function(p){ return p.id; });
-          memorialsTotal = (pr.data || []).length;
-
-          if (participantIds.length) {
-            var rr = await client.from("quick_recitations").select("recitation_count").in("participant_id", participantIds);
-            (rr.data || []).forEach(function(r){ recTotal += r.recitation_count; });
-            var jr = await client.from("khatam_claims").select("id").in("participant_id", participantIds);
-            juzTotal = (jr.data || []).length;
-          }
-
-          var nr = await client.from("memory_notes").select("id").eq("author_name", name);
-          notesTotal = (nr.data || []).length;
+        try { var raw=localStorage.getItem("memorial_user_details"); if(raw) saved=JSON.parse(raw); } catch(e){}
+        var name = saved?(saved.relation==="Anonymous"?"Anonymous":saved.name):(currentProfile?currentProfile.full_name:null);
+        if (!name) return;
+        var pr = await client.from("participants").select("id").eq("name",name);
+        var ids = (pr.data||[]).map(function(p){return p.id;});
+        document.getElementById("myMem").textContent = ids.length;
+        var recTotal=0;
+        if (ids.length) {
+          var rr = await client.from("quick_recitations").select("recitation_count").in("participant_id",ids);
+          (rr.data||[]).forEach(function(r){recTotal+=r.recitation_count;});
+          var jr = await client.from("khatam_claims").select("id").in("participant_id",ids);
+          document.getElementById("myJuz").textContent = (jr.data||[]).length;
         }
-
-        document.getElementById("myRecitations").textContent = recTotal;
-        document.getElementById("myMemorials").textContent = memorialsTotal;
-        document.getElementById("myJuz").textContent = juzTotal;
-        document.getElementById("myNotes").textContent = notesTotal;
-      } catch(e) { console.error(e); }
+        document.getElementById("myRec").textContent = recTotal;
+        var nr = await client.from("memory_notes").select("id").eq("author_name",name);
+        document.getElementById("myNotes").textContent = (nr.data||[]).length;
+      } catch(e){console.error(e);}
     }
 
-    // ── search ────────────────────────────────────────────
-    async function searchMemorials(query) {
-      var container = document.getElementById("searchResults");
-      clearTimeout(searchTimeout);
-
-      if (!query || query.trim().length < 2) {
-        container.style.display = "none";
-        container.innerHTML = "";
-        return;
-      }
-
-      container.style.display = "grid";
-      container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Searching...</h3></div>';
-
-      searchTimeout = setTimeout(async function() {
-        var q = query.trim().toLowerCase();
+    function doSearch(q) {
+      var results = document.getElementById("searchResults");
+      clearTimeout(searchTimer);
+      if (!q||q.trim().length<2) { results.style.display="none"; results.innerHTML=""; return; }
+      results.style.display="grid";
+      results.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><h3>Searching...</h3></div>';
+      searchTimer = setTimeout(async function(){
         var r = await client.from("memorials").select("*")
-          .or("full_name.ilike.%" + q + "%,mosque_name.ilike.%" + q + "%,uk_city.ilike.%" + q + "%")
-          .limit(12);
-
-        if (r.error || !r.data || !r.data.length) {
-          container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">😔</div><h3>No memorials found</h3><p>Try a different name or mosque.</p></div>';
-          return;
-        }
-
-        container.innerHTML = r.data.map(function(m) { return buildMemorialCard(m, false); }).join("");
-      }, 400);
+          .or("full_name.ilike.%"+q.trim()+"%,mosque_name.ilike.%"+q.trim()+"%,uk_city.ilike.%"+q.trim()+"%").limit(9);
+        if (!r.data||!r.data.length) { results.innerHTML='<div class="empty-state"><div class="empty-icon">😔</div><h3>No memorials found</h3><p>Try a different name or mosque.</p></div>'; return; }
+        results.innerHTML = r.data.map(function(m){return memCard(m,false);}).join("");
+      },400);
     }
 
+    function escH(v) { return String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     init();
   </script>
   <script src="nav.js"></script>
