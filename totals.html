@@ -211,7 +211,7 @@
     function generateQR() {
       var el = document.getElementById("qrDiv");
       if (!el || !memorialSlug) return;
-      var url = window.location.origin + window.location.pathname.replace("totals.html","index.html") + "?slug=" + encodeURIComponent(memorialSlug);
+      var url = window.location.origin + window.location.pathname.replace("totals.html","recite.html") + "?slug=" + encodeURIComponent(memorialSlug);
       el.innerHTML = "";
       new QRCode(el, { text: url, width: 180, height: 180, colorDark:"#000", colorLight:"#fff" });
     }

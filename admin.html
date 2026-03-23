@@ -146,7 +146,7 @@
         <div class="notice-box" id="adminNotice"></div>
         <div class="helper-box">
           Each memorial gets a unique URL like:<br /><br />
-          <strong>index.html?slug=ahmed-khan</strong><br />
+          <strong>recite.html?slug=ahmed-khan</strong><br />
           <strong>totals.html?slug=ahmed-khan</strong>
         </div>
       </section>
@@ -227,6 +227,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="config.js"></script>
+  <script src="nav.js"></script>
   <script>
     // ── Supabase client ───────────────────────────────────
     var adminClient = window.supabase.createClient(
@@ -421,7 +422,7 @@
       }
 
       var baseUrl = getBaseUrl();
-      var memorialUrl = baseUrl + "index.html?slug=" + encodeURIComponent(memorial.slug);
+      var memorialUrl = baseUrl + "recite.html?slug=" + encodeURIComponent(memorial.slug);
       var totalsUrl = baseUrl + "totals.html?slug=" + encodeURIComponent(memorial.slug);
 
       showNotice(
@@ -459,7 +460,7 @@
       var baseUrl = getBaseUrl();
 
       list.innerHTML = result.data.map(function(m) {
-        var memorialUrl = baseUrl + "index.html?slug=" + encodeURIComponent(m.slug);
+        var memorialUrl = baseUrl + "recite.html?slug=" + encodeURIComponent(m.slug);
         var totalsUrl = baseUrl + "totals.html?slug=" + encodeURIComponent(m.slug);
         var safeName = m.full_name.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
         var safeUrl = memorialUrl.replace(/'/g, "\\'");

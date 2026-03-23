@@ -6,7 +6,7 @@
   var q = slug ? "?slug=" + encodeURIComponent(slug) : "";
   var path = window.location.pathname;
 
-  var isHome     = path.endsWith("index.html") || path.endsWith("/");
+  var isHome     = path.endsWith("recite.html");
   var isTotals   = path.endsWith("totals.html");
   var isAdmin    = path.endsWith("admin.html");
   var isApproval = path.endsWith("approvals.html");
@@ -156,7 +156,7 @@
     if (user) {
       // Logged in links
       leftLinks =
-        '<a href="index.html' + q + '" class="' + (isHome ? "active" : "") + '">🤲 Recite</a>' +
+        '<a href="recite.html' + q + '" class="' + (isHome ? "active" : "") + '">🤲 Recite</a>' +
         '<a href="totals.html' + q + '" class="' + (isTotals ? "active" : "") + '">📊 Live Totals</a>';
 
       if (isApprovedMosque || isSuperAdmin) {
@@ -210,7 +210,7 @@
 
     if (user) {
       nav.innerHTML =
-        '<a href="index.html' + q + '" class="' + (isHome ? "active" : "") + '"><span class="bn-icon">🤲</span>Recite</a>' +
+        '<a href="recite.html' + q + '" class="' + (isHome ? "active" : "") + '"><span class="bn-icon">🤲</span>Recite</a>' +
         '<a href="totals.html' + q + '" class="' + (isTotals ? "active" : "") + '"><span class="bn-icon">📊</span>Totals</a>' +
         (isApprovedMosque || isSuperAdmin ? '<a href="admin.html" class="' + (isAdmin ? "active" : "") + '"><span class="bn-icon">🕌</span>Admin</a>' : '') +
         '<a href="login.html?signout=1" class=""><span class="bn-icon">👤</span>Account</a>';

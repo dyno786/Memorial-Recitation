@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recite — Khatam</title>
+  <meta name="theme-color" content="#03110f" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .chooser-wrap{display:none;}
+    .chooser-select{width:100%;border:none;outline:none;border-radius:14px;padding:14px;background:#1a3028;color:#fff;font-size:16px;margin-top:12px;}
+    .chooser-actions{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;}
+    .memorial-app{display:none;}
+
+    /* collapsible */
+    .collapse-card{background:linear-gradient(90deg,#0d1e18,#10241d);border:1px solid rgba(255,255,255,.06);border-radius:18px;margin-bottom:14px;overflow:hidden;}
+    .collapse-header{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 18px;cursor:pointer;user-select:none;text-align:center;}
+    .collapse-header>div{text-align:center;width:100%;}
+    .collapse-header:hover{background:rgba(255,255,255,.03);}
+    .collapse-title{font-size:16px;font-weight:bold;margin:0;}
+    .collapse-sub{font-size:12px;color:#c9c7b9;margin:0;}
+    .collapse-arrow{font-size:12px;color:#c9c7b9;transition:transform .25s;margin-left:auto;flex-shrink:0;}
+    .collapse-card.open .collapse-arrow{transform:rotate(180deg);}
+    .collapse-body{display:none;padding:0 18px 16px;border-top:1px solid rgba(255,255,255,.06);text-align:center;}
+    .collapse-body .field,.collapse-body .field-grid,.collapse-body form{text-align:left;}
+    .collapse-body .deceased-meta,.collapse-body .hadith-box{text-align:center;}
+    .collapse-card.open .collapse-body{display:block;}
+
+    /* deceased */
+    .deceased-meta{font-size:13px;color:#c9c7b9;text-align:center;line-height:1.7;margin-bottom:14px;}
+    .hadith-box{margin-top:0;padding:14px;border-radius:14px;background:rgba(202,168,92,.08);border:1px solid rgba(202,168,92,.28);}
+    .hadith-text{line-height:1.7;font-style:italic;font-size:13px;}
+    .hadith-ref{margin-top:6px;color:#caa85c;font-weight:bold;font-size:13px;}
+    .hadith-note{margin-top:6px;color:#d8d6c8;font-size:13px;}
+
+    /* details */
+    .saved-badge{display:inline-flex;align-items:center;gap:6px;background:#173026;border:1px solid rgba(202,168,92,.3);color:#caa85c;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:bold;}
+
+    /* totals bar */
+    .totals-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+    .totals-bar-stat{background:rgba(255,255,255,.03);border-radius:14px;padding:12px 8px;text-align:center;}
+    .totals-bar-value{display:block;font-size:24px;font-weight:bold;line-height:1;}
+    .totals-bar-label{display:block;font-size:11px;color:#c9c7b9;margin-top:5px;}
+
+    /* counter */
+    .counter-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+    .counter-item{background:rgba(255,255,255,.03);border-radius:14px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;}
+    .counter-name{font-size:15px;font-weight:bold;}
+    .counter-controls{display:flex;align-items:center;gap:8px;width:100%;justify-content:center;}
+    .count-btn{width:44px;height:44px;border:none;border-radius:10px;background:#caa85c;color:#111;font-size:24px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .count-btn:active{transform:scale(.93);}
+    .count-display{min-width:40px;height:44px;border-radius:10px;background:#173026;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;}
+
+    /* juz */
+    .juz-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .juz-card{background:rgba(255,255,255,.03);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}
+    .juz-meta{width:100%;text-align:center;}
+    .juz-meta strong{display:block;font-size:18px;margin-bottom:2px;}
+    .juz-meta span{color:#c9c7b9;font-size:12px;display:block;}
+    .juz-btn{width:100%;border:none;border-radius:10px;padding:10px;font-weight:bold;cursor:pointer;font-size:13px;}
+    .juz-btn.available{background:#caa85c;color:#111;}
+    .juz-btn.claimed{background:#3d4a44;color:#fff;}
+    .juz-btn.completed{background:#2f6d4f;color:#fff;cursor:default;}
+    .my-juz{border:1px solid rgba(202,168,92,.5)!important;}
+
+    /* fatiha btn */
+    .fatiha-btn{width:100%;border:none;border-radius:16px;padding:16px;font-size:18px;font-weight:bold;cursor:pointer;background:#8b1a1a;color:#fff;margin-top:6px;letter-spacing:.5px;transition:background .2s;}
+    .fatiha-btn:hover{background:#a52020;}
+    .fatiha-btn:active{transform:scale(.98);}
+
+    /* modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;overflow-y:auto;padding:40px 16px;}
+    .modal-overlay.open{display:block;}
+    .modal-box{background:#0d1e18;border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:24px;width:min(560px,100%);margin:0 auto;}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+    .modal-header h2{margin:0;font-size:20px;}
+    .modal-close{background:rgba(255,255,255,.08);border:none;color:#f5f5f0;border-radius:10px;width:36px;height:36px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+    /* toast */
+    .rec-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:#173026;border:1px solid rgba(202,168,92,.4);color:#caa85c;padding:10px 20px;border-radius:999px;font-size:14px;font-weight:bold;opacity:0;transition:opacity .25s,transform .25s;z-index:300;white-space:nowrap;pointer-events:none;}
+    .rec-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* footer */
+    .dedication-footer{margin-top:32px;padding:18px 24px;background:rgba(202,168,92,.06);border:1px solid rgba(202,168,92,.18);border-radius:16px;text-align:center;color:#c9c7b9;font-size:13px;line-height:1.8;font-style:italic;}
+    .dedication-footer strong{color:#caa85c;font-style:normal;}
+
+    @media(max-width:720px){.sidebar{display:none;}.totals-bar{grid-template-columns:repeat(2,1fr);}}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar container" style="text-align:center;flex-direction:column;align-items:center;gap:10px;">
+      <div>
+        <p class="eyebrow">Masjid Memorial Recitation</p>
+        <h1 class="page-title">Esaal-e-Sawab &amp; Quran Khatam</h1>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a class="ghost-link" id="totalsLink" href="totals.html" target="_blank" rel="noreferrer">Open totals screen</a>
+        <a class="ghost-link" id="whatsappShareBtn" href="#" target="_blank" rel="noreferrer" style="background:#1a472a;border-color:rgba(255,255,255,.1);">Share via WhatsApp</a>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="panel chooser-wrap" id="chooserWrap">
+        <div class="section-header"><h2>Select a Memorial</h2><p>Choose from the list below.</p></div>
+        <select id="memorialDropdown" class="chooser-select"><option value="">Loading memorials...</option></select>
+        <div class="chooser-actions"><button type="button" class="btn btn-primary" id="openMemorialBtn">Open Memorial</button></div>
+      </section>
+
+      <div class="memorial-app" id="memorialApp">
+        <!-- DECEASED -->
+        <div class="collapse-card" id="deceasedCard">
+          <div class="collapse-header" onclick="toggleCollapse('deceasedCard')">
+            <div><p class="collapse-title memorial-name">Loading...</p><p class="collapse-sub">Tap to view details &amp; tribute</p></div>
+            <span class="collapse-arrow">&#9660;</span>
+          </div>
+          <div class="collapse-body">
+            <div class="deceased-meta" id="deceasedMeta">Loading...</div>
+            <div class="hadith-box">
+              <div class="hadith-text">"When a person dies, all their deeds come to an end except three: ongoing charity, beneficial knowledge, or a righteous child who prays for them."</div>
+              <div class="hadith-ref">— Sahih Muslim</div>
+              <div class="hadith-note" id="deceasedTribute">Please recite, make du'a, and take part in the collective Qur'an reading with the intention of reward for the deceased.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- YOUR DETAILS -->
+        <div class="collapse-card" id="detailsCard">
+          <div class="collapse-header" onclick="toggleCollapse('detailsCard')">
+            <div><p class="collapse-title">Your Details</p><p class="collapse-sub" id="detailsCardSub">Tap to enter your name &amp; details</p></div>
+            <span class="collapse-arrow">&#9660;</span>
+          </div>
+          <div class="collapse-body" style="padding-top:14px;">
+            <div id="detailsSavedBadge" style="display:none;margin-bottom:12px;"><span class="saved-badge">&#10003; Saved &mdash; <span id="savedNameDisplay"></span></span></div>
+            <p class="muted-text" style="margin:0 0 12px;font-size:13px;">Saved in your browser — no need to re-enter next visit.</p>
+            <form class="stack-lg" onsubmit="return false;">
+              <div class="field"><label for="readerName">Name</label><input id="readerName" type="text" placeholder="Enter your name" /></div>
+              <div class="field-grid two-up">
+                <div class="field"><label for="ukCity">UK City</label><input id="ukCity" type="text" placeholder="e.g. Leeds" /></div>
+                <div class="field"><label for="pakCity">Pakistani City</label><input id="pakCity" type="text" placeholder="e.g. Lahore" /></div>
+              </div>
+              <div class="field">
+                <label for="relation">Relation</label>
+                <select id="relation">
+                  <option value="">Select relation</option>
+                  <option value="Family">Family</option>
+                  <option value="Friend">Friend</option>
+                  <option value="Community Member">Community Member</option>
+                  <option value="Anonymous">Anonymous</option>
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary" style="width:100%;margin-top:4px;" id="saveDetailsBtn">Save my details</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="grid-main">
+          <div>
+            <!-- TOTALS BAR -->
+            <div class="totals-bar">
+              <div class="totals-bar-stat"><span class="totals-bar-value" id="statReaders">—</span><span class="totals-bar-label">Readers</span></div>
+              <div class="totals-bar-stat"><span class="totals-bar-value" id="statRecitations">—</span><span class="totals-bar-label">Recitations</span></div>
+              <div class="totals-bar-stat"><span class="totals-bar-value" id="statJuz">—</span><span class="totals-bar-label">Juz Claimed</span></div>
+              <div class="totals-bar-stat"><span class="totals-bar-value" id="statJuzDone">—</span><span class="totals-bar-label">Juz Done</span></div>
+            </div>
+
+            <!-- FATIHA BUTTON -->
+            <button class="fatiha-btn" id="collectiveFatihaBtn">🤲 Request Collective Fatiha</button>
+
+            <!-- TABS -->
+            <section class="panel tab-panel-wrap" style="margin-top:14px;">
+              <div class="tabs">
+                <button type="button" class="tab-btn active" data-tab="quickPanel">Quick Recitations</button>
+                <button type="button" class="tab-btn" data-tab="khatamPanel">Quran Khatam</button>
+              </div>
+
+              <div id="quickPanel" class="tab-content active">
+                <div class="section-header compact" style="text-align:center;"><h2>Quick Recitations</h2><p>Tap + to instantly record a recitation.</p></div>
+                <div class="counter-list">
+                  <div class="counter-item"><div class="counter-name">Bismillah</div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('bismillah','Bismillah',-1)">−</button><div class="count-display" id="bismillah">0</div><button type="button" class="count-btn" onclick="count('bismillah','Bismillah',1)">+</button></div></div>
+                  <div class="counter-item"><div class="counter-name">Alhamdulillah</div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('alhamdulillah','Alhamdulillah',-1)">−</button><div class="count-display" id="alhamdulillah">0</div><button type="button" class="count-btn" onclick="count('alhamdulillah','Alhamdulillah',1)">+</button></div></div>
+                  <div class="counter-item"><div class="counter-name">Subhanallah</div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('subhanallah','Subhanallah',-1)">−</button><div class="count-display" id="subhanallah">0</div><button type="button" class="count-btn" onclick="count('subhanallah','Subhanallah',1)">+</button></div></div>
+                  <div class="counter-item"><div class="counter-name">Astaghfirullah</div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('astaghfirullah','Astaghfirullah',-1)">−</button><div class="count-display" id="astaghfirullah">0</div><button type="button" class="count-btn" onclick="count('astaghfirullah','Astaghfirullah',1)">+</button></div></div>
+                  <div class="counter-item"><div class="counter-name">Durood Sharif</div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('durood','Durood Sharif',-1)">−</button><div class="count-display" id="durood">0</div><button type="button" class="count-btn" onclick="count('durood','Durood Sharif',1)">+</button></div></div>
+                  <div class="counter-item"><div class="counter-name">Surah Fatiha</div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('fatiha','Surah Fatiha',-1)">−</button><div class="count-display" id="fatiha">0</div><button type="button" class="count-btn" onclick="count('fatiha','Surah Fatiha',1)">+</button></div></div>
+                  <div class="counter-item"><div class="counter-name">Surah Ikhlas</div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('ikhlas','Surah Ikhlas',-1)">−</button><div class="count-display" id="ikhlas">0</div><button type="button" class="count-btn" onclick="count('ikhlas','Surah Ikhlas',1)">+</button></div></div>
+                  <div class="counter-item"><div class="counter-name">Surah Yasin</div><div class="counter-controls"><button type="button" class="count-btn" onclick="count('yasin','Surah Yasin',-1)">−</button><div class="count-display" id="yasin">0</div><button type="button" class="count-btn" onclick="count('yasin','Surah Yasin',1)">+</button></div></div>
+                </div>
+              </div>
+
+              <div id="khatamPanel" class="tab-content">
+                <div class="section-header compact" style="text-align:center;"><h2>Quran Khatam</h2><p>Claim one available Juz below.</p></div>
+                <div class="stats-toolbar mt-lg" style="justify-content:center;">
+                  <div class="pill-row" style="justify-content:center;">
+                    <div class="pill">Campaign: Loading...</div>
+                    <div class="pill">Status: Syncing</div>
+                  </div>
+                </div>
+                <div class="juz-grid mt-lg" id="juzList"></div>
+              </div>
+            </section>
+
+            <div class="dedication-footer">
+              <strong>In loving memory</strong> of my mother, my wife and my extended family —
+              offered as <strong>Sadaqah Jariyah</strong>.<br />
+              Please remember them in your humble du'as. May Allah grant them the highest place in Jannah. Ameen.
+            </div>
+          </div>
+
+          <aside class="sidebar">
+            <section class="panel leaderboard-panel">
+              <div class="section-header compact"><h2>Leaderboard</h2><p>Top readers.</p></div>
+              <div class="leaderboard-list" id="leaderboardList"><div class="leaderboard-item"><span>Loading...</span><strong>—</strong></div></div>
+            </section>
+            <section class="panel activity-panel">
+              <div class="section-header compact"><h2>Recent Activity</h2><p>Latest recitations.</p></div>
+              <div class="activity-list" id="activityList"><div class="activity-item"><span>Loading...</span><strong>—</strong></div></div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="rec-toast" id="recToast"></div>
+
+  <!-- FATIHA MODAL -->
+  <div class="modal-overlay" id="fatihaModal">
+    <div class="modal-box" style="text-align:center;">
+      <div class="modal-header"><h2>🤲 Collective Fatiha</h2><button class="modal-close" id="closeFatihaModal">&#x2715;</button></div>
+      <p class="muted-text" style="margin:0 0 16px;">This will display on the live screen for everyone to recite together.</p>
+      <div class="field" style="text-align:left;margin-bottom:16px;">
+        <label for="fatihaName">Your name (shown on screen)</label>
+        <input id="fatihaName" type="text" placeholder="e.g. Ahmed Khan" style="width:100%;border:none;outline:none;border-radius:14px;padding:14px;background:#1a3028;color:#fff;font-size:15px;box-sizing:border-box;" />
+      </div>
+      <button class="fatiha-btn" id="submitFatihaBtn">Send to Live Screen</button>
+    </div>
+  </div>
+
+  <!-- DETAILS FALLBACK MODAL -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-box">
+      <div class="modal-header"><h2>Your Details</h2><button class="modal-close" id="closeDetailsModal">&#x2715;</button></div>
+      <p class="muted-text" style="margin:0 0 16px;">Please fill in your details before continuing.</p>
+      <form class="stack-lg" onsubmit="return false;">
+        <div class="field"><label for="readerNameModal">Name</label><input id="readerNameModal" type="text" placeholder="Enter your name" /></div>
+        <div class="field-grid two-up">
+          <div class="field"><label for="ukCityModal">UK City</label><input id="ukCityModal" type="text" placeholder="e.g. Leeds" /></div>
+          <div class="field"><label for="pakCityModal">Pakistani City</label><input id="pakCityModal" type="text" placeholder="e.g. Lahore" /></div>
+        </div>
+        <div class="field">
+          <label for="relationModal">Relation</label>
+          <select id="relationModal">
+            <option value="">Select relation</option>
+            <option value="Family">Family</option>
+            <option value="Friend">Friend</option>
+            <option value="Community Member">Community Member</option>
+            <option value="Anonymous">Anonymous</option>
+          </select>
+        </div>
+        <div class="inline-actions">
+          <button type="button" class="btn btn-primary" id="saveDetailsModalBtn">Save &amp; continue</button>
+          <button type="button" class="btn btn-secondary" id="cancelDetailsModal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>function toggleCollapse(id){document.getElementById(id).classList.toggle("open");}</script>
+  <script src="app.js"></script>
+  <script src="nav.js"></script>
+</body>
+</html>

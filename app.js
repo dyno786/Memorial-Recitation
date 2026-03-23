@@ -251,7 +251,7 @@ async function loadMemorialChooser() {
   dd.addEventListener("change",function(){btn.disabled=!dd.value;});
   btn.addEventListener("click",function(){
     if(!dd.value){alert("Please choose a memorial first.");return;}
-    window.location.href="index.html?slug="+encodeURIComponent(dd.value);
+    window.location.href="recite.html?slug="+encodeURIComponent(dd.value);
   });
 }
 
