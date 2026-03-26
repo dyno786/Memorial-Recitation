@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Khatam Summary Email</title>
+  <style>
+    body{margin:0;padding:0;background:#f4f1ea;font-family:Arial,Helvetica,sans-serif;}
+    .wrapper{max-width:600px;margin:0 auto;padding:24px 16px;}
+    .card{background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+
+    /* header */
+    .header{background:#03110f;padding:28px 28px 20px;text-align:center;}
+    .header-logo{font-size:28px;font-weight:bold;color:#caa85c;letter-spacing:.5px;margin-bottom:4px;}
+    .header-logo span{color:#f5f5f0;}
+    .header-bismillah{font-size:16px;color:#caa85c;margin:0;}
+    .header-memorial{margin-top:16px;padding:12px 16px;background:rgba(202,168,92,.1);border:1px solid rgba(202,168,92,.2);border-radius:10px;}
+    .header-memorial-name{font-size:20px;font-weight:bold;color:#f5f5f0;}
+    .header-memorial-meta{font-size:12px;color:#c9c7b9;margin-top:3px;}
+
+    /* body */
+    .body{padding:28px;}
+    .greeting{font-size:16px;color:#1a2e25;line-height:1.7;margin:0 0 20px;}
+
+    /* stat section */
+    .section{margin-bottom:24px;}
+    .section-title{font-size:13px;font-weight:bold;color:#03110f;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #caa85c;padding-bottom:6px;margin-bottom:14px;}
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .stat-box{background:#f4f1ea;border-radius:10px;padding:12px;text-align:center;}
+    .stat-val{font-size:22px;font-weight:bold;color:#03110f;display:block;}
+    .stat-lbl{font-size:11px;color:#6b7c6a;margin-top:2px;}
+
+    /* juz row */
+    .juz-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+    .juz-pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:bold;}
+    .juz-done{background:#0d3a28;color:#3dd68c;}
+    .juz-claimed{background:#f4f1ea;color:#6b7c6a;}
+    .juz-free{background:#faeeda;color:#854f0b;}
+
+    /* contributor row */
+    .contrib-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0ece3;}
+    .contrib-row:last-child{border-bottom:none;}
+    .contrib-avatar{width:34px;height:34px;border-radius:50%;background:#caa85c;color:#111;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;flex-shrink:0;}
+    .contrib-name{font-size:14px;font-weight:bold;color:#1a2e25;}
+    .contrib-count{font-size:12px;color:#6b7c6a;margin-left:auto;}
+
+    /* memory note */
+    .note-card{border-left:3px solid #caa85c;padding:10px 12px;background:#fafaf7;border-radius:0 8px 8px 0;margin-bottom:8px;}
+    .note-text{font-size:13px;color:#2a3a28;font-style:italic;line-height:1.7;}
+    .note-author{font-size:11px;color:#6b7c6a;margin-top:4px;}
+
+    /* deadline bar */
+    .deadline-box{background:#03110f;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;}
+    .deadline-num{font-size:32px;font-weight:bold;color:#caa85c;flex-shrink:0;}
+    .deadline-text{color:#c9c7b9;font-size:13px;line-height:1.6;}
+    .deadline-bar{height:6px;background:#173026;border-radius:999px;margin-top:8px;overflow:hidden;}
+    .deadline-fill{height:100%;border-radius:999px;background:#caa85c;}
+
+    /* dua box */
+    .dua-box{background:linear-gradient(135deg,#0d1e18,#0a1a12);border-radius:12px;padding:20px;text-align:center;}
+    .dua-label{font-size:11px;color:#caa85c;font-weight:bold;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+    .dua-arabic{font-size:18px;color:#caa85c;margin-bottom:10px;direction:rtl;}
+    .dua-text{font-size:13px;color:#c9c7b9;line-height:1.9;font-style:italic;}
+
+    /* cta */
+    .cta-wrap{text-align:center;margin:24px 0 8px;}
+    .cta-btn{display:inline-block;background:#caa85c;color:#111;font-weight:bold;font-size:14px;padding:14px 28px;border-radius:10px;text-decoration:none;}
+
+    /* footer */
+    .footer{background:#f4f1ea;padding:20px;text-align:center;font-size:11px;color:#9aaa96;line-height:1.8;}
+    .footer a{color:#caa85c;}
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-logo">Kh<span>atam</span></div>
+      <div class="header-bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+      <div class="header-memorial">
+        <div class="header-memorial-name">Ahmed Khan</div>
+        <div class="header-memorial-meta">🌙 Daily summary · Day 3 of 40 · {{date}}</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+
+      <p class="greeting">
+        Assalamu Alaikum wa Rahmatullahi wa Barakatuh,<br><br>
+        Here is today's update for <strong>Ahmed Khan</strong>'s Khatam.
+        May Allah grant him the highest place in Jannah al-Firdaus. Ameen. 🤲
+      </p>
+
+      <!-- Recitation stats -->
+      <div class="section">
+        <div class="section-title">📿 Today's recitations</div>
+        <div class="stat-grid">
+          <div class="stat-box"><span class="stat-val">292</span><span class="stat-lbl">Total recitations</span></div>
+          <div class="stat-box"><span class="stat-val">6</span><span class="stat-lbl">Active readers</span></div>
+          <div class="stat-box"><span class="stat-val">177</span><span class="stat-lbl">Durood Sharif</span></div>
+        </div>
+      </div>
+
+      <!-- Juz progress -->
+      <div class="section">
+        <div class="section-title">📖 Quran Khatam progress — 12 of 30 Juz</div>
+        <div class="juz-row">
+          <span class="juz-pill juz-done">Juz 4 ✓</span>
+          <span class="juz-pill juz-done">Juz 7 ✓</span>
+          <span class="juz-pill juz-claimed">Juz 1 — Ahmed</span>
+          <span class="juz-pill juz-claimed">Juz 2 — Sara</span>
+          <span class="juz-pill juz-claimed">Juz 3 — You</span>
+          <span class="juz-pill juz-claimed">Juz 5 — Tariq</span>
+          <span class="juz-pill juz-free">18 Juz available</span>
+        </div>
+        <p style="font-size:12px;color:#6b7c6a;margin:10px 0 0;">
+          MashaAllah — <strong>Juz 4 completed today</strong> by Sara Malik. 
+          18 Juz still available to claim — share the link to bring more reciters in.
+        </p>
+      </div>
+
+      <!-- Contributors -->
+      <div class="section">
+        <div class="section-title">👥 Who has joined and contributed</div>
+        <div class="contrib-row">
+          <div class="contrib-avatar">MA</div>
+          <div><div class="contrib-name">Mohammed Adris</div><div style="font-size:11px;color:#6b7c6a;">177 recitations · Juz 3 claimed</div></div>
+          <div class="contrib-count">Top reader 🏆</div>
+        </div>
+        <div class="contrib-row">
+          <div class="contrib-avatar">SM</div>
+          <div><div class="contrib-name">Sara Malik</div><div style="font-size:11px;color:#6b7c6a;">47 recitations · Juz 4 completed ✓</div></div>
+          <div class="contrib-count">MashaAllah</div>
+        </div>
+        <div class="contrib-row">
+          <div class="contrib-avatar">TM</div>
+          <div><div class="contrib-name">Tanny Malik</div><div style="font-size:11px;color:#6b7c6a;">34 recitations · Juz 5 claimed</div></div>
+        </div>
+        <p style="font-size:12px;color:#6b7c6a;margin:10px 0 0;">3 new readers joined today. JazakAllah Khair to everyone who has taken part. 💝</p>
+      </div>
+
+      <!-- Memory notes -->
+      <div class="section">
+        <div class="section-title">🌸 New memory wall notes today</div>
+        <div class="note-card">
+          <div class="note-text">"She always had a smile for everyone. May Allah grant her Jannah and fill her grave with noor."</div>
+          <div class="note-author">— Ahmed K · Family · Today at 7:32pm</div>
+        </div>
+        <div class="note-card">
+          <div class="note-text">"Reading Surah Yasin for her tonight. Please accept this ya Allah. Ameen."</div>
+          <div class="note-author">— Sara M · Friend · Today at 6:15pm</div>
+        </div>
+      </div>
+
+      <!-- Deadline -->
+      <div class="section">
+        <div class="section-title">⏳ Khatam deadline</div>
+        <div class="deadline-box">
+          <div class="deadline-num">37</div>
+          <div>
+            <div class="deadline-text" style="color:#f5f5f0;font-weight:bold;">days until the 40th day Khatam</div>
+            <div class="deadline-text">The deadline is 15 April 2026. Keep sharing the link — every new reader brings the Khatam closer to completion. InshAllah.</div>
+            <div class="deadline-bar"><div class="deadline-fill" style="width:8%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dua -->
+      <div class="section">
+        <div class="dua-box">
+          <div class="dua-label">🤲 Tonight's dua for you</div>
+          <div class="dua-arabic">اللَّهُمَّ ارْحَمْهُ وَاغْفِرْ لَهُ</div>
+          <div class="dua-text">
+            You are not alone in this. Every person who reads, every dua that is made, every Juz that is completed — it reaches them. Allah hears every word. He is Al-Sami', the All-Hearing.<br><br>
+            Keep going. Your loved one is being remembered by people they may never have even met. SubhanAllah. And Allah sees every single tear you have shed for them. Nothing is wasted with Him.<br><br>
+            <strong style="color:#caa85c;">Inna Allaha ma'akum — Truly, Allah is with you.</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-wrap">
+        <a href="https://dyno786.github.io/Memorial-Recitation/recite.html?slug=ahmed-khan" class="cta-btn">View the full memorial →</a>
+        <p style="font-size:12px;color:#9aaa96;margin-top:10px;">Share this link with anyone who would like to participate.</p>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>You are receiving this because you set up notifications for this memorial.<br>
+      <a href="#">Update preferences</a> · <a href="#">Unsubscribe</a></p>
+      <p style="margin-top:8px;">Built with love in memory of those we have lost. May Allah grant them Jannah. Ameen. 🤲</p>
+      <p style="margin-top:6px;">© 2026 Khatam Platform · <a href="#">khatam.app</a></p>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
