@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Notification Preferences — Khatam</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    body{background:#03110f;color:#f5f5f0;}
+    .shell{width:min(680px,calc(100% - 32px));margin:0 auto;padding:24px 0 90px;}
+    .page-header{margin-bottom:28px;}
+    .page-header h1{font-size:clamp(22px,4vw,32px);margin:0 0 6px;}
+    .page-header p{color:#c9c7b9;font-size:14px;margin:0;}
+
+    /* memorial selector */
+    .mem-select-wrap{margin-bottom:24px;}
+    .mem-select{width:100%;border:none;outline:none;border-radius:12px;padding:13px 14px;background:#1a3028;color:#fff;font-size:15px;box-sizing:border-box;}
+
+    /* section cards */
+    .pref-card{background:linear-gradient(135deg,#0d1e18,#10241d);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:20px;margin-bottom:14px;}
+    .pref-card-title{font-size:14px;font-weight:bold;color:#caa85c;margin:0 0 14px;display:flex;align-items:center;gap:8px;}
+
+    /* frequency buttons */
+    .freq-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+    .freq-btn{background:#1a3028;border:2px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all .15s;}
+    .freq-btn:hover{border-color:rgba(202,168,92,.3);}
+    .freq-btn.selected{border-color:#caa85c;background:rgba(202,168,92,.08);}
+    .freq-btn-icon{font-size:22px;margin-bottom:6px;}
+    .freq-btn-label{font-size:13px;font-weight:bold;color:#f5f5f0;margin-bottom:2px;}
+    .freq-btn-sub{font-size:11px;color:#c9c7b9;}
+
+    /* time picker */
+    .time-row{display:flex;align-items:center;gap:12px;margin-top:12px;}
+    .time-label{font-size:13px;color:#c9c7b9;flex-shrink:0;}
+    .time-input{border:none;outline:none;border-radius:10px;padding:10px 12px;background:#1a3028;color:#fff;font-size:15px;width:120px;}
+
+    /* toggle rows */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+    .toggle-row:last-child{border-bottom:none;}
+    .toggle-info{flex:1;}
+    .toggle-label{font-size:14px;color:#f5f5f0;margin-bottom:2px;}
+    .toggle-sub{font-size:12px;color:#c9c7b9;}
+    .toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;}
+    .toggle-switch input{opacity:0;width:0;height:0;}
+    .toggle-slider{position:absolute;inset:0;background:#1a3028;border-radius:999px;cursor:pointer;transition:.3s;}
+    .toggle-slider::before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#5a7a6a;border-radius:50%;transition:.3s;}
+    .toggle-switch input:checked + .toggle-slider{background:rgba(202,168,92,.2);}
+    .toggle-switch input:checked + .toggle-slider::before{background:#caa85c;transform:translateX(20px);}
+
+    /* channel toggles */
+    .channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .channel-card{background:#1a3028;border-radius:12px;padding:14px;cursor:pointer;border:2px solid rgba(255,255,255,.06);transition:all .15s;}
+    .channel-card.selected{border-color:#caa85c;background:rgba(202,168,92,.06);}
+    .channel-icon{font-size:24px;margin-bottom:8px;}
+    .channel-name{font-size:13px;font-weight:bold;color:#f5f5f0;margin-bottom:3px;}
+    .channel-sub{font-size:11px;color:#c9c7b9;}
+
+    /* phone input */
+    .phone-wrap{display:none;margin-top:10px;}
+    .phone-input{width:100%;border:none;outline:none;border-radius:10px;padding:12px 14px;background:#1a3028;color:#fff;font-size:14px;box-sizing:border-box;}
+    .phone-input::placeholder{color:#5a7a6a;}
+
+    /* dua preview */
+    .dua-preview{background:rgba(202,168,92,.06);border:1px solid rgba(202,168,92,.2);border-radius:14px;padding:16px;margin-top:12px;}
+    .dua-preview-label{font-size:11px;color:#caa85c;font-weight:bold;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+    .dua-text{font-size:13px;color:#e4decb;line-height:1.8;font-style:italic;}
+    .dua-refresh{font-size:12px;color:#caa85c;cursor:pointer;margin-top:8px;display:inline-block;}
+    .dua-refresh:hover{text-decoration:underline;}
+
+    /* preview email */
+    .email-preview{background:#0d1e18;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;margin-top:14px;}
+    .ep-label{font-size:11px;color:#caa85c;font-weight:bold;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+    .ep-subject{font-size:15px;font-weight:bold;color:#f5f5f0;margin-bottom:12px;}
+    .ep-body{font-size:13px;color:#c9c7b9;line-height:1.8;}
+    .ep-stat{display:inline-block;background:#173026;border-radius:8px;padding:4px 10px;font-size:12px;color:#caa85c;margin:2px;}
+    .ep-highlight{color:#caa85c;font-weight:bold;}
+
+    .notice{padding:12px 14px;border-radius:12px;font-size:13px;margin-top:12px;display:none;}
+    .notice.success{background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);color:#3dd68c;}
+    .notice.error{background:rgba(232,112,112,.1);border:1px solid rgba(232,112,112,.3);color:#e87070;}
+
+    @media(max-width:480px){.freq-grid{grid-template-columns:1fr;}.channel-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="page-header">
+    <p class="eyebrow" style="color:#caa85c;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Notification Settings</p>
+    <h1>Summary preferences 🔔</h1>
+    <p>Choose how and when you'd like to receive updates about your memorial's recitation progress.</p>
+  </div>
+
+  <!-- Memorial selector -->
+  <div class="mem-select-wrap">
+    <label style="display:block;font-size:13px;color:#c9c7b9;margin-bottom:6px;">Which memorial are these settings for?</label>
+    <select class="mem-select" id="memorialSelect">
+      <option value="">Loading memorials...</option>
+    </select>
+  </div>
+
+  <!-- Delivery channel -->
+  <div class="pref-card">
+    <div class="pref-card-title">📬 How should we notify you?</div>
+    <div class="channel-grid">
+      <div class="channel-card selected" id="emailCard" onclick="toggleChannel('email')">
+        <div class="channel-icon">✉️</div>
+        <div class="channel-name">Email</div>
+        <div class="channel-sub">Sent to your registered email address</div>
+      </div>
+      <div class="channel-card" id="whatsappCard" onclick="toggleChannel('whatsapp')">
+        <div class="channel-icon">💬</div>
+        <div class="channel-name">WhatsApp</div>
+        <div class="channel-sub">Sent to your WhatsApp number</div>
+      </div>
+    </div>
+    <div class="phone-wrap" id="phoneWrap">
+      <input type="tel" class="phone-input" id="whatsappNumber" placeholder="+44 7700 000000 — your WhatsApp number" />
+      <p style="font-size:11px;color:#5a7a6a;margin:6px 0 0;">We'll send a link you can open in WhatsApp. Standard message rates may apply.</p>
+    </div>
+  </div>
+
+  <!-- Frequency -->
+  <div class="pref-card">
+    <div class="pref-card-title">⏰ How often would you like updates?</div>
+    <div class="freq-grid">
+      <div class="freq-btn" id="freq-astheycome" onclick="selectFreq('astheycome',this)">
+        <div class="freq-btn-icon">⚡</div>
+        <div class="freq-btn-label">As they come</div>
+        <div class="freq-btn-sub">Every time someone recites or joins</div>
+      </div>
+      <div class="freq-btn selected" id="freq-daily" onclick="selectFreq('daily',this)">
+        <div class="freq-btn-icon">🌙</div>
+        <div class="freq-btn-label">Daily summary</div>
+        <div class="freq-btn-sub">One digest each evening</div>
+      </div>
+      <div class="freq-btn" id="freq-weekly" onclick="selectFreq('weekly',this)">
+        <div class="freq-btn-icon">📅</div>
+        <div class="freq-btn-label">Weekly</div>
+        <div class="freq-btn-sub">Every Friday evening</div>
+      </div>
+      <div class="freq-btn" id="freq-monthly" onclick="selectFreq('monthly',this)">
+        <div class="freq-btn-icon">🗓️</div>
+        <div class="freq-btn-label">Monthly</div>
+        <div class="freq-btn-sub">First of each month</div>
+      </div>
+    </div>
+    <div class="time-row" id="timeRow">
+      <span class="time-label">Send at:</span>
+      <input type="time" class="time-input" id="preferredTime" value="21:00" />
+      <span style="font-size:12px;color:#5a7a6a;">your local time</span>
+    </div>
+  </div>
+
+  <!-- What to include -->
+  <div class="pref-card">
+    <div class="pref-card-title">📋 What to include in each summary</div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">📿 Total recitations</div>
+        <div class="toggle-sub">How many recitations have been made since the last update</div>
+      </div>
+      <label class="toggle-switch"><input type="checkbox" id="inclRecitations" checked/><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">📖 Quran Khatam progress</div>
+        <div class="toggle-sub">Which Juz have been claimed and completed</div>
+      </div>
+      <label class="toggle-switch"><input type="checkbox" id="inclJuz" checked/><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">👥 Who has joined and contributed</div>
+        <div class="toggle-sub">Names of new participants and their contributions</div>
+      </div>
+      <label class="toggle-switch"><input type="checkbox" id="inclContributors" checked/><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">🌸 New memory wall notes</div>
+        <div class="toggle-sub">Messages and duas left by the community today</div>
+      </div>
+      <label class="toggle-switch"><input type="checkbox" id="inclNotes" checked/><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">⏳ Days until Khatam deadline</div>
+        <div class="toggle-sub">Countdown to the 3rd or 40th day deadline</div>
+      </div>
+      <label class="toggle-switch"><input type="checkbox" id="inclDeadline" checked/><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-label">🤲 Uplifting dua & reminder</div>
+        <div class="toggle-sub">A rotating dua and reminder that you are not alone</div>
+      </div>
+      <label class="toggle-switch"><input type="checkbox" id="inclDua" checked/><span class="toggle-slider"></span></label>
+    </div>
+  </div>
+
+  <!-- Dua preview -->
+  <div class="pref-card">
+    <div class="pref-card-title">🤲 Preview — tonight's dua</div>
+    <p style="font-size:13px;color:#c9c7b9;margin:0 0 10px;">The closing dua in each summary rotates so each message feels personal and fresh.</p>
+    <div class="dua-preview">
+      <div class="dua-preview-label">Tonight's message</div>
+      <div class="dua-text" id="duaPreviewText">Loading...</div>
+    </div>
+    <span class="dua-refresh" onclick="rotateDua()">↻ Show me another</span>
+  </div>
+
+  <!-- Email preview -->
+  <div class="pref-card">
+    <div class="pref-card-title">👁️ Preview — what the summary looks like</div>
+    <div class="email-preview">
+      <div class="ep-label">Example email — Khatam daily summary</div>
+      <div class="ep-subject">🌙 Today's update for Ahmed Khan's Khatam — Day 3 of 40</div>
+      <div class="ep-body">
+        Assalamu Alaikum,<br><br>
+        Here is today's summary for <span class="ep-highlight">Ahmed Khan</span>'s Khatam. May Allah grant him the highest place in Jannah. Ameen.<br><br>
+        <strong style="color:#caa85c;">Today's recitations:</strong><br>
+        <span class="ep-stat">📿 Durood Sharif — 177</span>
+        <span class="ep-stat">📖 Surah Yasin — 12</span>
+        <span class="ep-stat">🤲 Surah Fatiha — 34</span><br><br>
+        <strong style="color:#caa85c;">Quran Khatam progress:</strong><br>
+        12 of 30 Juz claimed · 2 completed ✓<br>
+        Juz completed today: <span class="ep-highlight">Juz 4</span> by Sara Malik. MashaAllah!<br><br>
+        <strong style="color:#caa85c;">Who joined today:</strong><br>
+        3 new readers — Fatima, Tariq, and Nazia have joined and begun reciting.<br><br>
+        <strong style="color:#caa85c;">New memory wall notes (2 today):</strong><br>
+        <em>"She always had a smile for everyone. May Allah grant her Jannah."</em> — Ahmed K<br>
+        <em>"Reading Yasin for her today. Ameen."</em> — Sara M<br><br>
+        <strong style="color:#caa85c;">Deadline:</strong> 37 days remaining until the 40th day Khatam. Keep going — every recitation counts.<br><br>
+        <div style="background:rgba(202,168,92,.08);border:1px solid rgba(202,168,92,.2);border-radius:10px;padding:12px;margin-top:8px;">
+          <div style="color:#caa85c;font-size:11px;font-weight:bold;margin-bottom:6px;">🤲 TODAY'S DUA FOR YOU</div>
+          <em>"You are not alone in this. Every person who reads, every dua that is made, every Juz that is completed — it reaches them. Allah hears every word. He is Al-Sami', the All-Hearing. Keep going. Your loved one is being remembered by people they may never have even met. SubhanAllah."</em>
+        </div>
+        <br>
+        <a href="#" style="color:#caa85c;">View the full memorial →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice success" id="saveNotice">Preferences saved successfully. 🌙</div>
+  <div class="notice error" id="saveError"></div>
+
+  <button class="btn btn-primary" style="width:100%;padding:16px;font-size:16px;margin-top:4px;" id="saveBtn">
+    Save notification preferences
+  </button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+var client = window.supabase.createClient(
+  window.APP_CONFIG.supabaseUrl,
+  window.APP_CONFIG.supabasePublishableKey
+);
+
+var currentUser = null;
+var selectedFreq = "daily";
+var emailEnabled = true;
+var whatsappEnabled = false;
+var currentDuaIndex = 0;
+
+var duas = [
+  "You are not alone in this. Every person who reads, every dua that is made, every Juz that is completed — it reaches them. Allah hears every word. He is Al-Sami', the All-Hearing. Keep going. Your loved one is being remembered by people they may never have even met. SubhanAllah.",
+  "Grief is heavy. But so is love. And love is what brought everyone here — to recite, to remember, to make dua. Know that Allah sees your pain, and He sees your effort. He is Al-Basir, the All-Seeing. Nothing you do for your loved one is wasted. Not a single word.",
+  "The Prophet (PBUH) said: 'When a person dies, all their deeds come to an end except three: ongoing charity, beneficial knowledge, or a righteous child who prays for them.' Tonight, all three are happening. The recitations of this community are a mercy for your loved one. Ameen.",
+  "In the depths of loss, it can feel like silence. But look at this — people across cities and countries, reciting in the name of your loved one. Allah has moved hearts on their behalf. That is not a coincidence. That is His mercy. La ilaha illallah.",
+  "Your tears are not weakness. They are love in its purest form. Allah does not waste the pain of a believer. He transforms it into something eternal. Every recitation made tonight is light in the grave of your loved one. Every dua is a hand reaching through the veil to hold them. Ameen.",
+  "It may feel like you are grieving alone. But know that across WhatsApp groups and family chats, people are opening this app, reading Quran, and saying 'Ameen' in the name of your loved one. They are with you. Allah is with you. Huwa ma'akum. He is with you.",
+  "The 40 days of loss are sacred in Islamic tradition — a time of remembrance, prayer and healing. You are honouring that tradition beautifully. Every Juz claimed, every note on the memory wall, every recitation — it is all being counted by Allah, Al-Muhsi, the All-Enumerator.",
+  "Jannah al-Firdaus is the highest garden. May your loved one be there — resting in peace, surrounded by light, waiting for you. Until that day, keep reciting. Keep making dua. Keep sharing the link. Every soul who joins this Khatam adds to the scale of their good deeds. SubhanAllah.",
+  "There will come a day, inshAllah, when you are reunited. Until then, the recitations of this community are a bridge — a connection between the world of the living and the mercy of Allah for those who have passed. You are not just grieving. You are building that bridge. Alhamdulillah.",
+  "Sabr is not silence. Sabr is continuing. Continuing to make dua, continuing to remember, continuing to honour them. You are doing that. And Allah sees it all. Inna Allaha ma'a as-sabireen — truly, Allah is with those who are patient.",
+];
+
+function rotateDua() {
+  currentDuaIndex = (currentDuaIndex + 1) % duas.length;
+  document.getElementById("duaPreviewText").textContent = duas[currentDuaIndex];
+}
+
+function selectFreq(freq, el) {
+  selectedFreq = freq;
+  document.querySelectorAll(".freq-btn").forEach(function(b){ b.classList.remove("selected"); });
+  el.classList.add("selected");
+  var timeRow = document.getElementById("timeRow");
+  timeRow.style.display = freq === "astheycome" ? "none" : "flex";
+}
+
+function toggleChannel(ch) {
+  if (ch === "email") {
+    emailEnabled = !emailEnabled;
+    document.getElementById("emailCard").classList.toggle("selected", emailEnabled);
+  } else {
+    whatsappEnabled = !whatsappEnabled;
+    document.getElementById("whatsappCard").classList.toggle("selected", whatsappEnabled);
+    document.getElementById("phoneWrap").style.display = whatsappEnabled ? "block" : "none";
+  }
+}
+
+async function init() {
+  var s = await client.auth.getSession();
+  if (!s.data || !s.data.session) { window.location.href = "login.html"; return; }
+  currentUser = s.data.session.user;
+
+  // Load memorials
+  var r = await client.from("memorials").select("id,full_name,slug").order("created_at",{ascending:false});
+  var sel = document.getElementById("memorialSelect");
+  if (r.data && r.data.length) {
+    sel.innerHTML = r.data.map(function(m){
+      return '<option value="'+m.id+'">'+m.full_name+'</option>';
+    }).join("");
+    sel.addEventListener("change", loadExistingPrefs);
+    loadExistingPrefs();
+  } else {
+    sel.innerHTML = '<option value="">No memorials found</option>';
+  }
+
+  // Show random dua
+  currentDuaIndex = Math.floor(Math.random() * duas.length);
+  document.getElementById("duaPreviewText").textContent = duas[currentDuaIndex];
+}
+
+async function loadExistingPrefs() {
+  var memId = document.getElementById("memorialSelect").value;
+  if (!memId) return;
+  var r = await client.from("notification_preferences")
+    .select("*").eq("user_id",currentUser.id).eq("memorial_id",memId).maybeSingle();
+  if (!r.data) return;
+  var p = r.data;
+  selectedFreq = p.frequency || "daily";
+  document.querySelectorAll(".freq-btn").forEach(function(b){ b.classList.remove("selected"); });
+  var fb = document.getElementById("freq-"+selectedFreq);
+  if (fb) fb.classList.add("selected");
+  emailEnabled = p.email_enabled !== false;
+  whatsappEnabled = !!p.whatsapp_enabled;
+  document.getElementById("emailCard").classList.toggle("selected",emailEnabled);
+  document.getElementById("whatsappCard").classList.toggle("selected",whatsappEnabled);
+  document.getElementById("phoneWrap").style.display = whatsappEnabled?"block":"none";
+  if (p.whatsapp_number) document.getElementById("whatsappNumber").value = p.whatsapp_number;
+  if (p.preferred_time) document.getElementById("preferredTime").value = p.preferred_time;
+  document.getElementById("inclRecitations").checked = p.include_recitations !== false;
+  document.getElementById("inclJuz").checked = p.include_juz !== false;
+  document.getElementById("inclContributors").checked = p.include_contributors !== false;
+  document.getElementById("inclNotes").checked = p.include_notes !== false;
+  document.getElementById("inclDeadline").checked = p.include_deadline !== false;
+  document.getElementById("inclDua").checked = p.include_dua !== false;
+}
+
+document.getElementById("saveBtn").addEventListener("click", async function(){
+  var btn = this;
+  var memId = document.getElementById("memorialSelect").value;
+  if (!memId) {
+    document.getElementById("saveError").textContent = "Please select a memorial first.";
+    document.getElementById("saveError").style.display = "block"; return;
+  }
+  btn.disabled = true; btn.textContent = "Saving...";
+
+  var data = {
+    user_id: currentUser.id,
+    memorial_id: memId,
+    email_enabled: emailEnabled,
+    whatsapp_enabled: whatsappEnabled,
+    whatsapp_number: whatsappEnabled ? (document.getElementById("whatsappNumber").value.trim()||null) : null,
+    frequency: selectedFreq,
+    preferred_time: document.getElementById("preferredTime").value || "21:00",
+    include_recitations: document.getElementById("inclRecitations").checked,
+    include_juz: document.getElementById("inclJuz").checked,
+    include_contributors: document.getElementById("inclContributors").checked,
+    include_notes: document.getElementById("inclNotes").checked,
+    include_deadline: document.getElementById("inclDeadline").checked,
+    include_dua: document.getElementById("inclDua").checked,
+  };
+
+  var r = await client.from("notification_preferences")
+    .upsert(data, { onConflict: "user_id,memorial_id" });
+
+  btn.disabled = false; btn.textContent = "Save notification preferences";
+  if (r.error) {
+    document.getElementById("saveError").textContent = "Could not save. Please try again.";
+    document.getElementById("saveError").style.display = "block";
+  } else {
+    document.getElementById("saveNotice").style.display = "block";
+    document.getElementById("saveError").style.display = "none";
+    setTimeout(function(){ document.getElementById("saveNotice").style.display = "none"; }, 3000);
+  }
+});
+
+init();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>
